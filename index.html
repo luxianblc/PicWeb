@@ -1,626 +1,121 @@
-,<!DOCTYPE html>
+            
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>现代化图片展示馆</title>
+    <title>鹿衔 - 视觉设计</title>
+    
+    <!-- 样式文件 -->
+    <link rel="stylesheet" href="global.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f9f9f9;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        
-        /* 头部样式 */
-        header {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            color: white;
-            padding: 3rem 0;
-            text-align: center;
-            margin-bottom: 3rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        header h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        
-        header p {
-            font-size: 1.2rem;
-            font-weight: 300;
-            max-width: 700px;
-            margin: 0 auto;
-            opacity: 0.9;
-        }
-        
-        /* 控制栏样式 */
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2.5rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        
-        .search-box {
-            flex-grow: 1;
-            max-width: 400px;
-        }
-        
-        .search-box input {
-            width: 100%;
-            padding: 12px 20px;
-            border: 2px solid #ddd;
-            border-radius: 50px;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-        
-        .search-box input:focus {
-            border-color: #6a11cb;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
-        }
-        
-        .filter-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .filter-btn {
-            padding: 10px 20px;
-            background-color: white;
-            border: 2px solid #ddd;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-        
-        .filter-btn:hover, .filter-btn.active {
-            background-color: #6a11cb;
-            color: white;
-            border-color: #6a11cb;
-        }
-        
-        /* 图片网格样式 */
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
-            margin-bottom: 3rem;
-        }
-        
-        .image-card {
-            background-color: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .image-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-        }
-        
-        .image-card img {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            display: block;
-        }
-        
-        .image-info {
-            padding: 20px;
-        }
-        
-        .image-info h3 {
-            font-size: 1.3rem;
-            margin-bottom: 8px;
-            color: #333;
-        }
-        
-        .image-info p {
-            color: #666;
-            font-size: 0.95rem;
-        }
-        
-        /* 灯箱样式 */
-        .lightbox {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .lightbox.active {
-            display: flex;
-        }
-        
-        .lightbox-content {
-            max-width: 90%;
-            max-height: 90%;
-            position: relative;
-        }
-        
-        .lightbox-content img {
-            max-width: 100%;
-            max-height: 80vh;
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .lightbox-info {
-            color: white;
-            text-align: center;
-            margin-top: 20px;
-        }
-        
-        .close-btn {
-            position: absolute;
-            top: -40px;
-            right: 0;
-            color: white;
-            font-size: 2.5rem;
-            cursor: pointer;
-            background: none;
-            border: none;
-        }
-        
-        .nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        .nav-btn:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-        }
-        
-        .prev-btn {
-            left: 20px;
-        }
-        
-        .next-btn {
-            right: 20px;
-        }
-        
-        /* 页脚样式 */
-        footer {
-            background-color: #333;
-            color: white;
-            text-align: center;
-            padding: 2.5rem 0;
-            margin-top: 3rem;
-        }
-        
-        footer p {
-            margin-bottom: 0.5rem;
-        }
-        
-        .github-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: white;
-            text-decoration: none;
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 10px 20px;
-            border-radius: 50px;
-            margin-top: 15px;
-            transition: all 0.3s;
-        }
-        
-        .github-link:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-3px);
-        }
-        
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 2.2rem;
-            }
-            
-            .image-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-                gap: 20px;
-            }
-            
-            .controls {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .search-box {
-                max-width: 100%;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .image-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .nav-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 1.2rem;
-            }
-            
-            .prev-btn {
-                left: 10px;
-            }
-            
-            .next-btn {
-                right: 10px;
-            }
-        }
-        
-        /* 加载动画 */
-        .loading {
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(106, 17, 203, 0.3);
-            border-radius: 50%;
-            border-top-color: #6a11cb;
-            animation: spin 1s ease-in-out infinite;
-            margin: 2rem auto;
-            display: block;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- 网站图标 -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦌</text></svg>">
 </head>
 <body>
-    <!-- 头部区域 -->
-    <header>
-        <div class="container">
-            <h1><i class="fas fa-camera-retro"></i> 现代化图片展示馆</h1>
-            <p>精选高质量图片，展示自然风光、城市建筑、艺术设计等多元主题。点击图片可放大查看，支持分类筛选和搜索功能。</p>
-        </div>
-    </header>
+    <!-- 加载头部组件 -->
+    <iframe src="header.html" frameborder="0" scrolling="no" style="width: 100%; height: 80px; border: none;"></iframe>
     
-    <main class="container">
-        <!-- 控制栏 -->
-        <div class="controls">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="搜索图片标题或描述...">
+    <!-- 主内容 -->
+    <main class="main-content">
+        <div class="container">
+            <div class="page-title">
+                <h1>鹿衔 <span style="color: var(--text-secondary); font-weight: 300;">| 视觉设计</span></h1>
+                <p>探索美学边界，创造独特视觉体验。精选高质量图像，感受设计之美。</p>
             </div>
-            
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="all">全部</button>
-                <button class="filter-btn" data-filter="nature">自然</button>
-                <button class="filter-btn" data-filter="city">城市</button>
-                <button class="filter-btn" data-filter="art">艺术</button>
-                <button class="filter-btn" data-filter="tech">科技</button>
+
+            <div class="glass card text-center p-3" style="max-width: 800px; margin: 0 auto;">
+                <h2 style="font-size: 2rem; margin-bottom: 1rem;">欢迎来到我的视觉空间</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                    这里汇集了我精选的视觉艺术作品，包括自然风光、城市建筑、抽象艺术和科技美学等多个主题。
+                    每一幅图像都经过精心挑选，旨在为您带来灵感和美的享受。
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="gallery.html" class="btn btn-primary">
+                        <i class="fas fa-images"></i> 浏览外链画廊
+                    </a>
+                </div>
+            </div>
+
+            <div class="mt-3" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                <div class="glass card">
+                    <div style="font-size: 2.5rem; margin-bottom: 1rem; text-align: center;">
+                        <i class="fas fa-mountain-sun"></i>
+                    </div>
+                    <h3 style="margin-bottom: 0.5rem;">自然之美</h3>
+                    <p style="color: var(--text-secondary);">捕捉大自然的壮丽景色，从山川湖海到微观世界。</p>
+                </div>
+                
+                <div class="glass card">
+                    <div style="font-size: 2.5rem; margin-bottom: 1rem; text-align: center;">
+                        <i class="fas fa-city"></i>
+                    </div>
+                    <h3 style="margin-bottom: 0.5rem;">都市韵律</h3>
+                    <p style="color: var(--text-secondary);">记录现代城市的建筑美学与生活节奏。</p>
+                </div>
+                
+                <div class="glass card">
+                    <div style="font-size: 2.5rem; margin-bottom: 1rem; text-align: center;">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <h3 style="margin-bottom: 0.5rem;">艺术创作</h3>
+                    <p style="color: var(--text-secondary);">探索色彩、形状与纹理的无限可能。</p>
+                </div>
             </div>
         </div>
-        
-        <!-- 图片网格 -->
-        <div class="image-grid" id="imageGrid">
-            <!-- 图片将通过JavaScript动态生成 -->
-        </div>
-        
-        <!-- 加载指示器 -->
-        <div id="loadingIndicator" class="loading"></div>
     </main>
     
-    <!-- 灯箱（查看大图） -->
+    <!-- 加载尾部组件 -->
+    <iframe src="footer.html" frameborder="0" scrolling="no" style="width: 100%; height: 200px; border: none;"></iframe>
+    
+    <!-- 灯箱 -->
     <div class="lightbox" id="lightbox">
-        <button class="close-btn" id="closeBtn">&times;</button>
-        <button class="nav-btn prev-btn" id="prevBtn"><i class="fas fa-chevron-left"></i></button>
-        <button class="nav-btn next-btn" id="nextBtn"><i class="fas fa-chevron-right"></i></button>
-        
+        <button class="lightbox-close" id="lightboxClose">&times;</button>
         <div class="lightbox-content">
             <img id="lightboxImage" src="" alt="">
-            <div class="lightbox-info">
-                <h3 id="lightboxTitle"></h3>
-                <p id="lightboxDesc"></p>
-            </div>
+            <div id="lightboxInfo" style="color: white; text-align: center; margin-top: 1rem;"></div>
         </div>
     </div>
-    
-    <!-- 页脚 -->
-    <footer>
-        <div class="container">
-            <p>现代化图片展示网页 &copy; 2023 - 可在GitHub Pages上部署的静态网站</p>
-            <p>使用纯HTML、CSS和JavaScript构建，无需后端支持</p>
-            <a href="https://github.com" class="github-link" target="_blank">
-                <i class="fab fa-github"></i> 在GitHub上查看源码
-            </a>
-        </div>
-    </footer>
-    
-    <script>
-        // 图片数据
-        const images = [
-            {
-                id: 1,
-                title: "山间日出",
-                description: "清晨的第一缕阳光洒在山峦之间，雾气缭绕，如仙境般美丽。",
-                category: "nature",
-                url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1350&q=80"
-            },
-            {
-                id: 2,
-                title: "未来都市",
-                description: "现代建筑与科技感的结合，展现未来城市风貌。",
-                category: "city",
-                url: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1350&q=80"
-            },
-            {
-                id: 3,
-                title: "抽象艺术",
-                description: "色彩与线条的碰撞，创造出独特的视觉体验。",
-                category: "art",
-                url: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1350&q=80"
-            },
-            {
-                id: 4,
-                title: "科技芯片",
-                description: "微观世界中的科技奇迹，集成电路的精细结构。",
-                category: "tech",
-                url: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1350&q=80"
-            },
-            {
-                id: 5,
-                title: "森林小径",
-                description: "阳光透过树叶洒在蜿蜒的小路上，宁静而神秘。",
-                category: "nature",
-                url: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1350&q=80"
-            },
-            {
-                id: 6,
-                title: "都市夜景",
-                description: "夜幕下的城市灯火辉煌，展现都市的繁华与活力。",
-                category: "city",
-                url: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1350&q=80"
-            },
-            {
-                id: 7,
-                title: "街头涂鸦",
-                description: "城市中的艺术表达，色彩鲜艳的涂鸦墙壁。",
-                category: "art",
-                url: "https://images.unsplash.com/photo-1544966503-7cc5ac882d5a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w-1350&q=80"
-            },
-            {
-                id: 8,
-                title: "数据可视化",
-                description: "复杂数据的美丽呈现，科技与艺术的完美结合。",
-                category: "tech",
-                url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1350&q=80"
-            },
-            {
-                id: 9,
-                title: "海滩日落",
-                description: "夕阳西下，金色的阳光洒在海面上，波光粼粼。",
-                category: "nature",
-                url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1350&q=80"
-            },
-            {
-                id: 10,
-                title: "建筑几何",
-                description: "现代建筑的几何美学，线条与结构的完美组合。",
-                category: "city",
-                url: "https://images.unsplash.com/photo-1487956382158-bb926046304a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1350&q=80"
-            },
-            {
-                id: 11,
-                title: "水彩画作",
-                description: "柔和的水彩渐变，创造出梦幻般的视觉效果。",
-                category: "art",
-                url: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1350&q=80"
-            },
-            {
-                id: 12,
-                title: "人工智能",
-                description: "神经网络可视化，展示人工智能的复杂结构与美。",
-                category: "tech",
-                url: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1350&q=80"
-            }
-        ];
 
-        // DOM元素
-        const imageGrid = document.getElementById('imageGrid');
+    <script>
+        // 灯箱功能
         const lightbox = document.getElementById('lightbox');
         const lightboxImage = document.getElementById('lightboxImage');
-        const lightboxTitle = document.getElementById('lightboxTitle');
-        const lightboxDesc = document.getElementById('lightboxDesc');
-        const closeBtn = document.getElementById('closeBtn');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const filterButtons = document.querySelectorAll('.filter-btn');
-        const searchInput = document.getElementById('searchInput');
-        const loadingIndicator = document.getElementById('loadingIndicator');
+        const lightboxInfo = document.getElementById('lightboxInfo');
+        const lightboxClose = document.getElementById('lightboxClose');
         
-        // 状态变量
-        let currentFilter = 'all';
-        let currentSearch = '';
-        let currentImageIndex = 0;
-        let filteredImages = [...images];
-        
-        // 初始化函数
-        function init() {
-            // 初始渲染图片
-            renderImages(images);
-            
-            // 添加事件监听器
-            closeBtn.addEventListener('click', closeLightbox);
-            prevBtn.addEventListener('click', showPrevImage);
-            nextBtn.addEventListener('click', showNextImage);
-            
-            // 点击灯箱背景关闭
-            lightbox.addEventListener('click', function(e) {
-                if (e.target === lightbox) {
-                    closeLightbox();
-                }
-            });
-            
-            // 筛选按钮事件
-            filterButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    // 更新活动按钮
-                    filterButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // 更新筛选器
-                    currentFilter = this.getAttribute('data-filter');
-                    filterAndRenderImages();
-                });
-            });
-            
-            // 搜索输入事件
-            searchInput.addEventListener('input', function() {
-                currentSearch = this.value.toLowerCase();
-                filterAndRenderImages();
-            });
-            
-            // 键盘导航
-            document.addEventListener('keydown', function(e) {
-                if (lightbox.classList.contains('active')) {
-                    if (e.key === 'Escape') closeLightbox();
-                    if (e.key === 'ArrowLeft') showPrevImage();
-                    if (e.key === 'ArrowRight') showNextImage();
-                }
-            });
-            
-            // 隐藏加载指示器
-            loadingIndicator.style.display = 'none';
-        }
-        
-        // 渲染图片网格
-        function renderImages(imagesToRender) {
-            imageGrid.innerHTML = '';
-            
-            if (imagesToRender.length === 0) {
-                imageGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #666;">没有找到匹配的图片</div>';
-                return;
-            }
-            
-            imagesToRender.forEach((image, index) => {
-                const imageCard = document.createElement('div');
-                imageCard.className = 'image-card';
-                imageCard.setAttribute('data-category', image.category);
-                imageCard.setAttribute('data-index', index);
-                
-                imageCard.innerHTML = `
-                    <img src="${image.url}" alt="${image.title}" loading="lazy">
-                    <div class="image-info">
-                        <h3>${image.title}</h3>
-                        <p>${image.description}</p>
-                    </div>
+        function openLightbox(src, title, description) {
+            lightboxImage.src = src;
+            if (title || description) {
+                lightboxInfo.innerHTML = `
+                    ${title ? `<h3>${title}</h3>` : ''}
+                    ${description ? `<p>${description}</p>` : ''}
                 `;
-                
-                // 点击打开灯箱
-                imageCard.addEventListener('click', () => openLightbox(index, imagesToRender));
-                
-                imageGrid.appendChild(imageCard);
-            });
-        }
-        
-        // 筛选和渲染图片
-        function filterAndRenderImages() {
-            // 显示加载指示器
-            loadingIndicator.style.display = 'block';
-            
-            // 模拟加载延迟（实际使用时可以移除）
-            setTimeout(() => {
-                filteredImages = images.filter(image => {
-                    // 按分类筛选
-                    const matchesFilter = currentFilter === 'all' || image.category === currentFilter;
-                    
-                    // 按搜索词筛选
-                    const matchesSearch = currentSearch === '' || 
-                        image.title.toLowerCase().includes(currentSearch) || 
-                        image.description.toLowerCase().includes(currentSearch);
-                    
-                    return matchesFilter && matchesSearch;
-                });
-                
-                renderImages(filteredImages);
-                
-                // 隐藏加载指示器
-                loadingIndicator.style.display = 'none';
-            }, 300);
-        }
-        
-        // 打开灯箱
-        function openLightbox(index, imageArray = filteredImages) {
-            currentImageIndex = index;
-            const image = imageArray[index];
-            
-            lightboxImage.src = image.url;
-            lightboxImage.alt = image.title;
-            lightboxTitle.textContent = image.title;
-            lightboxDesc.textContent = image.description;
-            
+            } else {
+                lightboxInfo.innerHTML = '';
+            }
             lightbox.classList.add('active');
-            document.body.style.overflow = 'hidden'; // 防止背景滚动
+            document.body.style.overflow = 'hidden';
         }
         
-        // 关闭灯箱
         function closeLightbox() {
             lightbox.classList.remove('active');
             document.body.style.overflow = 'auto';
         }
         
-        // 显示上一张图片
-        function showPrevImage() {
-            currentImageIndex = (currentImageIndex - 1 + filteredImages.length) % filteredImages.length;
-            openLightbox(currentImageIndex);
-        }
+        lightboxClose.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
         
-        // 显示下一张图片
-        function showNextImage() {
-            currentImageIndex = (currentImageIndex + 1) % filteredImages.length;
-            openLightbox(currentImageIndex);
-        }
-        
-        // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', init);
+        // 键盘支持
+        document.addEventListener('keydown', (e) => {
+            if (lightbox.classList.contains('active') && e.key === 'Escape') {
+                closeLightbox();
+            }
+        });
     </script>
 </body>
 </html>
