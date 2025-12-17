@@ -2,517 +2,983 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>网易云登录测试</title>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网易云音乐登录API测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+            text-align: center;
+            border-left: 5px solid #e60026;
+        }
+        
+        .header h1 {
+            font-size: 2.2rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #856404;
+        }
+        
+        .warning-box h3 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .warning-box ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+        
+        .warning-box li {
+            margin-bottom: 5px;
+        }
+        
+        .test-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+            border: 1px solid #e9ecef;
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card h2 i {
+            color: #e60026;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #e60026;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #e60026;
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #ff2d55;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #dee2e6;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #e9ecef;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            background: #218838;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: #c82333;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .result h3 {
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .result pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            color: #333;
+            line-height: 1.4;
+        }
+        
+        .qrcode-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        #qrcodeImage {
+            max-width: 250px;
+            height: 250px;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 10px;
+            background: white;
+            margin: 0 auto 15px;
+        }
+        
+        #qrcodeImage img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .status-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .status-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        
+        .status-waiting {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        
+        .cookie-display {
+            background: #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            border: 1px dashed #adb5bd;
+        }
+        
+        .cookie-display h4 {
+            margin-bottom: 10px;
+            color: #495057;
+        }
+        
+        .login-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .status-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        
+        .status-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .status-card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .status-card.true .value {
+            color: #28a745;
+        }
+        
+        .status-card.false .value {
+            color: #dc3545;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #e60026;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .timestamp {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 10px;
+        }
+        
+        .refresh-btn {
+            background: #17a2b8;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .refresh-btn:hover {
+            background: #138496;
+        }
+        
+        @media (max-width: 768px) {
+            .test-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <h1>网易云音乐登录测试</h1>
-    
-    <h2>游客登录测试</h2>
-    <button onclick="testGuestLogin()">测试游客登录</button>
-    <div id="guestResult" style="border:1px solid #ccc; padding:10px; margin:10px 0; min-height:50px;"></div>
-    
-    <hr>
-    
-    <h2>二维码登录测试</h2>
-    <button onclick="startQrLogin()">开始二维码登录</button>
-    <button onclick="stopQrCheck()" style="background-color:#f0f0f0;">停止检查</button>
-    <button onclick="checkLoginStatus()">检查登录状态</button>
-    
-    <div id="qrArea" style="display:none; margin:20px 0;">
-        <h3>请用网易云APP扫描二维码</h3>
-        <canvas id="qrcodeCanvas" style="border:1px solid #ccc;"></canvas>
-        <div id="qrStatus" style="margin:10px 0; padding:10px; background-color:#f5f5f5;"></div>
-    </div>
-    
-    <div id="userInfo" style="display:none; border:1px solid green; padding:15px; margin:10px 0; background-color:#f0fff0;">
-        <h3>登录成功！用户信息</h3>
-        <div id="userData"></div>
-        <button onclick="logout()">退出登录</button>
-    </div>
-    
-    <hr>
-    
-    <h2>API调用测试（需要登录）</h2>
-    <div>
-        <button onclick="testPersonalized()">测试推荐歌单</button>
-        <button onclick="testUserPlaylist()">测试用户歌单</button>
-        <button onclick="testDailyRecommend()">测试每日推荐</button>
-    </div>
-    <div id="apiResult" style="border:1px solid #ccc; padding:10px; margin:10px 0; min-height:100px; max-height:300px; overflow:auto;"></div>
-    
-    <hr>
-    
-    <div style="background-color:#fff8e1; padding:15px; border-left:4px solid #ff9800; margin:20px 0;">
-        <h3>安全提示</h3>
-        <p>1. 请勿使用他人提供的公开服务进行登录</p>
-        <p>2. 二维码登录可能因网易云盾检测而失败</p>
-        <p>3. 游客登录无法访问个人收藏等私有数据</p>
-        <p>4. 请勿频繁调用登录接口，避免触发风控</p>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-music"></i> 网易云音乐登录API测试</h1>
+            <p>测试二维码登录、游客登录、登录状态等接口功能</p>
+        </div>
+        
+        <div class="warning-box">
+            <h3><i class="fas fa-exclamation-triangle"></i> 重要安全提示</h3>
+            <ul>
+                <li>本项目仅供学习使用，请勿在生产环境使用他人提供的公开服务</li>
+                <li>不要频繁调用登录接口，以免触发风控机制</li>
+                <li>登录状态存在时不要重复调用登录接口</li>
+                <li>二维码登录需要加上时间戳参数防止缓存</li>
+                <li>请尊重版权，勿用于商业用途</li>
+            </ul>
+        </div>
+        
+        <div class="test-cards">
+            <!-- 二维码登录测试 -->
+            <div class="card">
+                <h2><i class="fas fa-qrcode"></i> 二维码登录测试</h2>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="startQRLogin()" id="qrLoginBtn">
+                        <i class="fas fa-qrcode"></i> 开始二维码登录
+                    </button>
+                </div>
+                
+                <div class="qrcode-container" id="qrcodeContainer" style="display: none;">
+                    <div id="qrcodeImage"></div>
+                    <div id="qrcodeStatus" class="status-box status-info">
+                        <i class="fas fa-sync-alt fa-spin"></i>
+                        <span>正在生成二维码...</span>
+                    </div>
+                    <div class="timestamp">
+                        <small>时间戳: <span id="qrTimestamp"></span></small>
+                    </div>
+                    <button class="btn-secondary" onclick="stopQRLogin()" id="stopQRBtn" style="display: none;">
+                        <i class="fas fa-stop"></i> 停止轮询
+                    </button>
+                </div>
+                
+                <div id="qrResult" class="result" style="display: none;">
+                    <h3><i class="fas fa-check-circle"></i> 登录结果</h3>
+                    <div id="qrData"></div>
+                </div>
+            </div>
+            
+            <!-- 游客登录测试 -->
+            <div class="card">
+                <h2><i class="fas fa-user"></i> 游客登录测试</h2>
+                
+                <div class="button-group">
+                    <button class="btn-success" onclick="testGuestLogin()" id="guestLoginBtn">
+                        <i class="fas fa-sign-in-alt"></i> 游客登录
+                    </button>
+                    <button class="btn-secondary" onclick="clearGuestCookie()" id="clearCookieBtn">
+                        <i class="fas fa-trash"></i> 清除Cookie
+                    </button>
+                </div>
+                
+                <div id="guestResult" class="result" style="display: none;">
+                    <h3><i class="fas fa-info-circle"></i> 游客登录结果</h3>
+                    <div id="guestData"></div>
+                </div>
+                
+                <div id="cookieInfo" class="cookie-display" style="display: none;">
+                    <h4>当前Cookie信息</h4>
+                    <div id="currentCookie"></div>
+                    <small>已保存到localStorage</small>
+                </div>
+            </div>
+            
+            <!-- 登录状态测试 -->
+            <div class="card">
+                <h2><i class="fas fa-check-circle"></i> 登录状态测试</h2>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="checkLoginStatus()" id="statusCheckBtn">
+                        <i class="fas fa-sync-alt"></i> 检查登录状态
+                    </button>
+                </div>
+                
+                <div class="login-status-grid">
+                    <div class="status-card" id="loginStatusCard">
+                        <h3>登录状态</h3>
+                        <div class="value">未知</div>
+                    </div>
+                    <div class="status-card" id="cookieStatusCard">
+                        <h3>Cookie状态</h3>
+                        <div class="value">未知</div>
+                    </div>
+                    <div class="status-card" id="apiStatusCard">
+                        <h3>API状态</h3>
+                        <div class="value">未知</div>
+                    </div>
+                </div>
+                
+                <div id="statusResult" class="result" style="display: none;">
+                    <h3><i class="fas fa-chart-bar"></i> 状态详情</h3>
+                    <div id="statusData"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 其他登录相关测试 -->
+        <div class="card">
+            <h2><i class="fas fa-cogs"></i> 其他登录功能测试</h2>
+            
+            <div class="button-group" style="margin-top: 20px;">
+                <button class="btn-secondary" onclick="refreshLogin()" id="refreshLoginBtn">
+                    <i class="fas fa-redo"></i> 刷新登录状态
+                </button>
+                <button class="btn-danger" onclick="logout()" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> 退出登录
+                </button>
+                <button class="btn-secondary" onclick="checkAPIStatus()" id="apiStatusBtn">
+                    <i class="fas fa-wifi"></i> 检查API连通性
+                </button>
+            </div>
+            
+            <div id="otherResult" class="result" style="display: none; margin-top: 20px;">
+                <h3><i class="fas fa-terminal"></i> 执行结果</h3>
+                <div id="otherData"></div>
+            </div>
+        </div>
+        
+        <!-- API信息 -->
+        <div class="card">
+            <h2><i class="fas fa-info-circle"></i> 接口说明</h2>
+            <div style="line-height: 1.8;">
+                <p><strong>API地址:</strong> <code>https://neteaseapi-enhanced.vercel.app</code></p>
+                <p><strong>二维码登录流程:</strong> /login/qr/key → /login/qr/create → /login/qr/check</p>
+                <p><strong>游客登录:</strong> /register/anonimous</p>
+                <p><strong>登录状态检查:</strong> /login/status</p>
+                <p><strong>注意:</strong> 所有接口调用请加上时间戳参数，如 <code>?timestamp=当前时间戳</code></p>
+            </div>
+        </div>
     </div>
 
     <script>
-        // API基础地址 - 请修改为你的部署地址
+        // API基础地址
         const API_BASE = 'https://neteaseapi-enhanced.vercel.app';
-        let currentCookie = '';
-        let qrKey = '';
+        let currentCookie = null;
         let qrCheckInterval = null;
-        
-        // 测试游客登录
-        async function testGuestLogin() {
-            const resultDiv = document.getElementById('guestResult');
-            resultDiv.innerHTML = '正在请求游客登录...';
+        let currentQRKey = null;
+
+        // 页面加载时检查本地Cookie
+        window.addEventListener('load', function() {
+            const savedCookie = localStorage.getItem('netease_cookie');
+            if (savedCookie) {
+                currentCookie = savedCookie;
+                updateCookieDisplay();
+                checkLoginStatus();
+            } else {
+                updateStatusCard('cookieStatusCard', '无', 'false');
+            }
+            
+            // 检查API状态
+            checkAPIStatus();
+        });
+
+        // 生成时间戳
+        function getTimestamp() {
+            return Date.now();
+        }
+
+        // 显示结果
+        function showResult(containerId, content) {
+            const container = document.getElementById(containerId);
+            if (typeof content === 'string') {
+                container.innerHTML = content;
+            } else {
+                container.innerHTML = `<pre>${JSON.stringify(content, null, 2)}</pre>`;
+            }
+            container.parentElement.style.display = 'block';
+        }
+
+        // 显示状态消息
+        function showStatus(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            let icon = '';
+            
+            switch(type) {
+                case 'success':
+                    icon = '<i class="fas fa-check-circle"></i>';
+                    container.className = 'status-box status-success';
+                    break;
+                case 'error':
+                    icon = '<i class="fas fa-exclamation-circle"></i>';
+                    container.className = 'status-box status-error';
+                    break;
+                case 'info':
+                    icon = '<i class="fas fa-info-circle"></i>';
+                    container.className = 'status-box status-info';
+                    break;
+                case 'waiting':
+                    icon = '<i class="fas fa-sync-alt fa-spin"></i>';
+                    container.className = 'status-box status-waiting';
+                    break;
+            }
+            
+            container.innerHTML = `${icon}<span>${message}</span>`;
+            container.style.display = 'flex';
+        }
+
+        // 开始二维码登录
+        async function startQRLogin() {
+            const qrLoginBtn = document.getElementById('qrLoginBtn');
+            const qrcodeContainer = document.getElementById('qrcodeContainer');
+            const qrTimestamp = document.getElementById('qrTimestamp');
+            
+            // 禁用按钮
+            qrLoginBtn.disabled = true;
+            qrLoginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在处理...';
+            
+            // 显示二维码容器
+            qrcodeContainer.style.display = 'block';
+            
+            // 更新时间戳
+            const timestamp = getTimestamp();
+            qrTimestamp.textContent = timestamp;
             
             try {
-                const startTime = Date.now();
-                const response = await fetch(`${API_BASE}/register/anonimous?timestamp=${Date.now()}`);
+                // 1. 获取二维码key
+                showStatus('qrcodeStatus', '正在获取二维码密钥...', 'waiting');
+                
+                const keyResponse = await fetch(`${API_BASE}/login/qr/key?timestamp=${timestamp}`);
+                const keyData = await keyResponse.json();
+                
+                if (keyData.code !== 200) {
+                    throw new Error(`获取二维码key失败: ${keyData.message || '未知错误'}`);
+                }
+                
+                currentQRKey = keyData.data.unikey;
+                showStatus('qrcodeStatus', '正在生成二维码...', 'waiting');
+                
+                // 2. 生成二维码
+                const qrResponse = await fetch(`${API_BASE}/login/qr/create?key=${currentQRKey}&qrimg=true&timestamp=${getTimestamp()}`);
+                const qrData = await qrResponse.json();
+                
+                if (qrData.code !== 200) {
+                    throw new Error(`生成二维码失败: ${qrData.message || '未知错误'}`);
+                }
+                
+                // 显示二维码图片
+                const qrcodeImage = document.getElementById('qrcodeImage');
+                qrcodeImage.innerHTML = `<img src="${qrData.data.qrimg}" alt="扫码登录二维码">`;
+                
+                // 显示停止按钮
+                document.getElementById('stopQRBtn').style.display = 'block';
+                
+                // 3. 开始轮询扫码状态
+                startPollingQRStatus();
+                
+            } catch (error) {
+                showStatus('qrcodeStatus', `错误: ${error.message}`, 'error');
+                qrLoginBtn.disabled = false;
+                qrLoginBtn.innerHTML = '<i class="fas fa-qrcode"></i> 开始二维码登录';
+            }
+        }
+
+        // 轮询二维码扫码状态
+        function startPollingQRStatus() {
+            if (qrCheckInterval) {
+                clearInterval(qrCheckInterval);
+            }
+            
+            qrCheckInterval = setInterval(async () => {
+                try {
+                    const checkResponse = await fetch(`${API_BASE}/login/qr/check?key=${currentQRKey}&timestamp=${getTimestamp()}`);
+                    const checkData = await checkResponse.json();
+                    
+                    const statusDiv = document.getElementById('qrcodeStatus');
+                    
+                    if (checkData.code === 800) {
+                        statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i><span>二维码已过期，请重新生成</span>';
+                        statusDiv.className = 'status-box status-error';
+                        clearInterval(qrCheckInterval);
+                        qrCheckInterval = null;
+                    } else if (checkData.code === 801) {
+                        statusDiv.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i><span>等待扫码...</span>';
+                        statusDiv.className = 'status-box status-waiting';
+                    } else if (checkData.code === 802) {
+                        statusDiv.innerHTML = '<i class="fas fa-check-circle"></i><span>已扫码，请在APP中确认登录</span>';
+                        statusDiv.className = 'status-box status-success';
+                    } else if (checkData.code === 803) {
+                        // 登录成功
+                        clearInterval(qrCheckInterval);
+                        qrCheckInterval = null;
+                        
+                        // 保存Cookie
+                        currentCookie = checkData.cookie;
+                        localStorage.setItem('netease_cookie', currentCookie);
+                        
+                        statusDiv.innerHTML = '<i class="fas fa-check-circle"></i><span>登录成功！正在更新状态...</span>';
+                        statusDiv.className = 'status-box status-success';
+                        
+                        // 显示登录结果
+                        showResult('qrData', {
+                            code: checkData.code,
+                            message: '登录成功',
+                            cookie: checkData.cookie ? '已获取' : '未获取',
+                            account: checkData.account || '未获取账户信息'
+                        });
+                        
+                        // 启用按钮
+                        document.getElementById('qrLoginBtn').disabled = false;
+                        document.getElementById('qrLoginBtn').innerHTML = '<i class="fas fa-qrcode"></i> 开始二维码登录';
+                        
+                        // 隐藏停止按钮
+                        document.getElementById('stopQRBtn').style.display = 'none';
+                        
+                        // 更新Cookie显示和状态
+                        updateCookieDisplay();
+                        checkLoginStatus();
+                    } else {
+                        statusDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i><span>未知状态: ${checkData.code}</span>`;
+                        statusDiv.className = 'status-box status-error';
+                    }
+                } catch (error) {
+                    console.error('轮询失败:', error);
+                }
+            }, 2000); // 每2秒轮询一次
+        }
+
+        // 停止二维码登录
+        function stopQRLogin() {
+            if (qrCheckInterval) {
+                clearInterval(qrCheckInterval);
+                qrCheckInterval = null;
+            }
+            
+            document.getElementById('stopQRBtn').style.display = 'none';
+            document.getElementById('qrcodeStatus').style.display = 'none';
+            
+            // 启用二维码登录按钮
+            const qrLoginBtn = document.getElementById('qrLoginBtn');
+            qrLoginBtn.disabled = false;
+            qrLoginBtn.innerHTML = '<i class="fas fa-qrcode"></i> 开始二维码登录';
+        }
+
+        // 测试游客登录
+        async function testGuestLogin() {
+            const guestLoginBtn = document.getElementById('guestLoginBtn');
+            guestLoginBtn.disabled = true;
+            guestLoginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 登录中...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/register/anonimous?timestamp=${getTimestamp()}`);
                 const data = await response.json();
-                const endTime = Date.now();
                 
                 if (data.code === 200 && data.cookie) {
                     currentCookie = data.cookie;
                     localStorage.setItem('netease_cookie', currentCookie);
                     
-                    let html = `
-                        <div style="color:green;">
-                            <h4>✅ 游客登录成功！</h4>
-                            <p>响应时间: ${endTime - startTime}ms</p>
-                            <p>Cookie长度: ${data.cookie.length} 字符</p>
-                            <p>用户ID: ${data.account?.id || '匿名用户'}</p>
-                            <p>用户名: ${data.account?.userName || '游客'}</p>
-                            <p><button onclick="showCookie()">查看Cookie</button></p>
-                            <div id="cookieDisplay" style="display:none; background:#f5f5f5; padding:10px; margin:5px 0; word-break:break-all;"></div>
-                        </div>
-                    `;
+                    showResult('guestData', {
+                        code: data.code,
+                        message: '游客登录成功',
+                        account: data.account || {},
+                        cookie: data.cookie ? '已保存' : '未获取'
+                    });
                     
-                    resultDiv.innerHTML = html;
-                    showUserInfo(data.account);
-                    checkAPIAccess();
+                    updateCookieDisplay();
+                    checkLoginStatus();
+                    
+                    showStatus('guestResult', '游客登录成功！', 'success');
                 } else {
-                    resultDiv.innerHTML = `
-                        <div style="color:red;">
-                            <h4>❌ 游客登录失败</h4>
-                            <p>错误码: ${data.code}</p>
-                            <p>错误信息: ${data.message || '未知错误'}</p>
-                        </div>
-                    `;
+                    showResult('guestData', {
+                        error: '登录失败',
+                        code: data.code,
+                        message: data.message || '未知错误'
+                    });
+                    showStatus('guestResult', '游客登录失败', 'error');
                 }
             } catch (error) {
-                resultDiv.innerHTML = `
-                    <div style="color:red;">
-                        <h4>❌ 请求失败</h4>
-                        <p>错误: ${error.message}</p>
-                        <p>请检查API地址: ${API_BASE}</p>
-                    </div>
-                `;
-            }
-        }
-        
-        // 显示Cookie
-        function showCookie() {
-            const display = document.getElementById('cookieDisplay');
-            if (display.style.display === 'none') {
-                display.innerHTML = `<pre>${currentCookie}</pre>`;
-                display.style.display = 'block';
-            } else {
-                display.style.display = 'none';
-            }
-        }
-        
-        // 显示用户信息
-        function showUserInfo(account) {
-            const userInfoDiv = document.getElementById('userInfo');
-            const userDataDiv = document.getElementById('userData');
-            
-            if (account) {
-                userDataDiv.innerHTML = `
-                    <p><strong>用户ID:</strong> ${account.id}</p>
-                    <p><strong>用户名:</strong> ${account.userName}</p>
-                    <p><strong>创建时间:</strong> ${new Date(account.createTime).toLocaleString()}</p>
-                    <p><strong>类型:</strong> ${account.type === 0 ? '普通用户' : '其他'}</p>
-                    <p><strong>状态:</strong> ${account.status === 0 ? '正常' : '异常'}</p>
-                `;
-            } else {
-                userDataDiv.innerHTML = '<p>匿名用户（游客）</p>';
-            }
-            
-            userInfoDiv.style.display = 'block';
-        }
-        
-        // 开始二维码登录流程
-        async function startQrLogin() {
-            try {
-                document.getElementById('qrArea').style.display = 'block';
-                document.getElementById('qrStatus').innerHTML = '正在生成二维码...';
-                
-                // 1. 获取二维码key
-                const keyRes = await fetch(`${API_BASE}/login/qr/key?timestamp=${Date.now()}`);
-                const keyData = await keyRes.json();
-                
-                if (keyData.code !== 200) {
-                    document.getElementById('qrStatus').innerHTML = `获取二维码key失败: ${keyData.code}`;
-                    return;
-                }
-                
-                qrKey = keyData.data.unikey;
-                console.log('二维码key:', qrKey);
-                
-                // 2. 生成二维码
-                const qrRes = await fetch(`${API_BASE}/login/qr/create?key=${qrKey}&qrimg=true&timestamp=${Date.now()}`);
-                const qrData = await qrRes.json();
-                
-                if (qrData.code !== 200) {
-                    document.getElementById('qrStatus').innerHTML = `生成二维码失败: ${qrData.code}`;
-                    return;
-                }
-                
-                // 显示二维码
-                QRCode.toCanvas(document.getElementById('qrcodeCanvas'), qrData.data.qrimg, {
-                    width: 250,
-                    height: 250,
-                    margin: 2
-                }, function(error) {
-                    if (error) {
-                        document.getElementById('qrStatus').innerHTML = `生成二维码图片失败: ${error.message}`;
-                    }
+                showResult('guestData', {
+                    error: '网络错误',
+                    message: error.message
                 });
-                
-                document.getElementById('qrStatus').innerHTML = '请用网易云APP扫描二维码';
-                
-                // 3. 开始轮询检查扫码状态
-                startPollingQrStatus();
-                
-            } catch (error) {
-                document.getElementById('qrStatus').innerHTML = `请求失败: ${error.message}`;
+                showStatus('guestResult', '网络错误', 'error');
+            } finally {
+                guestLoginBtn.disabled = false;
+                guestLoginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> 游客登录';
             }
         }
-        
-        // 轮询检查二维码扫码状态
-        function startPollingQrStatus() {
-            if (qrCheckInterval) clearInterval(qrCheckInterval);
+
+        // 清除Cookie
+        function clearGuestCookie() {
+            currentCookie = null;
+            localStorage.removeItem('netease_cookie');
+            document.getElementById('cookieInfo').style.display = 'none';
+            updateStatusCard('cookieStatusCard', '已清除', 'false');
+            updateStatusCard('loginStatusCard', '未知', 'false');
             
-            qrCheckInterval = setInterval(async () => {
-                try {
-                    const checkRes = await fetch(`${API_BASE}/login/qr/check?key=${qrKey}&timestamp=${Date.now()}`);
-                    const checkData = await checkRes.json();
-                    
-                    console.log('扫码状态:', checkData.code, checkData.message);
-                    
-                    if (checkData.code === 800) {
-                        document.getElementById('qrStatus').innerHTML = '❌ 二维码已过期，请重新生成';
-                        clearInterval(qrCheckInterval);
-                    } else if (checkData.code === 801) {
-                        document.getElementById('qrStatus').innerHTML = '⏳ 等待扫码...';
-                    } else if (checkData.code === 802) {
-                        document.getElementById('qrStatus').innerHTML = '✅ 已扫码，请在APP中确认登录';
-                    } else if (checkData.code === 803) {
-                        // 登录成功
-                        clearInterval(qrCheckInterval);
-                        currentCookie = checkData.cookie || checkData.data?.cookie;
-                        
-                        if (currentCookie) {
-                            localStorage.setItem('netease_cookie', currentCookie);
-                            document.getElementById('qrStatus').innerHTML = '🎉 登录成功！';
-                            document.getElementById('qrArea').style.display = 'none';
-                            
-                            // 获取用户信息
-                            const userRes = await fetch(`${API_BASE}/login/status?timestamp=${Date.now()}`, {
-                                headers: {
-                                    'Cookie': currentCookie
-                                }
-                            });
-                            const userData = await userRes.json();
-                            
-                            if (userData.data?.profile) {
-                                showUserInfo(userData.data.profile);
-                                checkAPIAccess();
-                            }
-                        } else {
-                            document.getElementById('qrStatus').innerHTML = '❌ 登录失败，未获取到Cookie';
-                        }
-                    } else if (checkData.code === 502) {
-                        document.getElementById('qrStatus').innerHTML = '⚠️ 扫码后返回502，请尝试加上noCookie参数';
-                    }
-                } catch (error) {
-                    console.error('检查扫码状态失败:', error);
-                    document.getElementById('qrStatus').innerHTML = `检查失败: ${error.message}`;
-                }
-            }, 2000); // 每2秒检查一次
+            showStatus('guestResult', 'Cookie已清除', 'success');
         }
-        
-        // 停止二维码检查
-        function stopQrCheck() {
-            if (qrCheckInterval) {
-                clearInterval(qrCheckInterval);
-                qrCheckInterval = null;
-                document.getElementById('qrStatus').innerHTML = '已停止检查扫码状态';
+
+        // 更新Cookie显示
+        function updateCookieDisplay() {
+            if (currentCookie) {
+                const cookieInfo = document.getElementById('cookieInfo');
+                const currentCookieDiv = document.getElementById('currentCookie');
+                
+                // 只显示部分Cookie信息
+                const maskedCookie = currentCookie.substring(0, 50) + '...';
+                currentCookieDiv.textContent = maskedCookie;
+                cookieInfo.style.display = 'block';
+                
+                updateStatusCard('cookieStatusCard', '已保存', 'true');
             }
         }
-        
+
         // 检查登录状态
         async function checkLoginStatus() {
-            if (!currentCookie) {
-                currentCookie = localStorage.getItem('netease_cookie');
-                if (!currentCookie) {
-                    alert('请先登录');
-                    return;
-                }
-            }
+            const statusCheckBtn = document.getElementById('statusCheckBtn');
+            statusCheckBtn.disabled = true;
+            statusCheckBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 检查中...';
             
             try {
-                const res = await fetch(`${API_BASE}/login/status?timestamp=${Date.now()}`, {
-                    headers: {
-                        'Cookie': currentCookie
-                    }
-                });
-                const data = await res.json();
+                let url = `${API_BASE}/login/status?timestamp=${getTimestamp()}`;
                 
-                const resultDiv = document.getElementById('guestResult');
-                if (data.data?.profile) {
-                    const profile = data.data.profile;
-                    resultDiv.innerHTML = `
-                        <div style="color:green;">
-                            <h4>✅ 已登录</h4>
-                            <p>用户ID: ${profile.userId}</p>
-                            <p>昵称: ${profile.nickname}</p>
-                            <p>头像: ${profile.avatarUrl ? '有' : '无'}</p>
-                            <p>VIP类型: ${profile.vipType === 0 ? '非VIP' : 'VIP'}</p>
-                        </div>
-                    `;
-                    showUserInfo(profile);
-                } else {
-                    resultDiv.innerHTML = `
-                        <div style="color:orange;">
-                            <h4>⚠️ 登录状态异常</h4>
-                            <p>可能Cookie已过期，请重新登录</p>
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                console.error('检查登录状态失败:', error);
-            }
-        }
-        
-        // 检查API访问权限
-        async function checkAPIAccess() {
-            const resultDiv = document.getElementById('apiResult');
-            resultDiv.innerHTML = '正在测试API访问权限...';
-            
-            try {
-                // 测试推荐歌单（不需要登录）
-                const playlistRes = await fetch(`${API_BASE}/personalized?limit=3&timestamp=${Date.now()}`);
-                const playlistData = await playlistRes.json();
-                
-                let html = '<h4>API访问测试结果:</h4>';
-                
-                if (playlistData.code === 200) {
-                    html += `<p>✅ 推荐歌单接口: 正常 (${playlistData.result?.length || 0} 个歌单)</p>`;
-                } else {
-                    html += `<p>❌ 推荐歌单接口: 失败 (${playlistData.code})</p>`;
-                }
-                
-                // 如果已登录，测试需要登录的接口
+                // 如果有Cookie，添加到请求中
                 if (currentCookie) {
-                    try {
-                        const userRes = await fetch(`${API_BASE}/user/account?timestamp=${Date.now()}`, {
-                            headers: {
-                                'Cookie': currentCookie
-                            }
-                        });
-                        const userData = await userRes.json();
-                        
-                        if (userData.code === 200) {
-                            html += `<p>✅ 用户信息接口: 正常</p>`;
-                        } else {
-                            html += `<p>❌ 用户信息接口: 失败 (${userData.code})</p>`;
-                        }
-                    } catch (error) {
-                        html += `<p>❌ 用户信息接口: 请求失败</p>`;
-                    }
+                    url += `&cookie=${encodeURIComponent(currentCookie)}`;
                 }
                 
-                resultDiv.innerHTML = html;
-            } catch (error) {
-                resultDiv.innerHTML = `<p>❌ API测试失败: ${error.message}</p>`;
-            }
-        }
-        
-        // 测试推荐歌单接口
-        async function testPersonalized() {
-            const resultDiv = document.getElementById('apiResult');
-            resultDiv.innerHTML = '正在测试推荐歌单接口...';
-            
-            try {
-                const res = await fetch(`${API_BASE}/personalized?limit=5&timestamp=${Date.now()}`);
-                const data = await res.json();
+                const response = await fetch(url);
+                const data = await response.json();
                 
-                let html = '<h4>推荐歌单测试结果:</h4>';
-                
-                if (data.code === 200) {
-                    const playlists = data.result || data.data || [];
-                    html += `<p>✅ 成功获取 ${playlists.length} 个推荐歌单</p>`;
+                // 更新状态卡片
+                if (data.code === 200 && data.data && data.data.profile) {
+                    updateStatusCard('loginStatusCard', '已登录', 'true');
                     
-                    playlists.forEach((playlist, index) => {
-                        html += `
-                            <div style="border:1px solid #ddd; padding:10px; margin:5px 0;">
-                                <p><strong>${index + 1}. ${playlist.name}</strong></p>
-                                <p>描述: ${playlist.copywriter || '无'}</p>
-                                <p>歌曲数: ${playlist.trackCount}</p>
-                            </div>
-                        `;
+                    showResult('statusData', {
+                        code: data.code,
+                        isLoggedIn: true,
+                        user: data.data.profile.nickname,
+                        userId: data.data.profile.userId,
+                        vipType: data.data.profile.vipType
                     });
                 } else {
-                    html += `<p>❌ 失败: ${data.code} - ${data.message || '未知错误'}</p>`;
+                    updateStatusCard('loginStatusCard', '未登录', 'false');
+                    
+                    showResult('statusData', {
+                        code: data.code,
+                        isLoggedIn: false,
+                        message: data.message || '未登录状态'
+                    });
                 }
                 
-                resultDiv.innerHTML = html;
             } catch (error) {
-                resultDiv.innerHTML = `<p>❌ 请求失败: ${error.message}</p>`;
+                updateStatusCard('loginStatusCard', '检查失败', 'false');
+                
+                showResult('statusData', {
+                    error: '检查失败',
+                    message: error.message
+                });
+            } finally {
+                statusCheckBtn.disabled = false;
+                statusCheckBtn.innerHTML = '<i class="fas fa-sync-alt"></i> 检查登录状态';
             }
         }
-        
-        // 测试用户歌单接口
-        async function testUserPlaylist() {
+
+        // 更新状态卡片
+        function updateStatusCard(cardId, value, status) {
+            const card = document.getElementById(cardId);
+            const valueDiv = card.querySelector('.value');
+            valueDiv.textContent = value;
+            
+            card.className = 'status-card';
+            if (status === 'true') {
+                card.classList.add('true');
+            } else if (status === 'false') {
+                card.classList.add('false');
+            }
+        }
+
+        // 刷新登录状态
+        async function refreshLogin() {
             if (!currentCookie) {
-                alert('请先登录');
+                showResult('otherData', {
+                    error: '请先登录',
+                    message: '没有找到有效的Cookie'
+                });
                 return;
             }
             
-            const resultDiv = document.getElementById('apiResult');
-            resultDiv.innerHTML = '正在测试用户歌单接口...';
-            
             try {
-                // 先获取用户信息以获取UID
-                const statusRes = await fetch(`${API_BASE}/login/status?timestamp=${Date.now()}`, {
-                    headers: {
-                        'Cookie': currentCookie
-                    }
-                });
-                const statusData = await statusRes.json();
+                const response = await fetch(`${API_BASE}/login/refresh?timestamp=${getTimestamp()}&cookie=${encodeURIComponent(currentCookie)}`);
+                const data = await response.json();
                 
-                if (statusData.code !== 200 || !statusData.data?.profile?.userId) {
-                    resultDiv.innerHTML = '<p>❌ 无法获取用户ID</p>';
-                    return;
+                showResult('otherData', {
+                    code: data.code,
+                    message: data.message || '刷新结果',
+                    newCookie: data.cookie ? '已更新' : '未更新'
+                });
+                
+                if (data.cookie) {
+                    currentCookie = data.cookie;
+                    localStorage.setItem('netease_cookie', currentCookie);
+                    updateCookieDisplay();
                 }
                 
-                const userId = statusData.data.profile.userId;
-                
-                // 获取用户歌单
-                const res = await fetch(`${API_BASE}/user/playlist?uid=${userId}&timestamp=${Date.now()}`, {
-                    headers: {
-                        'Cookie': currentCookie
-                    }
-                });
-                const data = await res.json();
-                
-                let html = '<h4>用户歌单测试结果:</h4>';
-                
-                if (data.code === 200) {
-                    const playlists = data.playlist || data.data || [];
-                    html += `<p>✅ 成功获取 ${playlists.length} 个歌单</p>`;
-                    
-                    playlists.slice(0, 5).forEach((playlist, index) => {
-                        html += `
-                            <div style="border:1px solid #ddd; padding:10px; margin:5px 0;">
-                                <p><strong>${index + 1}. ${playlist.name}</strong></p>
-                                <p>歌曲数: ${playlist.trackCount}</p>
-                                <p>创建者: ${playlist.creator?.nickname || '未知'}</p>
-                            </div>
-                        `;
-                    });
-                    
-                    if (playlists.length > 5) {
-                        html += `<p>... 还有 ${playlists.length - 5} 个歌单未显示</p>`;
-                    }
-                } else if (data.code === 301) {
-                    html += `<p>❌ 需要登录（返回301）</p>`;
-                    html += `<p>可能原因：Cookie已过期或无效</p>`;
-                } else {
-                    html += `<p>❌ 失败: ${data.code} - ${data.message || '未知错误'}</p>`;
-                }
-                
-                resultDiv.innerHTML = html;
             } catch (error) {
-                resultDiv.innerHTML = `<p>❌ 请求失败: ${error.message}</p>`;
+                showResult('otherData', {
+                    error: '刷新失败',
+                    message: error.message
+                });
             }
         }
-        
-        // 测试每日推荐
-        async function testDailyRecommend() {
-            if (!currentCookie) {
-                alert('请先登录');
-                return;
-            }
-            
-            const resultDiv = document.getElementById('apiResult');
-            resultDiv.innerHTML = '正在测试每日推荐接口...';
-            
-            try {
-                const res = await fetch(`${API_BASE}/recommend/songs?timestamp=${Date.now()}`, {
-                    headers: {
-                        'Cookie': currentCookie
-                    }
-                });
-                const data = await res.json();
-                
-                let html = '<h4>每日推荐测试结果:</h4>';
-                
-                if (data.code === 200) {
-                    const songs = data.data?.dailySongs || data.recommend || [];
-                    html += `<p>✅ 成功获取 ${songs.length} 首推荐歌曲</p>`;
-                    
-                    songs.slice(0, 5).forEach((song, index) => {
-                        html += `
-                            <div style="border:1px solid #ddd; padding:10px; margin:5px 0;">
-                                <p><strong>${index + 1}. ${song.name}</strong></p>
-                                <p>歌手: ${song.ar?.map(a => a.name).join(', ') || '未知'}</p>
-                                <p>专辑: ${song.al?.name || '未知'}</p>
-                            </div>
-                        `;
-                    });
-                } else if (data.code === 301) {
-                    html += `<p>❌ 需要登录（返回301）</p>`;
-                } else {
-                    html += `<p>❌ 失败: ${data.code} - ${data.message || '未知错误'}</p>`;
-                }
-                
-                resultDiv.innerHTML = html;
-            } catch (error) {
-                resultDiv.innerHTML = `<p>❌ 请求失败: ${error.message}</p>`;
-            }
-        }
-        
+
         // 退出登录
         async function logout() {
-            if (!currentCookie) return;
+            if (!currentCookie) {
+                showResult('otherData', {
+                    error: '未登录',
+                    message: '当前没有登录状态'
+                });
+                return;
+            }
             
             try {
-                const res = await fetch(`${API_BASE}/logout?timestamp=${Date.now()}`, {
-                    headers: {
-                        'Cookie': currentCookie
-                    }
-                });
-                const data = await res.json();
+                const response = await fetch(`${API_BASE}/logout?timestamp=${getTimestamp()}&cookie=${encodeURIComponent(currentCookie)}`);
+                const data = await response.json();
                 
-                if (data.code === 200) {
-                    currentCookie = '';
-                    localStorage.removeItem('netease_cookie');
-                    document.getElementById('userInfo').style.display = 'none';
-                    document.getElementById('guestResult').innerHTML = '<p style="color:green;">✅ 已退出登录</p>';
-                }
+                showResult('otherData', {
+                    code: data.code,
+                    message: data.message || '退出结果'
+                });
+                
+                // 清除本地Cookie
+                currentCookie = null;
+                localStorage.removeItem('netease_cookie');
+                updateCookieDisplay();
+                updateStatusCard('loginStatusCard', '已退出', 'false');
+                
             } catch (error) {
-                console.error('退出登录失败:', error);
+                showResult('otherData', {
+                    error: '退出失败',
+                    message: error.message
+                });
             }
         }
-        
-        // 页面加载时检查是否有保存的Cookie
-        window.addEventListener('load', () => {
-            const savedCookie = localStorage.getItem('netease_cookie');
-            if (savedCookie) {
-                currentCookie = savedCookie;
-                checkLoginStatus();
+
+        // 检查API连通性
+        async function checkAPIStatus() {
+            try {
+                const startTime = Date.now();
+                const response = await fetch(`${API_BASE}/login/status?timestamp=${getTimestamp()}`);
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                
+                updateStatusCard('apiStatusCard', '正常', 'true');
+                
+                // 如果有结果容器，显示详细信息
+                const otherResult = document.getElementById('otherResult');
+                if (otherResult.style.display === 'none') {
+                    showResult('otherData', {
+                        status: 'API连接正常',
+                        responseTime: `${responseTime}ms`,
+                        statusCode: response.status
+                    });
+                }
+                
+            } catch (error) {
+                updateStatusCard('apiStatusCard', '异常', 'false');
+                
+                showResult('otherData', {
+                    error: 'API连接失败',
+                    message: error.message,
+                    suggestion: '请检查API地址是否正确或网络是否正常'
+                });
             }
-        });
+        }
+
+        // 导出当前Cookie（用于开发调试）
+        function exportCookie() {
+            if (!currentCookie) {
+                alert('没有可导出的Cookie');
+                return;
+            }
+            
+            const blob = new Blob([JSON.stringify({
+                cookie: currentCookie,
+                timestamp: new Date().toISOString(),
+                note: '网易云音乐API Cookie'
+            }, null, 2)], { type: 'application/json' });
+            
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'netease-cookie.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
     </script>
 </body>
 </html>
