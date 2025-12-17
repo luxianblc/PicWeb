@@ -835,31 +835,12 @@ body {
     background: rgba(0, 0, 0, 0.1);
 }
 
-::-webkit-scrollbar-thumb/* 加载状态 */
-.loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 3rem;
-    min-height: 200px;
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
 
-.loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 3px solid rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    border-top-color: var(--primary-color);
-    animation: spin 1s ease-in-out infinite;
-}
-
-.light-theme .loading-spinner {
-    border: 3px solid rgba(0, 0, 0, 0.1);
-    border-top-color: var(--primary-color);
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
+.light-theme ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.2);
 }
 
 /* 动画效果 */
@@ -868,7 +849,7 @@ body {
     to { opacity: 1; }
 }
 
-@keyframes slideUp {
+@keyframes slideInUp {
     from {
         opacity: 0;
         transform: translateY(30px);
@@ -879,77 +860,43 @@ body {
     }
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
 .animate-slide-up {
-    animation: slideUp 0.6s ease-out forwards;
-    opacity: 0;
-}
-
-.animate-pulse {
-    animation: pulse 2s infinite;
-}
-
-/* 页脚 */
-.footer {
-    margin-top: 4rem;
-    padding: 2rem 0;
-    text-align: center;
-    color: var(--text-secondary);
-    border-top: 1px solid var(--border-color);
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.light-theme .footer {
-    background: rgba(0, 0, 0, 0.02);
-}
-
-.footer-note {
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-    color: var(--text-secondary);
-    opacity: 0.8;
+    animation: slideInUp 0.5s ease forwards;
 }
 
 /* 模态框 */
 .modal-overlay {
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
     align-items: center;
-    z-index: 10000;
-    animation: fadeIn 0.3s ease;
+    justify-content: center;
+    backdrop-filter: blur(5px);
 }
 
 .modal-content {
+    max-width: 400px;
     width: 90%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    animation: slideUp 0.4s ease;
+    animation: slideInUp 0.3s ease;
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
     border-bottom: 1px solid var(--border-color);
 }
 
 .modal-header h3 {
-    font-size: 1.5rem;
     color: var(--primary-color);
+    margin: 0;
 }
 
 .modal-close {
@@ -958,164 +905,66 @@ body {
     color: var(--text-secondary);
     font-size: 1.2rem;
     cursor: pointer;
-    transition: color 0.3s;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
+    transition: color 0.3s ease;
 }
 
 .modal-close:hover {
     color: var(--primary-color);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.light-theme .modal-close:hover {
-    background: rgba(0, 0, 0, 0.05);
 }
 
 .modal-body {
-    padding: 2rem;
+    padding: 0;
 }
 
 .qr-login-section {
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border-color);
+    margin-top: 1.5rem;
     text-align: center;
-}
-
-.qr-login-section p {
-    margin-bottom: 1rem;
     color: var(--text-secondary);
 }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .container {
-        padding: 0 15px;
-    }
-    
-    .nav-container {
-        padding: 1rem;
-        flex-wrap: wrap;
-    }
-    
-    .nav-links {
-        display: none;
-    }
-    
-    .player-info {
-        gap: 1rem;
-    }
-    
-    .track-title {
-        font-size: 1.5rem;
-    }
-    
-    .page-title h1 {
-        font-size: 2rem;
-    }
-    
-    .page-title p {
-        font-size: 1rem;
-    }
-    
-    .control-buttons {
-        gap: 1rem;
-    }
-    
-    .control-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 1rem;
-    }
-    
-    .play-btn {
-        width: 60px;
-        height: 60px;
-        font-size: 1.5rem;
-    }
-    
-    .status-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 480px) {
-    .container {
-        padding: 0 10px;
-    }
-    
-    .player-main {
-        padding: 1rem;
-    }
-    
-    .track-title {
-        font-size: 1.2rem;
-    }
-    
-    .track-artist {
-        font-size: 1rem;
-    }
-    
-    .function-grid {
-        gap: 1rem;
-    }
-    
-    .function-card {
-        padding: 1rem;
-    }
-}
-
-/* 工具类 */
-.hidden {
-    display: none !important;
-}
-
-.fade-in {
-    animation: fadeIn 0.5s ease;
-}
-
-.slide-in {
-    animation: slideUp 0.6s ease-out;
-}
-
-/* 高亮文本 */
-.highlight {
-    color: var(--primary-color);
-    font-weight: 600;
-}
-
-/* 标签样式 */
-.tag {
-    display: inline-block;
-    padding: 0.2rem 0.8rem;
-    background: color-mix(in srgb, var(--primary-color) 10%, transparent);
-    border: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent);
-    border-radius: 20px;
-    font-size: 0.8rem;
-    color: var(--primary-color);
-    margin-right: 0.5rem;
+.qr-login-section p {
     margin-bottom: 0.5rem;
 }
 
-/* 提示工具 */
-.tooltip {
-    position: relative;
-    display: inline-block;
+/* 加载动画 */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
 }
 
-.tooltip .tooltip-text {
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.light-theme .loading-spinner {
+    border-color: rgba(0, 0, 0, 0.1);
+    border-top-color: var(--primary-color);
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 工具提示 */
+.tooltip {
+    position: relative;
+    cursor: help;
+}
+
+.tooltip-text {
     visibility: hidden;
-    width: max-content;
-    max-width: 200px;
-    background: rgba(0, 0, 0, 0.8);
+    width: 200px;
+    background: rgba(0, 0, 0, 0.9);
     color: white;
     text-align: center;
-    padding: 0.5rem 1rem;
+    padding: 10px;
     border-radius: 6px;
     position: absolute;
     z-index: 1;
@@ -1124,8 +973,15 @@ body {
     transform: translateX(-50%);
     opacity: 0;
     transition: opacity 0.3s;
-    font-size: 0.8rem;
-    white-space: nowrap;
+    font-size: 12px;
+    line-height: 1.4;
+    pointer-events: none;
+}
+
+.light-theme .tooltip-text {
+    background: rgba(255, 255, 255, 0.95);
+    color: #333;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .tooltip:hover .tooltip-text {
@@ -1133,128 +989,202 @@ body {
     opacity: 1;
 }
 
-/* 骨架屏加载效果 */
+/* 页脚 */
+.footer {
+    text-align: center;
+    padding: 2rem 0;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border-color);
+    margin-top: 3rem;
+    transition: all 0.3s ease;
+}
+
+.footer p {
+    margin-bottom: 0.5rem;
+}
+
+.footer-note {
+    font-size: 0.9rem;
+    color: color-mix(in srgb, var(--text-secondary) 50%, transparent);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .nav-container {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .nav-links {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .page-title h1 {
+        font-size: 2rem;
+    }
+    
+    .player-info {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .album-art {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .track-title {
+        font-size: 1.5rem;
+    }
+    
+    .control-buttons {
+        gap: 1rem;
+    }
+    
+    .function-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .status-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+}
+
+/* 播放模式指示器 */
+.play-mode {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0.2rem 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* 搜索历史 */
+.search-history {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.search-history h4 {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.history-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.history-tag {
+    padding: 0.3rem 0.8rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.history-tag:hover {
+    background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* 通知 */
+.notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 5px 15px var(--shadow-color);
+    z-index: 3000;
+    animation: slideInUp 0.3s ease;
+    max-width: 300px;
+}
+
+.notification.success {
+    border-left: 4px solid var(--success-color);
+}
+
+.notification.error {
+    border-left: 4px solid var(--error-color);
+}
+
+.notification.info {
+    border-left: 4px solid var(--info-color);
+}
+
+/* 旋转动画 */
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.rotate {
+    animation: rotate 2s linear infinite;
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* 骨架屏加载 */
 .skeleton {
     background: linear-gradient(
         90deg,
-        rgba(255, 255, 255, 0.1) 25%,
-        rgba(255, 255, 255, 0.15) 50%,
-        rgba(255, 255, 255, 0.1) 75%
+        rgba(255, 255, 255, 0.05) 25%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.05) 75%
     );
     background-size: 200% 100%;
-    animation: loading 1.5s ease-in-out infinite;
+    animation: loading 1.5s infinite;
 }
 
 .light-theme .skeleton {
     background: linear-gradient(
         90deg,
         rgba(0, 0, 0, 0.05) 25%,
-        rgba(0, 0, 0, 0.08) 50%,
+        rgba(0, 0, 0, 0.1) 50%,
         rgba(0, 0, 0, 0.05) 75%
     );
     background-size: 200% 100%;
 }
 
 @keyframes loading {
-    0% {
-        background-position: 200% 0;
-    }
-    100% {
-        background-position: -200% 0;
-    }
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
-/* 搜索建议 */
-.search-suggestions {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 0 0 10px 10px;
-    max-height: 300px;
-    overflow-y: auto;
-    z-index: 100;
-    box-shadow: 0 10px 30px var(--shadow-color);
+/* 渐入动画 */
+.fade-in {
+    animation: fadeIn 0.5s ease forwards;
 }
-
-.suggestion-item {
-    padding: 0.8rem 1rem;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.suggestion-item:last-child {
-    border-bottom: none;
-}
-
-.suggestion-item:hover {
-    background-color: var(--bg-hover);
-}
-
-.suggestion-item .suggestion-text {
-    color: var(--text-primary);
-    font-size: 0.9rem;
-}
-
-.suggestion-item .suggestion-hint {
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-    margin-left: 0.5rem;
-}
-
-/* 播放列表 */
-.playlist {
-    border-top: 1px solid var(--border-color);
-    margin-top: 1rem;
-    padding-top: 1rem;
-}
-
-.playlist-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    padding: 0 1rem;
-}
-
-.playlist-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--primary-color);
-}
-
-.playlist-count {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-}
-
-.playlist-items {
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-/* 媒体查询用于打印 */
-@media print {
-    .navbar,
-    .theme-toggle,
-    .control-btn,
-    .btn,
-    .footer,
-    .modal-overlay {
-        display: none !important;
-    }
-    
-    body {
-        background: white !important;
-        color: black !important;
-    }
-    
-    .glass {
-        background: white !important;
-        border: 1px solid #ddd !important;
-        box-shadow: none !important;
-    }
-    }
