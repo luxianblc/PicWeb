@@ -15,28 +15,42 @@
     
     <!-- 网站图标 -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦌</text></svg>">
-    
     <style>
-        /* 页面加载时的过渡效果 */
-        body {
+    /* 页面加载时的过渡效果 */
+    body {
+        animation: fadeIn 0.5s ease forwards;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    /* 主内容动画 */
+    .main-content {
+        opacity: 1;
+        animation: slideInUp 0.6s ease 0.3s both;
+    }
+    
+    @keyframes slideInUp {
+        from {
             opacity: 0;
-            animation: fadeIn 0.5s ease forwards;
+            transform: translateY(30px);
         }
-        
-        @keyframes fadeIn {
-            to { opacity: 1; }
-        }
-        
-        /* 确保内容在组件加载前隐藏 */
-        .main-content {
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        body.components-loaded .main-content {
+        to {
             opacity: 1;
+            transform: translateY(0);
         }
+    }
+    
+    /* 卡片动画 */
+    .card {
+        animation: fadeIn 0.5s ease forwards;
+        animation-delay: calc(var(--i, 0) * 0.1s + 0.5s);
+        opacity: 0;
+    }
     </style>
+    
 </head>
 <body>
     <!-- 组件将在这里动态插入 -->
