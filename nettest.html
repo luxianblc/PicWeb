@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网易云API测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .test-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            font-size: 1.5rem;
+        }
+        
+        .card h2 i {
+            margin-right: 10px;
+            color: #667eea;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .result {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .result h3 {
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .result pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        
+        .song-item, .playlist-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+        
+        .song-item:hover, .playlist-item:hover {
+            transform: translateY(-3px);
+        }
+        
+        .song-cover, .playlist-cover {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+        
+        .song-cover img, .playlist-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .song-info h4, .playlist-info h4 {
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #333;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .song-info p, .playlist-info p {
+            font-size: 12px;
+            color: #666;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .url-display {
+            background: #f0f0f0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+            color: #333;
+        }
+        
+        .url-display span {
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .statistics {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .test-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .result-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-music"></i> 网易云音乐API测试</h1>
+            <p>测试推荐歌单和推荐新音乐接口</p>
+        </div>
+        
+        <div class="statistics">
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="apiStatus">✓</div>
+                    <div class="stat-label">API状态</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="playlistCount">0</div>
+                    <div class="stat-label">推荐歌单数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="songCount">0</div>
+                    <div class="stat-label">推荐新歌数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="responseTime">0ms</div>
+                    <div class="stat-label">响应时间</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-cards">
+            <!-- 推荐歌单测试 -->
+            <div class="card">
+                <h2><i class="fas fa-list"></i> 推荐歌单测试</h2>
+                
+                <div class="input-group">
+                    <label for="playlistLimit">显示数量 (默认30)</label>
+                    <input type="number" id="playlistLimit" min="1" max="100" value="10">
+                </div>
+                
+                <div class="url-display">
+                    API URL: <span id="playlistUrl">等待输入...</span>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="testPlaylist()">
+                        <i class="fas fa-play"></i> 测试接口
+                    </button>
+                    <button class="btn-secondary" onclick="clearPlaylistResult()">
+                        <i class="fas fa-trash"></i> 清空结果
+                    </button>
+                </div>
+                
+                <div id="playlistResult" class="result">
+                    <h3><i class="fas fa-list-ul"></i> 测试结果</h3>
+                    <div id="playlistData">
+                        <!-- 结果将在这里显示 -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 推荐新音乐测试 -->
+            <div class="card">
+                <h2><i class="fas fa-star"></i> 推荐新音乐测试</h2>
+                
+                <div class="input-group">
+                    <label for="songLimit">显示数量 (默认10)</label>
+                    <input type="number" id="songLimit" min="1" max="50" value="5">
+                </div>
+                
+                <div class="url-display">
+                    API URL: <span id="songUrl">等待输入...</span>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="testNewSongs()">
+                        <i class="fas fa-play"></i> 测试接口
+                    </button>
+                    <button class="btn-secondary" onclick="clearSongResult()">
+                        <i class="fas fa-trash"></i> 清空结果
+                    </button>
+                </div>
+                
+                <div id="songResult" class="result">
+                    <h3><i class="fas fa-music"></i> 测试结果</h3>
+                    <div id="songData">
+                        <!-- 结果将在这里显示 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- API信息 -->
+        <div class="card">
+            <h2><i class="fas fa-info-circle"></i> API接口信息</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h3>推荐歌单接口</h3>
+                    <p><strong>接口地址:</strong> <code>/personalized</code></p>
+                    <p><strong>参数:</strong> limit (数量，默认30)</p>
+                    <p><strong>示例:</strong> <code>/personalized?limit=10</code></p>
+                </div>
+                <div>
+                    <h3>推荐新音乐接口</h3>
+                    <p><strong>接口地址:</strong> <code>/personalized/newsong</code></p>
+                    <p><strong>参数:</strong> limit (数量，默认10)</p>
+                    <p><strong>示例:</strong> <code>/personalized/newsong?limit=5</code></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API基础地址
+        const API_BASE = 'https://neteaseapi-enhanced.vercel.app';
+        
+        // 更新URL显示
+        function updateUrlDisplays() {
+            const playlistLimit = document.getElementById('playlistLimit').value;
+            const songLimit = document.getElementById('songLimit').value;
+            
+            document.getElementById('playlistUrl').textContent = 
+                `${API_BASE}/personalized?limit=${playlistLimit}`;
+            document.getElementById('songUrl').textContent = 
+                `${API_BASE}/personalized/newsong?limit=${songLimit}`;
+        }
+        
+        // 初始更新URL显示
+        updateUrlDisplays();
+        
+        // 监听输入变化
+        document.getElementById('playlistLimit').addEventListener('input', updateUrlDisplays);
+        document.getElementById('songLimit').addEventListener('input', updateUrlDisplays);
+        
+        // 测试推荐歌单接口
+        async function testPlaylist() {
+            const limit = document.getElementById('playlistLimit').value;
+            const resultDiv = document.getElementById('playlistData');
+            const startTime = performance.now();
+            
+            resultDiv.innerHTML = '<div class="loading">正在加载推荐歌单...</div>';
+            updateStat('playlistCount', '...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/personalized?limit=${limit}`);
+                const endTime = performance.now();
+                const responseTime = Math.round(endTime - startTime);
+                updateStat('responseTime', `${responseTime}ms`);
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    const playlists = data.result || data.data || [];
+                    updateStat('playlistCount', playlists.length);
+                    displayPlaylists(playlists, resultDiv);
+                    updateStat('apiStatus', '✓');
+                } else {
+                    resultDiv.innerHTML = `<div style="color: #e74c3c; text-align: center; padding: 20px;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h3>错误: ${data.code}</h3>
+                        <p>${data.message || '获取歌单失败'}</p>
+                    </div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div style="color: #e74c3c; text-align: center; padding: 20px;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <h3>网络错误</h3>
+                    <p>${error.message}</p>
+                    <p>请检查API地址是否可用</p>
+                </div>`;
+                updateStat('apiStatus', '✗');
+            }
+        }
+        
+        // 显示推荐歌单
+        function displayPlaylists(playlists, container) {
+            if (playlists.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">没有找到推荐歌单</p>';
+                return;
+            }
+            
+            let html = `<div class="result-grid">`;
+            
+            playlists.forEach((playlist, index) => {
+                html += `
+                    <div class="playlist-item">
+                        <div class="playlist-cover">
+                            ${playlist.picUrl ? 
+                                `<img src="${playlist.picUrl}" alt="${playlist.name}" 
+                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\"fas fa-music\"></i>'">` :
+                                `<i class="fas fa-music"></i>`
+                            }
+                        </div>
+                        <div class="playlist-info">
+                            <h4>${playlist.name || '未知歌单'}</h4>
+                            <p>${playlist.copywriter || playlist.description || '网易云音乐推荐'}</p>
+                            <p style="font-size: 11px; color: #999; margin-top: 5px;">
+                                <i class="fas fa-music"></i> ${playlist.trackCount || 0} 首
+                            </p>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            
+            // 添加JSON数据查看按钮
+            html += `
+                <div style="margin-top: 20px;">
+                    <button onclick="showRawData('playlistRawData', ${JSON.stringify(playlists)})" 
+                            class="btn-secondary" style="width: 100%;">
+                        <i class="fas fa-code"></i> 查看原始JSON数据
+                    </button>
+                    <div id="playlistRawData" style="display: none; margin-top: 15px;">
+                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 12px; max-height: 300px; overflow: auto;"></pre>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        // 测试推荐新音乐接口
+        async function testNewSongs() {
+            const limit = document.getElementById('songLimit').value;
+            const resultDiv = document.getElementById('songData');
+            const startTime = performance.now();
+            
+            resultDiv.innerHTML = '<div class="loading">正在加载推荐新音乐...</div>';
+            updateStat('songCount', '...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/personalized/newsong?limit=${limit}`);
+                const endTime = performance.now();
+                const responseTime = Math.round(endTime - startTime);
+                updateStat('responseTime', `${responseTime}ms`);
+                
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    const songs = data.result || data.data || [];
+                    updateStat('songCount', songs.length);
+                    displaySongs(songs, resultDiv);
+                    updateStat('apiStatus', '✓');
+                } else {
+                    resultDiv.innerHTML = `<div style="color: #e74c3c; text-align: center; padding: 20px;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h3>错误: ${data.code}</h3>
+                        <p>${data.message || '获取新音乐失败'}</p>
+                    </div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div style="color: #e74c3c; text-align: center; padding: 20px;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <h3>网络错误</h3>
+                    <p>${error.message}</p>
+                    <p>请检查API地址是否可用</p>
+                </div>`;
+                updateStat('apiStatus', '✗');
+            }
+        }
+        
+        // 显示推荐新音乐
+        function displaySongs(songs, container) {
+            if (songs.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">没有找到推荐新音乐</p>';
+                return;
+            }
+            
+            let html = `<div class="result-grid">`;
+            
+            songs.forEach((song, index) => {
+                const songInfo = song.song || song;
+                const album = songInfo.album || {};
+                const artists = songInfo.artists || [];
+                
+                html += `
+                    <div class="song-item">
+                        <div class="song-cover">
+                            ${album.picUrl ? 
+                                `<img src="${album.picUrl}" alt="${songInfo.name}" 
+                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\"fas fa-music\"></i>'">` :
+                                `<i class="fas fa-music"></i>`
+                            }
+                        </div>
+                        <div class="song-info">
+                            <h4>${songInfo.name || '未知歌曲'}</h4>
+                            <p>${artists.map(a => a.name).join(', ') || '未知歌手'}</p>
+                            <p style="font-size: 11px; color: #999; margin-top: 5px;">
+                                <i class="fas fa-compact-disc"></i> ${album.name || '未知专辑'}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            
+            // 添加JSON数据查看按钮
+            html += `
+                <div style="margin-top: 20px;">
+                    <button onclick="showRawData('songRawData', ${JSON.stringify(songs)})" 
+                            class="btn-secondary" style="width: 100%;">
+                        <i class="fas fa-code"></i> 查看原始JSON数据
+                    </button>
+                    <div id="songRawData" style="display: none; margin-top: 15px;">
+                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 12px; max-height: 300px; overflow: auto;"></pre>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        // 显示原始JSON数据
+        function showRawData(elementId, data) {
+            const element = document.getElementById(elementId);
+            const isVisible = element.style.display !== 'none';
+            
+            if (isVisible) {
+                element.style.display = 'none';
+            } else {
+                element.style.display = 'block';
+                const pre = element.querySelector('pre');
+                pre.textContent = JSON.stringify(data, null, 2);
+            }
+        }
+        
+        // 清空结果
+        function clearPlaylistResult() {
+            document.getElementById('playlistData').innerHTML = '';
+            updateStat('playlistCount', '0');
+        }
+        
+        function clearSongResult() {
+            document.getElementById('songData').innerHTML = '';
+            updateStat('songCount', '0');
+        }
+        
+        // 更新统计信息
+        function updateStat(statId, value) {
+            const element = document.getElementById(statId);
+            if (element) {
+                element.textContent = value;
+                
+                // 添加动画效果
+                element.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    element.style.transform = 'scale(1)';
+                }, 200);
+            }
+        }
+        
+        // 页面加载时自动测试API状态
+        window.addEventListener('load', async () => {
+            try {
+                const startTime = performance.now();
+                const response = await fetch(`${API_BASE}/personalized?limit=1`);
+                const endTime = performance.now();
+                const responseTime = Math.round(endTime - startTime);
+                
+                updateStat('responseTime', `${responseTime}ms`);
+                
+                if (response.ok) {
+                    updateStat('apiStatus', '✓');
+                    console.log('API状态: 正常');
+                } else {
+                    updateStat('apiStatus', '⚠');
+                    console.log('API状态: 警告');
+                }
+            } catch (error) {
+                updateStat('apiStatus', '✗');
+                console.error('API状态: 异常', error);
+            }
+        });
+        
+        // 添加键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+1 测试歌单
+            if (e.ctrlKey && e.key === '1') {
+                e.preventDefault();
+                testPlaylist();
+            }
+            // Ctrl+2 测试新音乐
+            else if (e.ctrlKey && e.key === '2') {
+                e.preventDefault();
+                testNewSongs();
+            }
+        });
+    </script>
+</body>
+</html>
