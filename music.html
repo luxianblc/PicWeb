@@ -1,386 +1,111 @@
+<!-- music.html - 音乐主页（导航页面） -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>音乐播放器 - 鹿衔</title>
+    <title>音乐中心 - 鹿衔</title>
     
-    <!-- 样式文件 -->
     <link rel="stylesheet" href="global.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- 组件加载器 -->
     <script type="module" src="load-components.js"></script>
     
-    <!-- 网站图标 -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦌</text></svg>">
     
     <style>
-        /* 平台切换器 */
-        .platform-switcher {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
+        .music-platforms {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
         }
         
-        .platform-btn {
+        .platform-card {
+            padding: 2.5rem;
+            text-align: center;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+        }
+        
+        .platform-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .platform-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .spotify-card {
+            background: linear-gradient(135deg, rgba(29, 185, 84, 0.1), rgba(30, 215, 96, 0.1));
+            border: 1px solid rgba(29, 185, 84, 0.2);
+        }
+        
+        .spotify-card .platform-icon {
+            color: #1DB954;
+        }
+        
+        .netease-card {
+            background: linear-gradient(135deg, rgba(230, 0, 38, 0.1), rgba(255, 77, 77, 0.1));
+            border: 1px solid rgba(230, 0, 38, 0.2);
+        }
+        
+        .netease-card .platform-icon {
+            color: #e60026;
+        }
+        
+        .platform-name {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+        
+        .platform-desc {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        
+        .goto-btn {
             padding: 12px 30px;
             border-radius: 50px;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            color: var(--text-secondary);
+            color: var(--text-color);
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 10px;
             font-size: 1rem;
         }
         
-        .platform-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        }
-        
-        .platform-btn.active {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        .spotify-card .goto-btn:hover {
+            background: linear-gradient(135deg, #1DB954, #1ED760);
             color: white;
             border-color: transparent;
         }
         
-        .spotify-btn.active {
-            background: linear-gradient(135deg, #1DB954, #1ED760);
-        }
-        
-        .netease-btn.active {
+        .netease-card .goto-btn:hover {
             background: linear-gradient(135deg, #e60026, #ff4d4d);
+            color: white;
+            border-color: transparent;
         }
         
-        /* 播放器容器 */
-        .player-container {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .player-container.active {
-            display: block;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* 自定义播放器样式 */
-        .music-player-container {
+        .music-intro {
             max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .player-card {
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-        
-        .player-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .player-info {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-        
-        .album-art {
-            width: 120px;
-            height: 120px;
-            border-radius: 12px;
-            overflow: hidden;
-            background: var(--glass-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            color: var(--text-secondary);
-        }
-        
-        .album-art img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .track-info {
-            flex: 1;
-        }
-        
-        .track-info h2 {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .track-info p {
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            margin: 1rem 0;
-            overflow: hidden;
-            cursor: pointer;
-        }
-        
-        .progress {
-            width: 0%;
-            height: 100%;
-            border-radius: 2px;
-            transition: width 0.1s linear;
-        }
-        
-        .spotify .progress {
-            background: linear-gradient(90deg, #1DB954, #1ED760);
-        }
-        
-        .netease .progress {
-            background: linear-gradient(90deg, #e60026, #ff4d4d);
-        }
-        
-        .time-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-        
-        /* 控制按钮 */
-        .control-buttons {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 1.5rem;
-        }
-        
-        .control-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            color: var(--text-color);
-            font-size: 1.2rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-        
-        .control-btn:hover {
-            transform: scale(1.05);
-        }
-        
-        .play-btn {
-            width: 60px;
-            height: 60px;
-            font-size: 1.5rem;
-        }
-        
-        .spotify .play-btn {
-            background: linear-gradient(135deg, #1DB954, #1ED760);
-        }
-        
-        .netease .play-btn {
-            background: linear-gradient(135deg, #e60026, #ff4d4d);
-        }
-        
-        .play-btn:hover {
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        /* 音量控制 */
-        .volume-control {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        
-        .volume-slider {
-            flex: 1;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        
-        .spotify .volume-slider::-webkit-slider-thumb {
-            background: #1DB954;
-        }
-        
-        .netease .volume-slider::-webkit-slider-thumb {
-            background: #e60026;
-        }
-        
-        /* 播放列表 */
-        .playlist {
-            margin-top: 2rem;
-        }
-        
-        .playlist h3 {
-            margin-bottom: 1.5rem;
-            font-size: 1.3rem;
-        }
-        
-        .playlist-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            margin-bottom: 0.8rem;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .playlist-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateX(5px);
-        }
-        
-        .playlist-item.active {
-            border-left: 4px solid;
-        }
-        
-        .spotify .playlist-item.active {
-            background: rgba(29, 185, 84, 0.15);
-            border-left-color: #1DB954;
-        }
-        
-        .netease .playlist-item.active {
-            background: rgba(230, 0, 38, 0.15);
-            border-left-color: #e60026;
-        }
-        
-        .playlist-item img {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
-        
-        .playlist-info {
-            flex: 1;
-        }
-        
-        .playlist-info h4 {
-            font-size: 1rem;
-            margin-bottom: 0.3rem;
-        }
-        
-        .playlist-info p {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-        
-        .playlist-duration {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-        
-        /* 平台专属播放器 */
-        .platform-player {
-            margin-top: 2rem;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        }
-        
-        .platform-player h3 {
-            padding: 1rem;
-            margin: 0;
-            background: rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .spotify-embed {
-            background: #000;
-        }
-        
-        .netease-embed {
-            background: #fff;
-        }
-        
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .player-info {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .album-art {
-                width: 150px;
-                height: 150px;
-            }
-            
-            .control-buttons {
-                gap: 1rem;
-            }
-            
-            .control-btn {
-                width: 45px;
-                height: 45px;
-            }
-            
-            .play-btn {
-                width: 55px;
-                height: 55px;
-            }
-        }
-        
-        /* 动画效果 */
-        body {
-            animation: fadeIn 0.5s ease forwards;
-        }
-        
-        .main-content {
-            opacity: 1;
-            animation: slideInUp 0.6s ease 0.3s both;
-        }
-        
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            margin: 0 auto 3rem;
+            text-align: center;
         }
     </style>
 </head>
@@ -390,502 +115,84 @@
     <main class="main-content">
         <div class="container">
             <div class="page-title">
-                <h1>音乐播放器</h1>
-                <p>Spotify与网易云音乐双平台，让音乐无处不在</p>
+                <h1>音乐中心</h1>
+                <p>选择你喜欢的音乐平台，开启音乐之旅</p>
             </div>
 
-            <!-- 平台切换器 -->
-            <div class="platform-switcher">
-                <button class="platform-btn spotify-btn active" data-platform="spotify">
-                    <i class="fab fa-spotify"></i> Spotify
-                </button>
-                <button class="platform-btn netease-btn" data-platform="netease">
-                    <i class="fab fa-netease-music"></i> 网易云音乐
-                </button>
+            <div class="music-intro">
+                <p style="color: var(--text-secondary); font-size: 1.1rem;">
+                    这里提供了两个主流的音乐平台供您选择。每个平台都有独特的音乐库和特色功能。
+                    点击下方卡片，进入您喜欢的音乐世界。
+                </p>
             </div>
 
-            <div class="music-player-container">
-                <!-- Spotify 播放器 -->
-                <div class="player-container spotify active">
-                    <!-- Spotify 自定义播放器 -->
-                    <div class="glass player-card">
-                        <div class="player-controls">
-                            <div class="player-info">
-                                <div class="album-art" id="spotifyAlbumArt">
-                                    <i class="fab fa-spotify"></i>
-                                </div>
-                                <div class="track-info">
-                                    <h2 id="spotifyTrackTitle">选择歌曲开始播放</h2>
-                                    <p id="spotifyTrackArtist">-</p>
-                                    <div class="progress-bar" id="spotifyProgressBar">
-                                        <div class="progress" id="spotifyProgress"></div>
-                                    </div>
-                                    <div class="time-info">
-                                        <span id="spotifyCurrentTime">0:00</span>
-                                        <span id="spotifyTotalTime">0:00</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="control-buttons">
-                                <button class="control-btn" id="spotifyPrevBtn" title="上一首">
-                                    <i class="fas fa-step-backward"></i>
-                                </button>
-                                <button class="control-btn play-btn" id="spotifyPlayBtn" title="播放/暂停">
-                                    <i class="fas fa-play" id="spotifyPlayIcon"></i>
-                                </button>
-                                <button class="control-btn" id="spotifyNextBtn" title="下一首">
-                                    <i class="fas fa-step-forward"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="volume-control">
-                                <i class="fas fa-volume-up"></i>
-                                <input type="range" class="volume-slider" id="spotifyVolumeSlider" min="0" max="100" value="50">
-                                <span id="spotifyVolumePercent">50%</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Spotify 播放列表 -->
-                        <div class="playlist">
-                            <h3><i class="fas fa-list"></i> Spotify 播放列表</h3>
-                            <div id="spotifyPlaylistContainer">
-                                <!-- 播放列表将通过JavaScript动态生成 -->
-                            </div>
-                        </div>
+            <div class="music-platforms">
+                <!-- Spotify 卡片 -->
+                <div class="glass platform-card spotify-card" onclick="location.href='spotify.html'">
+                    <div class="platform-icon">
+                        <i class="fab fa-spotify"></i>
                     </div>
-                    
-                    <!-- Spotify 官方播放器 -->
-                    <div class="platform-player spotify-embed">
-                        <h3><i class="fab fa-spotify"></i> Spotify 官方播放器</h3>
-                        <iframe 
-                            src="https://open.spotify.com/embed/playlist/37i9dQZF1DX0XUsuxWHRQd?utm_source=generator&theme=0" 
-                            width="100%" 
-                            height="380" 
-                            frameborder="0" 
-                            allowfullscreen="" 
-                            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-                            loading="lazy">
-                        </iframe>
+                    <div class="platform-name">Spotify</div>
+                    <div class="platform-desc">
+                        全球领先的音乐流媒体平台<br>
+                        海量正版音乐，个性化推荐<br>
+                        高品质音质，跨设备同步
                     </div>
+                    <button class="goto-btn">
+                        <i class="fas fa-arrow-right"></i> 进入 Spotify
+                    </button>
                 </div>
                 
-                <!-- 网易云音乐播放器 -->
-                <div class="player-container netease">
-                    <!-- 网易云自定义播放器 -->
-                    <div class="glass player-card">
-                        <div class="player-controls">
-                            <div class="player-info">
-                                <div class="album-art" id="neteaseAlbumArt">
-                                    <i class="fab fa-netease-music"></i>
-                                </div>
-                                <div class="track-info">
-                                    <h2 id="neteaseTrackTitle">选择歌曲开始播放</h2>
-                                    <p id="neteaseTrackArtist">-</p>
-                                    <div class="progress-bar" id="neteaseProgressBar">
-                                        <div class="progress" id="neteaseProgress"></div>
-                                    </div>
-                                    <div class="time-info">
-                                        <span id="neteaseCurrentTime">0:00</span>
-                                        <span id="neteaseTotalTime">0:00</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="control-buttons">
-                                <button class="control-btn" id="neteasePrevBtn" title="上一首">
-                                    <i class="fas fa-step-backward"></i>
-                                </button>
-                                <button class="control-btn play-btn" id="neteasePlayBtn" title="播放/暂停">
-                                    <i class="fas fa-play" id="neteasePlayIcon"></i>
-                                </button>
-                                <button class="control-btn" id="neteaseNextBtn" title="下一首">
-                                    <i class="fas fa-step-forward"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="volume-control">
-                                <i class="fas fa-volume-up"></i>
-                                <input type="range" class="volume-slider" id="neteaseVolumeSlider" min="0" max="100" value="50">
-                                <span id="neteaseVolumePercent">50%</span>
-                            </div>
-                        </div>
-                        
-                        <!-- 网易云播放列表 -->
-                        <div class="playlist">
-                            <h3><i class="fas fa-list"></i> 网易云音乐播放列表</h3>
-                            <div id="neteasePlaylistContainer">
-                                <!-- 播放列表将通过JavaScript动态生成 -->
-                            </div>
-                        </div>
+                <!-- 网易云音乐卡片 -->
+                <div class="glass platform-card netease-card" onclick="location.href='netease.html'">
+                    <div class="platform-icon">
+                        <i class="fab fa-netease-music"></i>
                     </div>
-                    
-                    <!-- 网易云官方播放器 -->
-                    <div class="platform-player netease-embed">
-                        <h3><i class="fab fa-netease-music"></i> 网易云音乐精选歌单</h3>
-                        <iframe 
-                            frameborder="no" 
-                            border="0" 
-                            marginwidth="0" 
-                            marginheight="0" 
-                            width="100%" 
-                            height="450" 
-                            src="https://music.163.com/outchain/player?type=0&id=2956917777&auto=1&height=430">
-                        </iframe>
+                    <div class="platform-name">网易云音乐</div>
+                    <div class="platform-desc">
+                        中文音乐爱好者的首选<br>
+                        丰富的社区功能与评论<br>
+                        精准的个性化推荐系统
                     </div>
+                    <button class="goto-btn">
+                        <i class="fas fa-arrow-right"></i> 进入 网易云音乐
+                    </button>
                 </div>
-                
-                <!-- 使用说明 -->
-                <div class="glass card mt-3 text-center">
-                    <h3><i class="fas fa-info-circle"></i> 使用说明</h3>
-                    <p style="color: var(--text-secondary); margin-top: 1rem;">
-                        1. 上方按钮切换 Spotify 和网易云音乐平台<br>
-                        2. 每个平台都有自定义播放器和官方播放器<br>
-                        3. 点击播放列表中的歌曲可以切换播放<br>
-                        4. 音乐仅供个人欣赏，请支持正版音乐
-                    </p>
+            </div>
+            
+            <!-- 特性对比 -->
+            <div class="glass card mt-4">
+                <h3 style="text-align: center; margin-bottom: 2rem;">平台特性对比</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 1rem; color: #1DB954;">
+                            <i class="fab fa-spotify"></i>
+                        </div>
+                        <h4>Spotify</h4>
+                        <ul style="text-align: left; padding-left: 1.5rem; color: var(--text-secondary);">
+                            <li>全球曲库最全</li>
+                            <li>音质高达320kbps</li>
+                            <li>跨平台同步</li>
+                            <li>智能播放列表</li>
+                        </ul>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 1rem; color: #e60026;">
+                            <i class="fab fa-netease-music"></i>
+                        </div>
+                        <h4>网易云音乐</h4>
+                        <ul style="text-align: left; padding-left: 1.5rem; color: var(--text-secondary);">
+                            <li>中文音乐丰富</li>
+                            <li>社区互动活跃</li>
+                            <li>个性化推荐准</li>
+                            <li>歌词翻译功能</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
     
     <!-- 页脚将由load-components.js动态插入 -->
-
-    <script>
-        // 等待组件加载完成后再初始化播放器
-        document.addEventListener('componentsLoaded', function() {
-            console.log('双平台音乐播放器初始化...');
-            
-            // 初始化平台切换
-            initPlatformSwitcher();
-            
-            // 初始化Spotify播放器
-            initSpotifyPlayer();
-            
-            // 初始化网易云播放器
-            initNeteasePlayer();
-            
-            console.log('双平台音乐播放器初始化完成');
-        });
-        
-        // 平台切换功能
-        function initPlatformSwitcher() {
-            const platformBtns = document.querySelectorAll('.platform-btn');
-            const playerContainers = document.querySelectorAll('.player-container');
-            
-            platformBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const platform = this.dataset.platform;
-                    
-                    // 更新按钮状态
-                    platformBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // 更新播放器显示
-                    playerContainers.forEach(container => {
-                        container.classList.remove('active');
-                        if (container.classList.contains(platform)) {
-                            container.classList.add('active');
-                        }
-                    });
-                    
-                    // 更新body类名，用于CSS样式
-                    document.body.classList.remove('spotify', 'netease');
-                    document.body.classList.add(platform);
-                    
-                    console.log(`切换到 ${platform} 平台`);
-                    
-                    // 停止当前播放的音乐（如果正在播放）
-                    const activePlayer = document.querySelector(`.player-container.active`);
-                    const audio = activePlayer.querySelector('audio');
-                    if (audio) {
-                        audio.pause();
-                    }
-                });
-            });
-            
-            // 默认设置body类
-            document.body.classList.add('spotify');
-        }
-        
-        // Spotify播放器初始化
-        function initSpotifyPlayer() {
-            // Spotify音乐数据
-            const spotifyPlaylist = [
-                {
-                    id: 1,
-                    title: "Blinding Lights",
-                    artist: "The Weeknd",
-                    duration: "3:20",
-                    cover: "https://i.scdn.co/image/ab67616d00001e02fc9f69c06f50a91f82d6c58c",
-                    audioUrl: "https://p.scdn.co/mp3-preview/4b6e7d1b9e3f5b5d5e5f5e5f5e5f5e5f5e5f5e5f"
-                },
-                {
-                    id: 2,
-                    title: "Stay",
-                    artist: "The Kid LAROI, Justin Bieber",
-                    duration: "2:21",
-                    cover: "https://i.scdn.co/image/ab67616d00001e02e1a5e5f5e5f5e5f5e5f5e5f5",
-                    audioUrl: "https://p.scdn.co/mp3-preview/5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f"
-                },
-                {
-                    id: 3,
-                    title: "good 4 u",
-                    artist: "Olivia Rodrigo",
-                    duration: "2:58",
-                    cover: "https://i.scdn.co/image/ab67616d00001e025e5f5e5f5e5f5e5f5e5f5e5f",
-                    audioUrl: "https://p.scdn.co/mp3-preview/6e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f"
-                },
-                {
-                    id: 4,
-                    title: "Levitating",
-                    artist: "Dua Lipa",
-                    duration: "3:23",
-                    cover: "https://i.scdn.co/image/ab67616d00001e027e5f5e5f5e5f5e5f5e5f5e5f",
-                    audioUrl: "https://p.scdn.co/mp3-preview/7e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f"
-                },
-                {
-                    id: 5,
-                    title: "Save Your Tears",
-                    artist: "The Weeknd",
-                    duration: "3:35",
-                    cover: "https://i.scdn.co/image/ab67616d00001e028e5f5e5f5e5f5e5f5e5f5e5f",
-                    audioUrl: "https://p.scdn.co/mp3-preview/8e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f"
-                },
-                {
-                    id: 6,
-                    title: "Heat Waves",
-                    artist: "Glass Animals",
-                    duration: "3:58",
-                    cover: "https://i.scdn.co/image/ab67616d00001e029e5f5e5f5e5f5e5f5e5f5e5f",
-                    audioUrl: "https://p.scdn.co/mp3-preview/9e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f"
-                }
-            ];
-            
-            // 创建Spotify播放器实例
-            createMusicPlayer({
-                platform: 'spotify',
-                playlist: spotifyPlaylist,
-                albumArtId: 'spotifyAlbumArt',
-                trackTitleId: 'spotifyTrackTitle',
-                trackArtistId: 'spotifyTrackArtist',
-                progressId: 'spotifyProgress',
-                progressBarId: 'spotifyProgressBar',
-                currentTimeId: 'spotifyCurrentTime',
-                totalTimeId: 'spotifyTotalTime',
-                playBtnId: 'spotifyPlayBtn',
-                playIconId: 'spotifyPlayIcon',
-                prevBtnId: 'spotifyPrevBtn',
-                nextBtnId: 'spotifyNextBtn',
-                volumeSliderId: 'spotifyVolumeSlider',
-                volumePercentId: 'spotifyVolumePercent',
-                playlistContainerId: 'spotifyPlaylistContainer'
-            });
-        }
-        
-        // 网易云播放器初始化
-        function initNeteasePlayer() {
-            // 网易云音乐数据
-            const neteasePlaylist = [
-                {
-                    id: 1,
-                    title: "Lemon",
-                    artist: "米津玄師",
-                    duration: "4:15",
-                    cover: "https://p2.music.126.net/9idkdzbel_-lYBP7Dv_dVQ==/109951163785855539.jpg",
-                    audioUrl: "https://music.163.com/song/media/outer/url?id=536622304.mp3"
-                },
-                {
-                    id: 2,
-                    title: "打上花火",
-                    artist: "DAOKO × 米津玄師",
-                    duration: "4:49",
-                    cover: "https://p1.music.126.net/Y7aCCR6OW3m_-eTd_vs7Tw==/109951163077613693.jpg",
-                    audioUrl: "https://music.163.com/song/media/outer/url?id=516657051.mp3"
-                },
-                {
-                    id: 3,
-                    title: "前前前世",
-                    artist: "RADWIMPS",
-                    duration: "4:45",
-                    cover: "https://p2.music.126.net/wQ9q8O2v7sK8pN5Y2e6z6Q==/109951163078599674.jpg",
-                    audioUrl: "https://music.163.com/song/media/outer/url?id=436514312.mp3"
-                },
-                {
-                    id: 4,
-                    title: "春日影",
-                    artist: "MyGO!!!!!",
-                    duration: "5:20",
-                    cover: "https://p2.music.126.net/fYNa6NyhpaKv-Rkz2qTq8A==/109951168716169363.jpg",
-                    audioUrl: "https://music.163.com/song/media/outer/url?id=2058267912.mp3"
-                },
-                {
-                    id: 5,
-                    title: "シルエット",
-                    artist: "KANA-BOON",
-                    duration: "4:00",
-                    cover: "https://p2.music.126.net/6O5I7P-cnM-_VoKx6e1Ojw==/109951163088216710.jpg",
-                    audioUrl: "https://music.163.com/song/media/outer/url?id=29723014.mp3"
-                },
-                {
-                    id: 6,
-                    title: "紅蓮華",
-                    artist: "LiSA",
-                    duration: "3:58",
-                    cover: "https://p2.music.126.net/koiU-jvV2V2zqMxWfBcTgw==/109951164076539477.jpg",
-                    audioUrl: "https://music.163.com/song/media/outer/url?id=1363948882.mp3"
-                }
-            ];
-            
-            // 创建网易云播放器实例
-            createMusicPlayer({
-                platform: 'netease',
-                playlist: neteasePlaylist,
-                albumArtId: 'neteaseAlbumArt',
-                trackTitleId: 'neteaseTrackTitle',
-                trackArtistId: 'neteaseTrackArtist',
-                progressId: 'neteaseProgress',
-                progressBarId: 'neteaseProgressBar',
-                currentTimeId: 'neteaseCurrentTime',
-                totalTimeId: 'neteaseTotalTime',
-                playBtnId: 'neteasePlayBtn',
-                playIconId: 'neteasePlayIcon',
-                prevBtnId: 'neteasePrevBtn',
-                nextBtnId: 'neteaseNextBtn',
-                volumeSliderId: 'neteaseVolumeSlider',
-                volumePercentId: 'neteaseVolumePercent',
-                playlistContainerId: 'neteasePlaylistContainer'
-            });
-        }
-        
-        // 通用播放器创建函数
-        function createMusicPlayer(config) {
-            const {
-                platform,
-                playlist,
-                albumArtId,
-                trackTitleId,
-                trackArtistId,
-                progressId,
-                progressBarId,
-                currentTimeId,
-                totalTimeId,
-                playBtnId,
-                playIconId,
-                prevBtnId,
-                nextBtnId,
-                volumeSliderId,
-                volumePercentId,
-                playlistContainerId
-            } = config;
-            
-            // 音频元素
-            const audio = new Audio();
-            let currentTrackIndex = 0;
-            let isPlaying = false;
-            let isSeeking = false;
-            
-            // DOM 元素
-            const albumArt = document.getElementById(albumArtId);
-            const trackTitle = document.getElementById(trackTitleId);
-            const trackArtist = document.getElementById(trackArtistId);
-            const progress = document.getElementById(progressId);
-            const progressBar = document.getElementById(progressBarId);
-            const currentTimeEl = document.getElementById(currentTimeId);
-            const totalTimeEl = document.getElementById(totalTimeId);
-            const playBtn = document.getElementById(playBtnId);
-            const playIcon = document.getElementById(playIconId);
-            const prevBtn = document.getElementById(prevBtnId);
-            const nextBtn = document.getElementById(nextBtnId);
-            const volumeSlider = document.getElementById(volumeSliderId);
-            const volumePercent = document.getElementById(volumePercentId);
-            const playlistContainer = document.getElementById(playlistContainerId);
-            
-            // 初始化播放列表
-            function initPlaylist() {
-                playlistContainer.innerHTML = '';
-                
-                playlist.forEach((track, index) => {
-                    const item = document.createElement('div');
-                    item.className = 'playlist-item';
-                    if (index === currentTrackIndex) {
-                        item.classList.add('active');
-                    }
-                    
-                    item.innerHTML = `
-                        <img src="${track.cover}" alt="${track.title}" 
-                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>'">
-                        <div class="playlist-info">
-                            <h4>${track.title}</h4>
-                            <p>${track.artist}</p>
-                        </div>
-                        <div class="playlist-duration">${track.duration}</div>
-                    `;
-                    
-                    item.addEventListener('click', () => {
-                        playTrack(index);
-                    });
-                    
-                    playlistContainer.appendChild(item);
-                });
-            }
-            
-            // 播放指定曲目
-            function playTrack(index) {
-                if (index < 0 || index >= playlist.length) return;
-                
-                currentTrackIndex = index;
-                const track = playlist[currentTrackIndex];
-                
-                // 更新音频源
-                audio.src = track.audioUrl;
-                
-                // 更新界面
-                albumArt.innerHTML = `<img src="${track.cover}" alt="${track.title}" 
-                    onerror="this.parentElement.innerHTML='<i class=\"fab fa-${platform}\"></i>'">`;
-                trackTitle.textContent = track.title;
-                trackArtist.textContent = track.artist;
-                totalTimeEl.textContent = track.duration;
-                
-                // 更新播放列表高亮
-                document.querySelectorAll(`#${playlistContainerId} .playlist-item`).forEach((item, i) => {
-                    if (i === currentTrackIndex) {
-                        item.classList.add('active');
-                    } else {
-                        item.classList.remove('active');
-                    }
-                });
-                
-                // 播放
-                audio.play().then(() => {
-                    isPlaying = true;
-                    playIcon.className = 'fas fa-pause';
-                    console.log(`${platform} 正在播放:`, track.title);
-                }).catch(error => {
-                    console.error(`${platform} 播放失败:`, error);
-                    // 优雅降级
-                    if (platform === 'spotify') {
-                        trackTitle.textContent = "请使用上方Spotify官方播放器";
-                        trackArtist.textContent = "预览音频可能无法播放";
-                    } else {
-                        trackTitle.textContent = "播放失败，请点击其他歌曲";
-                        trackArtist.textContent = "网络或版权限制";
-                    }
-                });
-            }
-            
-            // 播放/暂停
-            function togglePlay() {
-                if (audio.src) {
-                    if (isPlaying) {
-                        audio.pause();
-                        playIcon.className = 'fas fa-play';
-                    } else {
-                        audio.play().then(() => {
-                            playIcon.className = 'fas fa-pause';
-                        });
-                    }
-                    isPlaying = !isPlaying;
-                } else {
-                    // 如果还没选择歌曲，播放第一首
-                    playTrack(0);
+</body>
+</html>
