@@ -80,14 +80,15 @@
             border-radius: 2px;
             margin: 1rem 0;
             overflow: hidden;
+            cursor: pointer;
         }
         
         .progress {
-            width: 30%;
+            width: 0%;
             height: 100%;
             background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
             border-radius: 2px;
-            transition: width 0.3s ease;
+            transition: width 0.1s linear;
         }
         
         .time-info {
@@ -257,29 +258,8 @@
     </style>
 </head>
 <body>
-    <!-- 直接包含导航栏 -->
-    <div id="header-container">
-        <!-- 背景装饰元素 -->
-        <div class="bg-elements">
-            <div class="bg-element" style="width: 300px; height: 300px; top: 10%; left: 5%;"></div>
-            <div class="bg-element" style="width: 200px; height: 200px; bottom: 15%; right: 10%;"></div>
-        </div>
-
-        <!-- 导航栏 -->
-        <nav class="navbar">
-            <div class="container">
-                <a href="index.html" class="logo">
-                    <div class="logo-icon">🦌</div>
-                    鹿衔
-                </a>
-                <ul class="nav-links">
-                    <li><a href="index.html" class="nav-link"><i class="fas fa-home"></i> 首页</a></li>
-                    <li><a href="gallery.html" class="nav-link"><i class="fas fa-images"></i> 外链画廊</a></li>
-                    <li><a href="music.html" class="nav-link active"><i class="fas fa-music"></i> 音乐播放器</a></li>
-                </ul>
-            </div>
-        </nav>
-    </div>
+    <!-- 加载头部组件 -->
+    <iframe src="header.html" frameborder="0" scrolling="no" style="width: 100%; height: 80px; border: none;"></iframe>
     
     <!-- 主内容 -->
     <main class="main-content">
@@ -300,7 +280,7 @@
                             <div class="track-info">
                                 <h2 id="trackTitle">选择歌曲开始播放</h2>
                                 <p id="trackArtist">-</p>
-                                <div class="progress-bar">
+                                <div class="progress-bar" id="progressBar">
                                     <div class="progress" id="progress"></div>
                                 </div>
                                 <div class="time-info">
@@ -367,62 +347,19 @@
         </div>
     </main>
     
-    <!-- 直接包含页脚 -->
-    <footer class="footer" id="footer-container">
-        <div class="container">
-            <div class="footer-content">
-                <a href="index.html" class="logo">
-                    <div class="logo-icon">🦌</div>
-                    鹿衔
-                </a>
-                <ul class="footer-links">
-                    <li><a href="index.html">首页</a></li>
-                    <li><a href="gallery.html">外链画廊</a></li>
-                    <li><a href="music.html">音乐播放器</a></li>
-                </ul>
-                <p class="copyright">© 2023 鹿衔 视觉设计. 保留所有权利.</p>
-            </div>
-        </div>
-    </footer>
+    <!-- 加载尾部组件 -->
+    <iframe src="footer.html" frameborder="0" scrolling="no" style="width: 100%; height: 200px; border: none;"></iframe>
 
     <script>
         // 页面初始化
         document.addEventListener('DOMContentLoaded', function() {
             console.log('音乐播放器页面初始化...');
             
-            // 初始化导航栏
-            initNavigation();
-            
             // 初始化音乐播放器
             initMusicPlayer();
             
             console.log('音乐播放器页面初始化完成');
         });
-        
-        // 初始化导航栏
-        function initNavigation() {
-            const navbar = document.querySelector('.navbar');
-            const navLinks = document.querySelectorAll('.nav-link');
-            const currentPage = window.location.pathname.split('/').pop();
-            
-            // 高亮当前页面
-            navLinks.forEach(link => {
-                const href = link.getAttribute('href');
-                if ((currentPage === '' && href === 'index.html') || 
-                    (currentPage === href)) {
-                    link.classList.add('active');
-                }
-            });
-            
-            // 滚动效果
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 50) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
-            });
-        }
         
         // 音乐播放器
         function initMusicPlayer() {
@@ -482,12 +419,14 @@
             const audio = new Audio();
             let currentTrackIndex = 0;
             let isPlaying = false;
+            let isSeeking = false;
             
             // DOM 元素
             const albumArt = document.getElementById('albumArt');
             const trackTitle = document.getElementById('trackTitle');
             const trackArtist = document.getElementById('trackArtist');
             const progress = document.getElementById('progress');
+            const progressBar = document.getElementById('progressBar');
             const currentTimeEl = document.getElementById('currentTime');
             const totalTimeEl = document.getElementById('totalTime');
             const playBtn = document.getElementById('playBtn');
@@ -510,7 +449,7 @@
                     }
                     
                     item.innerHTML = `
-                        <img src="${track.cover}" alt="${track.title}">
+                        <img src="${track.cover}" alt="${track.title}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>'">
                         <div class="playlist-info">
                             <h4>${track.title}</h4>
                             <p>${track.artist}</p>
@@ -537,9 +476,10 @@
                 audio.src = track.audioUrl;
                 
                 // 更新界面
-                albumArt.innerHTML = `<img src="${track.cover}" alt="${track.title}">`;
+                albumArt.innerHTML = `<img src="${track.cover}" alt="${track.title}" onerror="this.innerHTML='<i class=\"fas fa-music\"></i>'">`;
                 trackTitle.textContent = track.title;
                 trackArtist.textContent = track.artist;
+                totalTimeEl.textContent = track.duration;
                 
                 // 更新播放列表高亮
                 document.querySelectorAll('.playlist-item').forEach((item, i) => {
@@ -554,9 +494,12 @@
                 audio.play().then(() => {
                     isPlaying = true;
                     playIcon.className = 'fas fa-pause';
+                    console.log('正在播放:', track.title);
                 }).catch(error => {
                     console.error('播放失败:', error);
-                    alert('无法播放此歌曲，请尝试其他曲目。注意：部分歌曲可能因版权限制无法播放。');
+                    // 优雅降级：显示提示但继续播放其他歌曲
+                    trackTitle.textContent = "播放失败，请点击其他歌曲";
+                    trackArtist.textContent = "网络或版权限制";
                 });
             }
             
@@ -594,7 +537,7 @@
             
             // 更新播放进度
             function updateProgress() {
-                if (audio.duration) {
+                if (!isSeeking && audio.duration && !isNaN(audio.duration)) {
                     const progressPercent = (audio.currentTime / audio.duration) * 100;
                     progress.style.width = `${progressPercent}%`;
                     
@@ -606,6 +549,7 @@
             
             // 格式化时间 (秒 -> 分:秒)
             function formatTime(seconds) {
+                if (isNaN(seconds)) return "0:00";
                 const mins = Math.floor(seconds / 60);
                 const secs = Math.floor(seconds % 60);
                 return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
@@ -617,6 +561,15 @@
                 volumePercent.textContent = `${value}%`;
             }
             
+            // 跳转到指定进度
+            function seekTo(e) {
+                if (!audio.duration) return;
+                
+                const rect = progressBar.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                audio.currentTime = percent * audio.duration;
+            }
+            
             // 事件监听
             playBtn.addEventListener('click', togglePlay);
             prevBtn.addEventListener('click', prevTrack);
@@ -624,34 +577,45 @@
             
             audio.addEventListener('timeupdate', updateProgress);
             audio.addEventListener('ended', nextTrack);
+            audio.addEventListener('loadedmetadata', function() {
+                totalTimeEl.textContent = formatTime(audio.duration);
+            });
             
             volumeSlider.addEventListener('input', (e) => {
                 setVolume(e.target.value);
             });
             
             // 点击进度条跳转
-            document.querySelector('.progress-bar').addEventListener('click', (e) => {
-                if (audio.duration) {
-                    const rect = e.target.getBoundingClientRect();
-                    const percent = (e.clientX - rect.left) / rect.width;
-                    audio.currentTime = percent * audio.duration;
-                }
+            progressBar.addEventListener('click', seekTo);
+            
+            // 拖拽进度条
+            progressBar.addEventListener('mousedown', (e) => {
+                isSeeking = true;
+                seekTo(e);
+                
+                const mouseMoveHandler = (moveEvent) => {
+                    seekTo(moveEvent);
+                };
+                
+                const mouseUpHandler = () => {
+                    isSeeking = false;
+                    document.removeEventListener('mousemove', mouseMoveHandler);
+                    document.removeEventListener('mouseup', mouseUpHandler);
+                };
+                
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('mouseup', mouseUpHandler);
             });
             
             // 初始化
             initPlaylist();
             setVolume(volumeSlider.value);
             
-            // 导出函数供调试
-            window.musicPlayer = {
-                playTrack,
-                togglePlay,
-                prevTrack,
-                nextTrack,
-                audio
-            };
-            
-            console.log('音乐播放器初始化完成，共加载', playlist.length, '首歌曲');
+            // 自动播放第一首（静音状态）
+            audio.volume = 0.1; // 较低音量开始
+            setTimeout(() => {
+                playTrack(0);
+            }, 500);
         }
     </script>
 </body>
