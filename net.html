@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网易云音乐播放器</title>
+</head>
+<body>
+    <h1>网易云音乐播放器</h1>
+    
+    <div style="margin: 20px 0;">
+        <label for="songId">输入歌曲ID: </label>
+        <input type="text" id="songId" placeholder="例如: 1330348068">
+        <button onclick="playSong()">播放</button>
+    </div>
+    
+    <div id="playerContainer" style="margin-top: 20px;">
+        <!-- 播放器将在这里显示 -->
+    </div>
+
+    <script>
+        function playSong() {
+            const songId = document.getElementById('songId').value.trim();
+            if (!songId) {
+                alert('请输入歌曲ID');
+                return;
+            }
+            
+            const playerContainer = document.getElementById('playerContainer');
+            
+            // 清空之前的播放器
+            playerContainer.innerHTML = '';
+            
+            // 创建iframe播放器
+            const iframe = document.createElement('iframe');
+            iframe.frameBorder = 'no';
+            iframe.border = '0';
+            iframe.marginWidth = '0';
+            iframe.marginHeight = '0';
+            iframe.width = '330';
+            iframe.height = '86';
+            iframe.src = `https://music.163.com/outchain/player?type=2&id=${songId}&auto=0&height=66`;
+            
+            playerContainer.appendChild(iframe);
+        }
+        
+        // 页面加载时自动播放示例歌曲
+        window.onload = function() {
+            document.getElementById('songId').value = '1330348068'; // 示例歌曲ID
+            playSong();
+        };
+    </script>
+</body>
+</html>
