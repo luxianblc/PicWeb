@@ -8,8 +8,8 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 
-// 网易云API基础URL
-const NETEASE_API = 'http://cloud-music.pl-fe.cn';
+// 网易云API基础URL（使用公共API服务）
+const NETEASE_API = 'https://netease-cloud-music-api-liart-iota.vercel.app';
 
 // 代理请求函数
 async function proxyRequest(req, res, path, params = {}) {
@@ -23,7 +23,9 @@ async function proxyRequest(req, res, path, params = {}) {
       },
       data: req.body,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Referer': 'https://music.163.com/',
+        'Origin': 'https://music.163.com'
       }
     });
     
@@ -131,6 +133,27 @@ app.get('/api/login/status', (req, res) => {
   proxyRequest(req, res, '/login/status');
 });
 
+// 根路径
+app.get('/', (req, res) => {
+  res.json({
+    message: '网易云API代理服务器运行中',
+    endpoints: [
+      'POST /api/login - 登录',
+      'GET /api/search - 搜索',
+      'GET /api/song/url - 获取歌曲URL',
+      'GET /api/lyric - 获取歌词',
+      'GET /api/top/playlist - 获取热门歌单',
+      'GET /api/recommend/songs - 获取每日推荐',
+      'GET /api/personal_fm - 获取私人FM',
+      'GET /api/toplist - 获取排行榜',
+      'GET /api/like - 喜欢歌曲',
+      'GET /api/login/status - 检查登录状态',
+      'GET /api/login/refresh - 刷新登录状态'
+    ]
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`网易云API代理服务器运行在 http://localhost:${PORT}`);
+  console.log(`前端API地址: http://localhost:${PORT}/api`);
 });
