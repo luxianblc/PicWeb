@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外链画廊 - 鹿衔</title>
+    
+    <!-- 样式文件 -->
+    <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- 网站图标 -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦌</text></svg>">
+    
+    <style>
+        /* 画廊特定样式 */
+        .gallery-controls {
+            margin-bottom: 2.5rem;
+        }
+        
+        .search-container {
+            position: relative;
+            max-width: 400px;
+            margin: 1rem auto;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            padding-right: 50px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(107, 112, 255, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 加载头部组件 -->
+    <iframe src="header.html" frameborder="0" scrolling="no" style="width: 100%; height: 80px; border: none;"></iframe>
+    
+    <!-- 主内容 -->
+    <main class="main-content">
+        <div class="container">
+            <div class="page-title">
+                <h1>外链画廊</h1>
+                <p>精选高质量图片，感受视觉艺术的魅力。点击图片可查看大图。</p>
+            </div>
+
+            <!-- 控制面板 -->
+            <div class="glass card gallery-controls">
+                <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                    <button class="btn btn-secondary filter-btn active" data-filter="all">全部</button>
+                    <button class="btn btn-secondary filter-btn" data-filter="nature">自然</button>
+                    <button class="btn btn-secondary filter-btn" data-filter="city">城市</button>
+                    <button class="btn btn-secondary filter-btn" data-filter="art">艺术</button>
+                    <button class="btn btn-secondary filter-btn" data-filter="tech">科技</button>
+                </div>
+                
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="search-input" placeholder="搜索图片标题或描述...">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+            </div>
+
+            <!-- 图片网格 -->
+            <div class="image-grid" id="galleryGrid">
+                <!-- 图片将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </main>
+    
+    <!-- 加载尾部组件 -->
+    <iframe src="footer.html" frameborder="0" scrolling="no" style="width: 100%; height: 200px; border: none;"></iframe>
+    
+    <!-- 灯箱 -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lightboxClose">&times;</button>
+        <div class="lightbox-content">
+            <img id="lightboxImage" src="" alt="">
+            <div id="lightboxInfo" style="color: white; text-align: center; margin-top: 1rem;"></div>
+        </div>
+    </div>
+
+    <script>
+        // 图片数据
+        const galleryImages = [
+            {
+                id: 1,
+                title: "山间日出",
+                description: "清晨的第一缕阳光洒在山峦之间，雾气缭绕，如仙境般美丽。",
+                category: "nature",
+                url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: 2,
+                title: "未来都市",
+                description: "现代建筑与科技感的结合，展现未来城市风貌。",
+                category: "city",
+                url: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: 3,
+                title: "抽象艺术",
+                description: "色彩与线条的碰撞，创造出独特的视觉体验。",
+                category: "art",
+                url: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: 4,
+                title: "科技芯片",
+                description: "微观世界中的科技奇迹，集成电路的精细结构。",
+                category: "tech",
+                url: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: 5,
+                title: "森林小径",
+                description: "阳光透过树叶洒在蜿蜒的小路上，宁静而神秘。",
+                category: "nature",
+                url: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: 6,
+                title: "都市夜景",
+                description: "夜幕下的城市灯火辉煌，展现都市的繁华与活力。",
+                category: "city",
+                url: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: 7,
+                title: "街头涂鸦",
+                description: "城市中的艺术表达，色彩鲜艳的涂鸦墙壁。",
+                category: "art",
+                url: "https://images.unsplash.com/photo-1544966503-7cc5ac882d5a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: 8,
+                title: "数据可视化",
+                description: "复杂数据的美丽呈现，科技与艺术的完美结合。",
+                category: "tech",
+                url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+            },
+            {
+                id: 9,
+                title: "海滩日落",
+                description: "夕阳西下，金色的阳光洒在海面上，波光粼粼。",
+                category: "nature",
+                url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+            }
+        ];
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            const galleryGrid = document.getElementById('galleryGrid');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const searchInput = document.getElementById('searchInput');
+            
+            let currentFilter = 'all';
+            let currentSearch = '';
+            
+            // 渲染图片
+            function renderImages() {
+                galleryGrid.innerHTML = '';
+                
+                const filteredImages = galleryImages.filter(image => {
+                    const matchesFilter = currentFilter === 'all' || image.category === currentFilter;
+                    const matchesSearch = currentSearch === '' || 
+                        image.title.toLowerCase().includes(currentSearch) || 
+                        image.description.toLowerCase().includes(currentSearch);
+                    
+                    return matchesFilter && matchesSearch;
+                });
+                
+                if (filteredImages.length === 0) {
+                    galleryGrid.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">
+                            <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                            <h3>未找到匹配的图片</h3>
+                            <p>请尝试其他搜索词或分类</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                filteredImages.forEach(image => {
+                    const imageCard = document.createElement('div');
+                    imageCard.className = 'image-card glass';
+                    imageCard.setAttribute('data-category', image.category);
+                    
+                    imageCard.innerHTML = `
+                        <img src="${image.url}" alt="${image.title}" loading="lazy">
+                        <div class="image-overlay">
+                            <h3>${image.title}</h3>
+                            <p>${image.description}</p>
+                        </div>
+                    `;
+                    
+                    imageCard.addEventListener('click', () => {
+                        openLightbox(image.url, image.title, image.description);
+                    });
+                    
+                    galleryGrid.appendChild(imageCard);
+                });
+            }
+            
+            // 筛选功能
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.getAttribute('data-filter');
+                    renderImages();
+                });
+            });
+            
+            // 搜索功能
+            searchInput.addEventListener('input', function() {
+                currentSearch = this.value.toLowerCase();
+                renderImages();
+            });
+            
+            // 灯箱功能
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImage = document.getElementById('lightboxImage');
+            const lightboxInfo = document.getElementById('lightboxInfo');
+            const lightboxClose = document.getElementById('lightboxClose');
+            
+            function openLightbox(src, title, description) {
+                lightboxImage.src = src;
+                lightboxInfo.innerHTML = `
+                    <h3>${title}</h3>
+                    <p>${description}</p>
+                    <p style="margin-top: 0.5rem;">
+                        <a href="${src}" target="_blank" style="color: #6b70ff; text-decoration: none;">
+                            <i class="fas fa-external-link-alt"></i> 查看原图
+                        </a>
+                    </p>
+                `;
+                lightbox.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            function closeLightbox() {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+            
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            
+            // 键盘支持
+            document.addEventListener('keydown', (e) => {
+                if (lightbox.classList.contains('active') && e.key === 'Escape') {
+                    closeLightbox();
+                }
+            });
+            
+            // 初始渲染
+            renderImages();
+        });
+    </script>
+</body>
+</html>
