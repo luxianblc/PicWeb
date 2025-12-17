@@ -13,7 +13,7 @@
     <!-- 网站图标 -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>">
 </head>
-<body class="dark-theme">
+<body>
     <!-- 导航栏 -->
     <nav class="navbar">
         <div class="container nav-container">
@@ -35,9 +35,9 @@
                     <i class="fas fa-user"></i> 我的
                 </a>
             </div>
-            <div class="nav-right">
+            <div class="nav-controls">
                 <button class="theme-toggle" id="themeToggle" title="切换主题">
-                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-moon" id="themeIcon"></i>
                 </button>
                 <div class="status-indicator">
                     <span class="status-dot status-online"></span>
@@ -100,8 +100,11 @@
                                         <button class="control-btn" id="likeBtn" title="喜欢">
                                             <i class="far fa-heart"></i>
                                         </button>
-                                        <button class="control-btn" id="modeBtn" title="播放模式">
-                                            <i class="fas fa-retweet"></i>
+                                        <button class="control-btn" id="shuffleBtn" title="随机播放">
+                                            <i class="fas fa-random"></i>
+                                        </button>
+                                        <button class="control-btn" id="repeatBtn" title="循环播放">
+                                            <i class="fas fa-redo"></i>
                                         </button>
                                     </div>
                                     
@@ -117,73 +120,96 @@
                 </div>
             </div>
 
-            <!-- 功能区域 -->
-            <div class="function-grid animate-slide-up" style="animation-delay: 0.2s">
-                <!-- 搜索功能 -->
+            <!-- 搜索区域 -->
+            <div class="search-container animate-slide-up" style="animation-delay: 0.15s">
                 <div class="function-card glass">
                     <div class="function-header">
                         <i class="fas fa-search"></i>
-                        <h3>搜索音乐</h3>
+                        <h3>智能搜索</h3>
+                        <span class="search-tips">支持歌曲名、歌手、专辑、歌词等</span>
                     </div>
                     
-                    <div class="search-controls">
-                        <div class="input-group">
-                            <label class="input-label">关键词</label>
-                            <div class="search-input-container">
-                                <input type="text" class="input-field" id="searchInput" placeholder="输入歌曲名、歌手或专辑">
-                                <button class="search-clear" id="searchClear">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
+                    <div class="search-input-group">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="search-input" id="searchInput" placeholder="输入关键词，如 '周杰伦 晴天' 或 '海阔天空'">
+                            <button class="search-clear" id="searchClear" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
                         
-                        <div class="input-group">
-                            <label class="input-label">搜索类型</label>
+                        <div class="search-options">
                             <div class="search-type-selector">
-                                <select class="input-field" id="searchType">
-                                    <option value="1">单曲</option>
-                                    <option value="100">歌手</option>
-                                    <option value="10">专辑</option>
-                                    <option value="1000">歌单</option>
-                                    <option value="1004">MV</option>
-                                    <option value="1014">视频</option>
-                                    <option value="1002">用户</option>
-                                </select>
+                                <label class="input-label">搜索类型</label>
+                                <div class="type-buttons">
+                                    <button class="type-btn active" data-type="1">单曲</button>
+                                    <button class="type-btn" data-type="10">专辑</button>
+                                    <button class="type-btn" data-type="100">歌手</button>
+                                    <button class="type-btn" data-type="1000">歌单</button>
+                                    <button class="type-btn" data-type="1004">MV</button>
+                                    <button class="type-btn" data-type="1018">综合</button>
+                                </div>
+                            </div>
+                            
+                            <div class="search-advanced">
+                                <div class="advanced-row">
+                                    <div class="advanced-col">
+                                        <label class="input-label">每页数量</label>
+                                        <select class="input-field" id="searchLimit">
+                                            <option value="20">20条</option>
+                                            <option value="30" selected>30条</option>
+                                            <option value="50">50条</option>
+                                            <option value="100">100条</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="advanced-col">
+                                        <label class="input-label">排序方式</label>
+                                        <select class="input-field" id="searchSort">
+                                            <option value="0" selected>综合排序</option>
+                                            <option value="1">热度排序</option>
+                                            <option value="2">时间排序</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
                     <div class="btn-group">
                         <button class="btn btn-primary" onclick="searchMusic()">
-                            <i class="fas fa-search"></i> 搜索
+                            <i class="fas fa-search"></i> 搜索音乐
                         </button>
-                        <button class="btn btn-secondary" onclick="getRecommendations()">
-                            <i class="fas fa-fire"></i> 热门推荐
+                        <button class="btn btn-secondary" onclick="clearSearch()">
+                            <i class="fas fa-times"></i> 清空
                         </button>
-                        <button class="btn btn-secondary" onclick="clearSearchResults()">
-                            <i class="fas fa-times"></i> 清空结果
+                        <button class="btn btn-secondary" onclick="showHotSearches()">
+                            <i class="fas fa-fire"></i> 热门搜索
+                        </button>
+                        <button class="btn btn-secondary" onclick="showSearchHistory()">
+                            <i class="fas fa-history"></i> 搜索历史
                         </button>
                     </div>
                     
-                    <div class="search-stats" id="searchStats" style="display: none;">
-                        <div class="stats-item">
-                            <span class="stats-label">搜索结果:</span>
-                            <span class="stats-value" id="resultCount">0</span>
+                    <div class="search-results-container" id="searchResultsContainer" style="display: none;">
+                        <div class="search-results-header">
+                            <h4 id="searchResultsTitle">搜索结果</h4>
+                            <div class="search-pagination" id="searchPagination"></div>
                         </div>
-                        <div class="stats-item">
-                            <span class="stats-label">搜索类型:</span>
-                            <span class="stats-value" id="resultType">单曲</span>
-                        </div>
-                    </div>
-                    
-                    <div class="song-list" id="searchResults">
-                        <div class="no-results" id="noResults">
-                            <i class="fas fa-search"></i>
-                            <p>输入关键词搜索音乐</p>
+                        <div class="search-results-body">
+                            <div class="search-tabs" id="searchTabs">
+                                <!-- 标签页将动态生成 -->
+                            </div>
+                            <div class="search-results" id="searchResults">
+                                <!-- 搜索结果将动态插入 -->
+                            </div>
                         </div>
                     </div>
                 </div>
-                
+            </div>
+
+            <!-- 功能区域 -->
+            <div class="function-grid animate-slide-up" style="animation-delay: 0.2s">
                 <!-- 推荐功能 -->
                 <div class="function-card glass">
                     <div class="function-header">
@@ -204,8 +230,28 @@
                         <button class="btn btn-secondary" onclick="getTopList()">
                             <i class="fas fa-chart-line"></i> 排行榜
                         </button>
-                        <button class="btn btn-secondary" onclick="refreshRecommendations()">
+                    </div>
+                </div>
+                
+                <!-- 热门歌单 -->
+                <div class="function-card glass">
+                    <div class="function-header">
+                        <i class="fas fa-list"></i>
+                        <h3>热门歌单</h3>
+                    </div>
+                    
+                    <div class="playlist-list" id="playlistList">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" onclick="getHotPlaylists()">
                             <i class="fas fa-sync-alt"></i> 刷新
+                        </button>
+                        <button class="btn btn-secondary" onclick="getHighQualityPlaylists()">
+                            <i class="fas fa-crown"></i> 精品歌单
                         </button>
                     </div>
                 </div>
@@ -221,19 +267,19 @@
                 <div class="status-grid">
                     <div class="status-card">
                         <h4 class="status-label">登录状态</h4>
-                        <div id="loginStatus" class="status-value error">未登录</div>
+                        <div id="loginStatus" class="status-value status-offline">未登录</div>
                     </div>
                     <div class="status-card">
                         <h4 class="status-label">音质权限</h4>
-                        <div id="qualityStatus" class="status-value warning">标准音质</div>
+                        <div id="qualityStatus" class="status-value status-warning">标准音质</div>
                     </div>
                     <div class="status-card">
                         <h4 class="status-label">API状态</h4>
-                        <div id="apiStatusCard" class="status-value success">正常</div>
+                        <div id="apiStatus" class="status-value status-online">正常</div>
                     </div>
                     <div class="status-card">
-                        <h4 class="status-label">播放模式</h4>
-                        <div id="playMode" class="status-value info">顺序播放</div>
+                        <h4 class="status-label">歌曲缓存</h4>
+                        <div id="cacheStatus" class="status-value">0首</div>
                     </div>
                 </div>
                 
@@ -244,8 +290,8 @@
                     <button class="btn btn-secondary" onclick="checkLoginStatus()">
                         <i class="fas fa-sync-alt"></i> 刷新状态
                     </button>
-                    <button class="btn btn-secondary" onclick="logout()">
-                        <i class="fas fa-sign-out-alt"></i> 退出登录
+                    <button class="btn btn-secondary" onclick="clearCache()">
+                        <i class="fas fa-trash"></i> 清空缓存
                     </button>
                 </div>
             </div>
@@ -256,7 +302,9 @@
     <footer class="footer">
         <div class="container">
             <p>网易云音乐正式版 &copy; 2024 网易公司 版权所有</p>
-            <p class="footer-note">本产品仅用于学习交流，请支持正版音乐</p>
+            <p class="footer-note">
+                本产品仅用于学习交流，请支持正版音乐
+            </p>
         </div>
     </footer>
 
@@ -264,43 +312,87 @@
     <div id="loginModal" class="modal-overlay">
         <div class="modal-content glass">
             <div class="modal-header">
-                <h3>登录网易云音乐</h3>
+                <h3><i class="fas fa-sign-in-alt"></i> 登录网易云音乐</h3>
                 <button class="modal-close" onclick="hideLoginModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             
             <div class="modal-body">
-                <div class="input-group">
-                    <label class="input-label">手机号/邮箱</label>
-                    <input type="text" class="input-field" id="loginAccount" placeholder="请输入手机号或邮箱">
+                <div class="login-tabs">
+                    <button class="login-tab active" onclick="switchLoginTab('qr')">二维码登录</button>
+                    <button class="login-tab" onclick="switchLoginTab('password')">密码登录</button>
+                    <button class="login-tab" onclick="switchLoginTab('phone')">手机登录</button>
                 </div>
                 
-                <div class="input-group">
-                    <label class="input-label">密码</label>
-                    <input type="password" class="input-field" id="loginPassword" placeholder="请输入密码">
-                </div>
-                
-                <div class="btn-group" style="margin-top: 2rem;">
-                    <button class="btn btn-primary" onclick="handleLogin()">
-                        <i class="fas fa-sign-in-alt"></i> 登录
-                    </button>
-                    <button class="btn btn-secondary" onclick="hideLoginModal()">
-                        <i class="fas fa-times"></i> 取消
-                    </button>
-                </div>
-                
-                <div class="qr-login-section">
-                    <p>或使用二维码登录</p>
-                    <button class="btn btn-secondary" onclick="startQRLogin()">
-                        <i class="fas fa-qrcode"></i> 二维码登录
-                    </button>
+                <div class="login-content">
+                    <!-- 二维码登录 -->
+                    <div id="qrLogin" class="login-form active">
+                        <div class="qr-container" id="qrContainer">
+                            <div class="qr-placeholder">
+                                <i class="fas fa-qrcode"></i>
+                                <p>点击生成二维码</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary qr-generate-btn" onclick="startQRLogin()">
+                            <i class="fas fa-qrcode"></i> 生成二维码
+                        </button>
+                        <div class="qr-tips">
+                            <p><i class="fas fa-info-circle"></i> 使用网易云音乐APP扫描二维码登录</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 密码登录 -->
+                    <div id="passwordLogin" class="login-form">
+                        <div class="input-group">
+                            <label class="input-label">手机号/邮箱</label>
+                            <input type="text" class="input-field" id="loginAccount" placeholder="请输入手机号或邮箱">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">密码</label>
+                            <input type="password" class="input-field" id="loginPassword" placeholder="请输入密码">
+                        </div>
+                        
+                        <div class="login-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="rememberMe"> 记住我
+                            </label>
+                            <a href="#" class="forgot-password">忘记密码？</a>
+                        </div>
+                        
+                        <button class="btn btn-primary login-btn" onclick="handleLogin()">
+                            <i class="fas fa-sign-in-alt"></i> 登录
+                        </button>
+                    </div>
+                    
+                    <!-- 手机登录 -->
+                    <div id="phoneLogin" class="login-form">
+                        <div class="input-group">
+                            <label class="input-label">手机号码</label>
+                            <input type="tel" class="input-field" id="loginPhone" placeholder="请输入手机号码">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">验证码</label>
+                            <div class="captcha-input">
+                                <input type="text" class="input-field" id="loginCaptcha" placeholder="请输入验证码">
+                                <button class="btn btn-secondary captcha-btn" id="sendCaptchaBtn">
+                                    发送验证码
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary login-btn" onclick="handlePhoneLogin()">
+                            <i class="fas fa-sign-in-alt"></i> 登录
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 脚本 -->
+    <!-- 脚本文件 -->
     <script src="netease.js"></script>
 </body>
 </html>
