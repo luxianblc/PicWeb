@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -7,94 +6,245 @@
     <title>网易云音乐 - 正式版</title>
     
     <!-- 样式文件 -->
-    <link rel="stylesheet" href="global.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- 组件加载器 -->
-    <script type="module" src="load-components.js"></script>
     
     <!-- 网站图标 -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>">
     
     <style>
-        /* 音乐播放器容器 */
-        .music-player-container {
+        /* 全局样式 */
+        :root {
+            --primary-color: #e60026;
+            --primary-light: #ff2d55;
+            --bg-dark: #0a0a0a;
+            --bg-card: #1a1a1a;
+            --bg-hover: #2a2a2a;
+            --text-primary: #f5f5f5;
+            --text-secondary: #b3b3b3;
+            --text-muted: #888888;
+            --border-color: #333333;
+            --gradient-primary: linear-gradient(135deg, #e60026, #ff2d55);
+            --gradient-dark: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--gradient-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
             max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* 导航栏样式 */
+        .navbar {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(230, 0, 38, 0.1);
+        }
+        
+        .nav-link.active {
+            color: #fff;
+            background: rgba(230, 0, 38, 0.2);
+        }
+        
+        /* 主要内容区域 */
+        .main-content {
+            padding: 2rem 0;
+        }
+        
+        .page-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .page-title h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+        
+        .page-title p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            max-width: 600px;
             margin: 0 auto;
         }
         
-        .player-card {
-            border-radius: 20px;
+        /* 卡片样式 */
+        .card {
+            background: rgba(26, 26, 26, 0.8);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
             padding: 2rem;
             margin-bottom: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         
-        .player-controls {
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(230, 0, 38, 0.15);
+        }
+        
+        /* 播放器样式 */
+        .music-player-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .player-header {
+            background: rgba(230, 0, 38, 0.1);
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 16px 16px 0 0;
+            margin-bottom: 0;
+        }
+        
+        .player-header h3 {
+            font-size: 1.3rem;
             display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+        }
+        
+        .player-main {
+            padding: 2rem;
         }
         
         .player-info {
             display: flex;
             align-items: center;
             gap: 2rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
         
         .album-art {
-            width: 160px;
-            height: 160px;
-            border-radius: 15px;
+            width: 180px;
+            height: 180px;
+            border-radius: 12px;
             overflow: hidden;
-            background: rgba(230, 0, 38, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            color: #e60026;
+            background: rgba(255, 255, 255, 0.05);
             flex-shrink: 0;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
         
         .album-art img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .album-art:hover img {
+            transform: scale(1.05);
+        }
+        
+        .album-art.default {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            color: var(--primary-color);
+            background: rgba(230, 0, 38, 0.1);
         }
         
         .track-info {
             flex: 1;
         }
         
-        .track-info h2 {
+        .track-title {
             font-size: 2rem;
+            font-weight: 700;
             margin-bottom: 0.5rem;
-            color: white;
+            line-height: 1.3;
+            color: var(--text-primary);
         }
         
-        .track-info p {
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
+        .track-artist {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
         }
         
         .track-meta {
             display: flex;
             gap: 2rem;
-            margin-top: 1rem;
             font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+        
+        /* 进度条 */
+        .progress-container {
+            margin: 2rem 0;
         }
         
         .progress-bar {
             width: 100%;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.1);
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
             border-radius: 3px;
-            margin: 1.5rem 0;
+            margin: 1rem 0;
             overflow: hidden;
             cursor: pointer;
         }
@@ -102,35 +252,40 @@
         .progress {
             width: 0%;
             height: 100%;
+            background: var(--gradient-primary);
             border-radius: 3px;
             transition: width 0.1s linear;
-            background: linear-gradient(90deg, #e60026, #ff2d55);
         }
         
         .time-info {
             display: flex;
             justify-content: space-between;
             font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 0.5rem;
+            color: var(--text-muted);
         }
         
         /* 控制按钮 */
+        .player-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
         .control-buttons {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 2rem;
+            gap: 1.5rem;
         }
         
         .control-btn {
-            width: 55px;
-            height: 55px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            font-size: 1.3rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-primary);
+            font-size: 1.2rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -140,19 +295,20 @@
         
         .control-btn:hover {
             transform: scale(1.05);
-            background: rgba(230, 0, 38, 0.2);
+            background: rgba(230, 0, 38, 0.15);
+            border-color: rgba(230, 0, 38, 0.3);
         }
         
         .play-btn {
-            width: 70px;
-            height: 70px;
-            font-size: 1.8rem;
-            background: linear-gradient(135deg, #e60026, #ff2d55);
+            width: 65px;
+            height: 65px;
+            font-size: 1.5rem;
+            background: var(--gradient-primary);
             border: none;
         }
         
         .play-btn:hover {
-            box-shadow: 0 0 30px rgba(230, 0, 38, 0.3);
+            box-shadow: 0 0 25px rgba(230, 0, 38, 0.4);
         }
         
         /* 音量控制 */
@@ -160,13 +316,12 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-            margin-top: 1rem;
         }
         
         .volume-slider {
             flex: 1;
             height: 4px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
             border-radius: 2px;
             outline: none;
             -webkit-appearance: none;
@@ -174,49 +329,113 @@
         
         .volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             cursor: pointer;
-            background: #e60026;
+            background: var(--primary-color);
         }
         
-        /* 功能卡片 */
+        /* 功能区域 */
         .function-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
             margin: 3rem 0;
-        }
-        
-        .function-card {
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
         }
         
         .function-header {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             margin-bottom: 1.5rem;
         }
         
         .function-header h3 {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
+            color: var(--text-primary);
+        }
+        
+        /* 输入框样式 */
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(230, 0, 38, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            padding: 0.9rem 1.8rem;
+            border: none;
+            border-radius: 10px;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-primary);
             color: white;
         }
         
-        .function-header i {
-            color: #e60026;
-            font-size: 1.3rem;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(230, 0, 38, 0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
         }
         
         /* 歌曲列表 */
         .song-list {
+            margin-top: 1rem;
             max-height: 400px;
             overflow-y: auto;
-            margin: 1.5rem 0;
         }
         
         .song-item {
@@ -224,31 +443,32 @@
             align-items: center;
             gap: 1rem;
             padding: 1rem;
-            margin-bottom: 0.8rem;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 0.5rem;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
             cursor: pointer;
             transition: all 0.3s ease;
             border: 1px solid transparent;
         }
         
         .song-item:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.1);
             transform: translateX(5px);
         }
         
         .song-item.active {
-            background: rgba(230, 0, 38, 0.15);
-            border-left: 4px solid #e60026;
+            background: rgba(230, 0, 38, 0.12);
+            border-color: rgba(230, 0, 38, 0.3);
         }
         
         .song-cover {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border-radius: 8px;
             overflow: hidden;
             flex-shrink: 0;
-            background: rgba(230, 0, 38, 0.1);
+            background: rgba(255, 255, 255, 0.05);
         }
         
         .song-cover img {
@@ -263,10 +483,9 @@
         }
         
         .song-title {
-            font-size: 1rem;
             font-weight: 600;
-            margin-bottom: 0.3rem;
-            color: white;
+            margin-bottom: 0.2rem;
+            color: var(--text-primary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -274,7 +493,7 @@
         
         .song-artist {
             font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-secondary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -282,130 +501,117 @@
         
         .song-duration {
             font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-muted);
             flex-shrink: 0;
         }
         
-        /* 输入框样式 */
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .input-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-        
-        .input-field {
-            width: 100%;
-            padding: 0.9rem 1.2rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: white;
-            font-family: inherit;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-        
-        .input-field:focus {
-            outline: none;
-            border-color: #e60026;
-            box-shadow: 0 0 0 2px rgba(230, 0, 38, 0.1);
-        }
-        
-        /* 按钮组 */
-        .btn-group {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1.5rem;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            padding: 0.9rem 1.5rem;
-            border: none;
-            border-radius: 12px;
-            font-family: inherit;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        /* 状态指示器 */
+        .status-indicator {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 8px;
-            font-size: 0.95rem;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #e60026, #ff2d55);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(230, 0, 38, 0.3);
-        }
-        
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-        }
-        
-        /* 状态指示器 */
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin: 1.5rem 0;
-        }
-        
-        .status-card {
+            padding: 0.3rem 0.8rem;
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 1.5rem;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
         }
         
-        .status-card h4 {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
-            margin-bottom: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
         }
         
-        .status-card .value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: white;
+        .status-online {
+            background: #28a745;
+            box-shadow: 0 0 8px rgba(40, 167, 69, 0.5);
         }
         
-        .status-card .value.online {
-            color: #28a745;
+        .status-offline {
+            background: #dc3545;
         }
         
-        .status-card .value.offline {
-            color: #dc3545;
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 6px;
         }
         
-        /* 搜索和推荐区域 */
-        .search-results {
-            display: none;
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 3px;
         }
         
-        .recommendations {
-            display: block;
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-slide-up {
+            animation: slideInUp 0.5s ease forwards;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+            
+            .page-title h1 {
+                font-size: 2.5rem;
+            }
+            
+            .player-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .album-art {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .control-buttons {
+                gap: 1rem;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
         }
         
         /* 加载动画 */
@@ -420,7 +626,7 @@
             width: 40px;
             height: 40px;
             border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top-color: #e60026;
+            border-top-color: var(--primary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -429,544 +635,631 @@
             to { transform: rotate(360deg); }
         }
         
-        /* 网易云主题颜色 */
-        .netease-theme {
-            --primary-color: #e60026;
-            --secondary-color: #ff2d55;
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            padding: 2.5rem 0;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+            margin-top: 3rem;
+            background: rgba(10, 10, 10, 0.8);
         }
         
-        /* 返回按钮 */
-        .back-to-home {
-            margin-bottom: 2rem;
+        .footer p {
+            margin-bottom: 0.5rem;
         }
         
-        .back-btn {
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.9rem;
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .footer-link {
+            color: var(--text-secondary);
             text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
         }
         
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
-        
-        /* 动画效果 */
-        body {
-            animation: fadeIn 0.5s ease forwards;
-        }
-        
-        .main-content {
-            opacity: 1;
-            animation: slideInUp 0.6s ease 0.3s both;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .player-info {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .album-art {
-                width: 180px;
-                height: 180px;
-            }
-            
-            .control-buttons {
-                gap: 1rem;
-            }
-            
-            .control-btn {
-                width: 50px;
-                height: 50px;
-            }
-            
-            .play-btn {
-                width: 60px;
-                height: 60px;
-            }
-            
-            .function-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .btn-group {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-            }
-            
-            .track-info h2 {
-                font-size: 1.5rem;
-            }
-        }
-        
-        /* 滚动条样式 */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
+        .footer-link:hover {
+            color: var(--text-primary);
         }
         
         /* 工具提示 */
-        .tooltip {
+        [title] {
             position: relative;
-            cursor: help;
         }
         
-        .tooltip-text {
-            visibility: hidden;
-            width: 200px;
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            text-align: center;
-            padding: 10px;
-            border-radius: 6px;
+        [title]:hover::after {
+            content: attr(title);
             position: absolute;
-            z-index: 1;
-            bottom: 125%;
+            bottom: 100%;
             left: 50%;
             transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.3s;
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.9);
+            color: var(--text-primary);
             font-size: 12px;
-            line-height: 1.4;
+            white-space: nowrap;
+            border-radius: 4px;
             pointer-events: none;
+            z-index: 1000;
+            margin-bottom: 8px;
         }
         
-        .tooltip:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
+        /* 主内容动画 */
+        .main-content {
+            opacity: 0;
+            animation: fadeIn 0.8s ease 0.2s forwards;
         }
     </style>
 </head>
-<body class="netease-theme">
-    <!-- 页眉将由load-components.js动态插入 -->
-    
-    <main class="main-content">
-        <div class="container">
-            <div class="back-to-home">
-                <a href="music.html" class="back-btn">
-                    <i class="fas fa-arrow-left"></i> 返回音乐主页
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <i class="fas fa-music"></i>
+                网易云音乐
+            </a>
+            <div class="nav-links">
+                <a href="#" class="nav-link active">
+                    <i class="fas fa-home"></i> 发现音乐
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-compass"></i> 浏览
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-radio"></i> 私人FM
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-heart"></i> 我的喜欢
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-user"></i> 我的主页
                 </a>
             </div>
-            
-            <div class="page-title">
-                <h1><i class="fas fa-music" style="color: #e60026;"></i> 网易云音乐正式版</h1>
-                <p>千万曲库，随时随地，发现音乐之美</p>
+            <div class="status-indicator">
+                <span class="status-dot status-online"></span>
+                <span>在线</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="main-content">
+        <div class="container">
+            <!-- 页面标题 -->
+            <div class="page-title animate-slide-up">
+                <h1>发现音乐之旅</h1>
+                <p>千万曲库，智能推荐，发现属于你的音乐世界</p>
             </div>
 
-            <div class="music-player-container">
-                <!-- 网易云音乐播放器 -->
-                <div class="glass player-card">
-                    <div class="player-controls">
+            <!-- 音乐播放器 -->
+            <div class="music-player-container animate-slide-up" style="animation-delay: 0.1s">
+                <div class="card">
+                    <div class="player-header">
+                        <h3><i class="fas fa-play-circle"></i> 正在播放</h3>
+                    </div>
+                    <div class="player-main">
                         <div class="player-info">
-                            <div class="album-art" id="albumArt">
+                            <div class="album-art default" id="albumArt">
                                 <i class="fas fa-music"></i>
                             </div>
                             <div class="track-info">
-                                <h2 id="trackTitle">选择一首歌曲开始播放</h2>
-                                <p id="trackArtist">-</p>
-                                
+                                <h2 class="track-title" id="trackTitle">选择一首歌曲开始播放</h2>
+                                <p class="track-artist" id="trackArtist">-</p>
                                 <div class="track-meta">
                                     <span id="trackAlbum">专辑：-</span>
                                     <span id="trackDuration">时长：-</span>
-                                    <span id="trackQuality">音质：-</span>
+                                    <span id="trackQuality">音质：标准</span>
                                 </div>
                                 
-                                <div class="time-info">
-                                    <span id="currentTime">0:00</span>
-                                    <span id="totalTime">0:00</span>
+                                <div class="progress-container">
+                                    <div class="time-info">
+                                        <span id="currentTime">0:00</span>
+                                        <span id="totalTime">0:00</span>
+                                    </div>
+                                    <div class="progress-bar" id="progressBar">
+                                        <div class="progress" id="progress"></div>
+                                    </div>
                                 </div>
-                                <div class="progress-bar" id="progressBar">
-                                    <div class="progress" id="progress"></div>
+                                
+                                <div class="player-controls">
+                                    <div class="control-buttons">
+                                        <button class="control-btn" id="prevBtn" title="上一首">
+                                            <i class="fas fa-step-backward"></i>
+                                        </button>
+                                        <button class="control-btn play-btn" id="playBtn" title="播放/暂停">
+                                            <i class="fas fa-play" id="playIcon"></i>
+                                        </button>
+                                        <button class="control-btn" id="nextBtn" title="下一首">
+                                            <i class="fas fa-step-forward"></i>
+                                        </button>
+                                        <button class="control-btn" id="likeBtn" title="添加到喜欢">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="volume-control">
+                                        <i class="fas fa-volume-up" style="color: var(--primary-color);"></i>
+                                        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50">
+                                        <span id="volumePercent">50%</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="control-buttons">
-                            <button class="control-btn" id="prevBtn" title="上一首">
-                                <i class="fas fa-step-backward"></i>
-                            </button>
-                            <button class="control-btn play-btn" id="playBtn" title="播放/暂停">
-                                <i class="fas fa-play" id="playIcon"></i>
-                            </button>
-                            <button class="control-btn" id="nextBtn" title="下一首">
-                                <i class="fas fa-step-forward"></i>
-                            </button>
-                            <button class="control-btn" id="likeBtn" title="喜欢">
-                                <i class="far fa-heart"></i>
-                            </button>
-                        </div>
-                        
-                        <div class="volume-control">
-                            <i class="fas fa-volume-up" style="color: #e60026;"></i>
-                            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50">
-                            <span id="volumePercent" style="color: rgba(255, 255, 255, 0.7);">50%</span>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- 功能区域 -->
-                <div class="function-grid">
-                    <!-- 搜索功能 -->
-                    <div class="glass function-card">
-                        <div class="function-header">
-                            <i class="fas fa-search"></i>
-                            <h3>搜索音乐</h3>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label class="input-label">歌曲名、歌手或专辑</label>
-                            <input type="text" class="input-field" id="searchInput" placeholder="例如：周杰伦 晴天" value="周杰伦">
-                        </div>
-                        
-                        <div class="btn-group">
-                            <button class="btn btn-primary" onclick="searchMusic()">
-                                <i class="fas fa-search"></i> 搜索音乐
-                            </button>
-                            <button class="btn btn-secondary" onclick="getRecommendations()">
-                                <i class="fas fa-fire"></i> 热门推荐
-                            </button>
-                        </div>
-                        
-                        <div class="search-results" id="searchResults">
-                            <h4 style="margin-bottom: 1rem; color: #e60026;">搜索结果</h4>
-                            <div class="song-list" id="searchResultsList">
-                                <!-- 搜索结果将动态插入 -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 推荐功能 -->
-                    <div class="glass function-card">
-                        <div class="function-header">
-                            <i class="fas fa-star"></i>
-                            <h3>每日推荐</h3>
-                        </div>
-                        
-                        <div class="recommendations" id="recommendations">
-                            <div class="song-list" id="recommendationsList">
-                                <div class="loading">
-                                    <div class="loading-spinner"></div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="btn-group">
-                            <button class="btn btn-secondary" onclick="getPersonalized()">
-                                <i class="fas fa-user-check"></i> 个性化推荐
-                            </button>
-                            <button class="btn btn-secondary" onclick="getTopList()">
-                                <i class="fas fa-chart-line"></i> 排行榜
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 账户状态 -->
-                <div class="glass function-card">
+            <!-- 功能区域 -->
+            <div class="function-grid animate-slide-up" style="animation-delay: 0.2s">
+                <!-- 搜索功能 -->
+                <div class="card">
                     <div class="function-header">
-                        <i class="fas fa-user-circle"></i>
-                        <h3>账户状态</h3>
+                        <i class="fas fa-search" style="color: var(--primary-color);"></i>
+                        <h3>搜索音乐</h3>
                     </div>
                     
-                    <div class="status-grid">
-                        <div class="status-card">
-                            <h4>登录状态</h4>
-                            <div class="value" id="loginStatus">未登录</div>
-                        </div>
-                        <div class="status-card">
-                            <h4>音质权限</h4>
-                            <div class="value" id="qualityStatus">标准音质</div>
-                        </div>
-                        <div class="status-card">
-                            <h4>API状态</h4>
-                            <div class="value online" id="apiStatus">正常</div>
+                    <div class="input-group">
+                        <label class="input-label">搜索歌曲、歌手或专辑</label>
+                        <input type="text" class="input-field" id="searchInput" placeholder="输入关键词...">
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="searchMusic()">
+                            <i class="fas fa-search"></i> 搜索
+                        </button>
+                        <button class="btn btn-secondary" onclick="getRecommendations()">
+                            <i class="fas fa-fire"></i> 热门推荐
+                        </button>
+                    </div>
+                    
+                    <div class="song-list" id="searchResults" style="display: none;">
+                        <h4 style="margin-bottom: 1rem; color: var(--primary-color);">搜索结果</h4>
+                        <!-- 搜索结果将动态插入 -->
+                    </div>
+                </div>
+                
+                <!-- 推荐功能 -->
+                <div class="card">
+                    <div class="function-header">
+                        <i class="fas fa-star" style="color: #ffc107;"></i>
+                        <h3>每日推荐</h3>
+                    </div>
+                    
+                    <div class="song-list" id="recommendations">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
                         </div>
                     </div>
                     
                     <div class="btn-group">
-                        <button class="btn btn-primary" onclick="showLoginModal()">
-                            <i class="fas fa-sign-in-alt"></i> 立即登录
+                        <button class="btn btn-secondary" onclick="getPersonalized()">
+                            <i class="fas fa-user-check"></i> 个性推荐
                         </button>
-                        <button class="btn btn-secondary" onclick="checkLoginStatus()">
-                            <i class="fas fa-sync-alt"></i> 刷新状态
-                        </button>
-                        <button class="btn btn-secondary" onclick="openQRLogin()">
-                            <i class="fas fa-qrcode"></i> 扫码登录
+                        <button class="btn btn-secondary" onclick="getTopList()">
+                            <i class="fas fa-chart-line"></i> 排行榜
                         </button>
                     </div>
                 </div>
+            </div>
+
+            <!-- 账户状态 -->
+            <div class="card animate-slide-up" style="animation-delay: 0.3s">
+                <div class="function-header">
+                    <i class="fas fa-user-circle" style="color: var(--primary-color);"></i>
+                    <h3>账户信息</h3>
+                </div>
                 
-                <!-- 使用说明 -->
-                <div class="glass card mt-3 text-center">
-                    <h3><i class="fas fa-info-circle"></i> 网易云音乐使用说明</h3>
-                    <p style="color: rgba(255, 255, 255, 0.7); margin-top: 1rem; line-height: 1.8;">
-                        1. 搜索歌曲或使用推荐列表开始播放音乐<br>
-                        2. 登录后可享受更高音质和个性化推荐<br>
-                        3. 使用控制按钮切换歌曲和调整音量<br>
-                        4. 进度条可以拖拽以跳转到指定位置<br>
-                        5. 音乐仅供个人欣赏，请支持正版音乐
-                    </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin: 1.5rem 0;">
+                    <div class="status-card">
+                        <h4 style="color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">登录状态</h4>
+                        <div id="loginStatus" style="color: #dc3545; font-weight: 600; font-size: 1.1rem;">未登录</div>
+                    </div>
+                    <div class="status-card">
+                        <h4 style="color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">音质权限</h4>
+                        <div id="qualityStatus" style="color: #ffc107; font-weight: 600; font-size: 1.1rem;">标准音质</div>
+                    </div>
+                    <div class="status-card">
+                        <h4 style="color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">API状态</h4>
+                        <div id="apiStatus" style="color: #28a745; font-weight: 600; font-size: 1.1rem;">正常</div>
+                    </div>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="showLoginModal()">
+                        <i class="fas fa-sign-in-alt"></i> 立即登录
+                    </button>
+                    <button class="btn btn-secondary" onclick="checkLoginStatus()">
+                        <i class="fas fa-sync-alt"></i> 刷新状态
+                    </button>
                 </div>
             </div>
         </div>
     </main>
-    
-    <!-- 页脚将由load-components.js动态插入 -->
 
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <p style="font-size: 1.1rem; margin-bottom: 1rem;">网易云音乐</p>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">音乐的力量，触手可及</p>
+            
+            <div class="footer-links">
+                <a href="#" class="footer-link">关于我们</a>
+                <a href="#" class="footer-link">用户协议</a>
+                <a href="#" class="footer-link">隐私政策</a>
+                <a href="#" class="footer-link">帮助中心</a>
+                <a href="#" class="footer-link">联系我们</a>
+            </div>
+            
+            <p style="margin-top: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
+                &copy; 2024 网易公司 版权所有 | 本产品仅用于学习交流，请支持正版音乐
+            </p>
+        </div>
+    </footer>
+
+    <!-- 登录模态框 -->
+    <div id="loginModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); z-index: 2000; align-items: center; justify-content: center;">
+        <div class="card" style="max-width: 400px; width: 90%;">
+            <h3 style="color: var(--primary-color); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-sign-in-alt"></i> 登录网易云音乐
+            </h3>
+            
+            <div class="input-group">
+                <label class="input-label">手机号/邮箱</label>
+                <input type="text" class="input-field" id="loginAccount" placeholder="请输入手机号或邮箱">
+            </div>
+            
+            <div class="input-group">
+                <label class="input-label">密码</label>
+                <input type="password" class="input-field" id="loginPassword" placeholder="请输入密码">
+            </div>
+            
+            <div class="btn-group" style="margin-top: 2rem;">
+                <button class="btn btn-primary" onclick="handleLogin()">
+                    <i class="fas fa-sign-in-alt"></i> 登录
+                </button>
+                <button class="btn btn-secondary" onclick="hideLoginModal()">
+                    <i class="fas fa-times"></i> 取消
+                </button>
+            </div>
+            
+            <div style="margin-top: 1.5rem; text-align: center; color: var(--text-secondary); padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                <p style="margin-bottom: 1rem;">或使用二维码登录</p>
+                <button class="btn btn-secondary" onclick="startQRLogin()" style="width: 100%;">
+                    <i class="fas fa-qrcode"></i> 二维码登录
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 代码 -->
     <script>
-        // 等待组件加载完成后再初始化播放器
-        document.addEventListener('componentsLoaded', function() {
-            console.log('网易云音乐播放器初始化...');
-            initNeteasePlayer();
-            console.log('网易云音乐播放器初始化完成');
-        });
-        
-        // 网易云音乐播放器初始化
-        function initNeteasePlayer() {
-            // 全局变量
-            let API_BASE = 'https://neteaseapi-enhanced.vercel.app';
-            let currentAudio = new Audio();
-            let currentTrackIndex = 0;
-            let isPlaying = false;
-            let currentPlaylist = [];
-            let userCookie = null;
-            let currentSongData = null;
+        // 全局变量
+        let API_BASE = 'https://neteaseapi-enhanced.vercel.app';
+        let currentAudio = null;
+        let currentTrackIndex = 0;
+        let isPlaying = false;
+        let currentPlaylist = [];
+        let userCookie = null;
+
+        // 页面加载初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('网易云音乐正式版已加载');
             
-            // 从本地存储加载设置
-            const savedApiBase = localStorage.getItem('netease_api_base');
-            if (savedApiBase) {
-                API_BASE = savedApiBase;
-            }
+            // 初始化播放器
+            initPlayer();
             
-            const savedCookie = localStorage.getItem('netease_cookie');
-            if (savedCookie) {
-                userCookie = savedCookie;
-                updateLoginStatus();
-            }
+            // 加载推荐音乐
+            getRecommendations();
             
-            // DOM元素
-            const albumArt = document.getElementById('albumArt');
-            const trackTitle = document.getElementById('trackTitle');
-            const trackArtist = document.getElementById('trackArtist');
-            const trackAlbum = document.getElementById('trackAlbum');
-            const trackDuration = document.getElementById('trackDuration');
-            const trackQuality = document.getElementById('trackQuality');
-            const progress = document.getElementById('progress');
-            const progressBar = document.getElementById('progressBar');
-            const currentTimeEl = document.getElementById('currentTime');
-            const totalTimeEl = document.getElementById('totalTime');
-            const playBtn = document.getElementById('playBtn');
-            const playIcon = document.getElementById('playIcon');
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            const likeBtn = document.getElementById('likeBtn');
-            const volumeSlider = document.getElementById('volumeSlider');
-            const volumePercent = document.getElementById('volumePercent');
-            
-            // 工具函数
-            function buildApiUrl(endpoint, params = {}) {
-                const baseParams = {
-                    timestamp: Date.now(),
-                    randomCNIP: true
-                };
-                
-                const allParams = { ...baseParams, ...params };
-                const queryString = new URLSearchParams(allParams).toString();
-                
-                return `${API_BASE}${endpoint}?${queryString}`;
-            }
-            
-            function formatTime(milliseconds) {
-                if (!milliseconds || isNaN(milliseconds)) return "0:00";
-                const seconds = Math.floor(milliseconds / 1000);
-                const mins = Math.floor(seconds / 60);
-                const secs = seconds % 60;
-                return `${mins}:${secs.toString().padStart(2, '0')}`;
-            }
-            
-            function getQualityText(level) {
-                const qualityMap = {
-                    'standard': '标准',
-                    'higher': '较高',
-                    'exhigh': '极高',
-                    'lossless': '无损',
-                    'hires': 'Hi-Res'
-                };
-                return qualityMap[level] || level;
-            }
-            
-            // 更新登录状态显示
-            function updateLoginStatus() {
-                if (userCookie) {
-                    document.getElementById('loginStatus').textContent = '已登录';
-                    document.getElementById('loginStatus').className = 'value online';
-                    document.getElementById('qualityStatus').textContent = '高质量音质';
-                } else {
-                    document.getElementById('loginStatus').textContent = '未登录';
-                    document.getElementById('loginStatus').className = 'value offline';
-                    document.getElementById('qualityStatus').textContent = '标准音质';
-                }
-            }
+            // 更新登录状态
+            updateLoginStatus();
             
             // 检查API状态
-            async function checkAPIStatus() {
-                try {
-                    const url = buildApiUrl('/login/status');
-                    const response = await fetch(url);
-                    
-                    if (response.ok) {
-                        document.getElementById('apiStatus').textContent = '正常';
-                        document.getElementById('apiStatus').className = 'value online';
-                    } else {
-                        document.getElementById('apiStatus').textContent = '异常';
-                        document.getElementById('apiStatus').className = 'value offline';
-                    }
-                } catch (error) {
-                    document.getElementById('apiStatus').textContent = '失败';
-                    document.getElementById('apiStatus').className = 'value offline';
-                }
+            checkAPIStatus();
+            
+            // 设置默认音量
+            document.getElementById('volumeSlider').value = 50;
+        });
+
+        // 初始化播放器
+        function initPlayer() {
+            const audio = new Audio();
+            currentAudio = audio;
+            
+            // DOM元素
+            const playBtn = document.getElementById('playBtn');
+            const playIcon = document.getElementById('playIcon');
+            const progress = document.getElementById('progress');
+            const progressBar = document.getElementById('progressBar');
+            const volumeSlider = document.getElementById('volumeSlider');
+            
+            // 播放/暂停
+            playBtn.addEventListener('click', togglePlay);
+            
+            // 音量控制
+            volumeSlider.addEventListener('input', function() {
+                audio.volume = this.value / 100;
+                document.getElementById('volumePercent').textContent = this.value + '%';
+            });
+            
+            // 进度条控制
+            progressBar.addEventListener('click', function(e) {
+                if (!audio.duration) return;
+                const percent = e.offsetX / this.clientWidth;
+                audio.currentTime = percent * audio.duration;
+            });
+            
+            // 音频事件监听
+            audio.addEventListener('timeupdate', updateProgress);
+            audio.addEventListener('loadedmetadata', function() {
+                document.getElementById('totalTime').textContent = formatTime(audio.duration);
+            });
+            audio.addEventListener('ended', function() {
+                isPlaying = false;
+                playIcon.className = 'fas fa-play';
+                // 播放下一首
+                setTimeout(() => {
+                    playNext();
+                }, 1000);
+            });
+            
+            // 上一首/下一首按钮
+            document.getElementById('prevBtn').addEventListener('click', playPrev);
+            document.getElementById('nextBtn').addEventListener('click', playNext);
+            
+            // 喜欢按钮
+            document.getElementById('likeBtn').addEventListener('click', toggleLike);
+        }
+
+        // 搜索音乐
+        async function searchMusic() {
+            const searchInput = document.getElementById('searchInput');
+            const keywords = searchInput.value.trim();
+            
+            if (!keywords) {
+                alert('请输入搜索关键词');
+                return;
             }
             
-            // 搜索音乐
-            async function searchMusic() {
-                const searchInput = document.getElementById('searchInput');
-                const keywords = searchInput.value.trim();
-                
-                if (!keywords) {
-                    alert('请输入搜索关键词');
-                    return;
-                }
-                
-                const resultsDiv = document.getElementById('searchResults');
-                const resultsList = document.getElementById('searchResultsList');
-                resultsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
-                resultsDiv.style.display = 'block';
-                
-                try {
-                    const params = {
-                        keywords: encodeURIComponent(keywords),
-                        type: 1, // 单曲
-                        limit: 20,
-                        offset: 0
-                    };
-                    
-                    if (userCookie) params.cookie = userCookie;
-                    
-                    const url = buildApiUrl('/cloudsearch', params);
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    
-                    if (data.code === 200 && data.result.songs) {
-                        displaySearchResults(data.result.songs);
-                    } else {
-                        resultsList.innerHTML = '<div style="color: #dc3545; text-align: center; padding: 2rem;">搜索失败：' + (data.message || '未知错误') + '</div>';
-                    }
-                } catch (error) {
-                    resultsList.innerHTML = '<div style="color: #dc3545; text-align: center; padding: 2rem;">网络错误：' + error.message + '</div>';
-                }
-            }
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
+            resultsDiv.style.display = 'block';
             
-            // 显示搜索结果
-            function displaySearchResults(songs) {
-                const resultsList = document.getElementById('searchResultsList');
-                currentPlaylist = songs;
+            try {
+                const params = {
+                    keywords: encodeURIComponent(keywords),
+                    type: 1,
+                    limit: 15,
+                    offset: 0
+                };
                 
-                let html = '';
+                if (userCookie) params.cookie = userCookie;
                 
-                songs.forEach((song, index) => {
-                    const artists = song.ar ? song.ar.map(artist => artist.name).join(', ') : '未知';
-                    const album = song.al ? song.al.name : '未知';
-                    const cover = song.al ? song.al.picUrl : '';
-                    const duration = formatTime(song.dt);
-                    
-                    html += `
-                        <div class="song-item" onclick="window.playSearchResult(${index})" data-id="${song.id}">
-                            <div class="song-cover">
-                                ${cover ? `<img src="${cover}?param=60y60" alt="${song.name}">` : 
-                                          `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-music"></i></div>`}
-                            </div>
-                            <div class="song-info">
-                                <div class="song-title">${song.name}</div>
-                                <div class="song-artist">${artists} - ${album}</div>
-                            </div>
-                            <div class="song-duration">${duration}</div>
-                        </div>
-                    `;
-                });
+                const url = buildApiUrl('/cloudsearch', params);
+                const response = await fetch(url);
+                const data = await response.json();
                 
-                resultsList.innerHTML = html;
-            }
-            
-            // 播放搜索结果
-            async function playSearchResult(index) {
-                const song = currentPlaylist[index];
-                
-                // 更新高亮
-                document.querySelectorAll('#searchResultsList .song-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                event.currentTarget.classList.add('active');
-                
-                // 更新播放器显示
-                trackTitle.textContent = song.name;
-                trackArtist.textContent = song.ar ? song.ar.map(artist => artist.name).join(', ') : '未知';
-                trackAlbum.textContent = '专辑：' + (song.al ? song.al.name : '未知');
-                trackDuration.textContent = '时长：' + formatTime(song.dt);
-                
-                // 更新专辑封面
-                if (song.al && song.al.picUrl) {
-                    albumArt.innerHTML = `<img src="${song.al.picUrl}?param=160y160" alt="${song.name}">`;
+                if (data.code === 200 && data.result.songs) {
+                    displaySearchResults(data.result.songs);
                 } else {
-                    albumArt.innerHTML = '<i class="fas fa-music"></i>';
+                    resultsDiv.innerHTML = '<div style="color: #dc3545; text-align: center; padding: 2rem;">搜索失败：' + (data.message || '未知错误') + '</div>';
                 }
+            } catch (error) {
+                resultsDiv.innerHTML = '<div style="color: #dc3545; text-align: center; padding: 2rem;">网络错误：' + error.message + '</div>';
+            }
+        }
+
+        // 显示搜索结果
+        function displaySearchResults(songs) {
+            const resultsDiv = document.getElementById('searchResults');
+            currentPlaylist = songs;
+            
+            let html = '<h4 style="margin-bottom: 1rem; color: var(--primary-color);">搜索结果 (' + songs.length + ')</h4>';
+            
+            songs.forEach((song, index) => {
+                const artists = song.ar ? song.ar.map(artist => artist.name).join(', ') : '未知';
+                const album = song.al ? song.al.name : '未知';
+                const cover = song.al ? song.al.picUrl : '';
+                const duration = formatTime(song.dt);
                 
-                // 获取播放链接
-                try {
+                html += `
+                    <div class="song-item" onclick="playSearchResult(${index})" data-id="${song.id}">
+                        <div class="song-cover">
+                            ${cover ? `<img src="${cover}?param=50y50" alt="${song.name}" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\"fas fa-music\" style=\"color: var(--text-muted); font-size: 1.2rem;\"></i>'">` : 
+                                      `<i class="fas fa-music" style="color: var(--text-muted); font-size: 1.2rem;"></i>`}
+                        </div>
+                        <div class="song-info">
+                            <div class="song-title">${song.name}</div>
+                            <div class="song-artist">${artists}</div>
+                        </div>
+                        <div class="song-duration">${duration}</div>
+                    </div>
+                `;
+            });
+            
+            resultsDiv.innerHTML = html;
+        }
+
+        // 播放搜索结果
+        async function playSearchResult(index) {
+            const song = currentPlaylist[index];
+            
+            // 更新高亮
+            document.querySelectorAll('#searchResults .song-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // 更新播放器显示
+            document.getElementById('trackTitle').textContent = song.name;
+            document.getElementById('trackArtist').textContent = song.ar ? song.ar.map(artist => artist.name).join(', ') : '未知';
+            document.getElementById('trackAlbum').textContent = '专辑：' + (song.al ? song.al.name : '未知');
+            document.getElementById('trackDuration').textContent = '时长：' + formatTime(song.dt);
+            
+            // 更新专辑封面
+            const albumArt = document.getElementById('albumArt');
+            if (song.al && song.al.picUrl) {
+                albumArt.className = 'album-art';
+                albumArt.innerHTML = `<img src="${song.al.picUrl}?param=200y200" alt="${song.name}" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\"fas fa-music\" style=\"color: var(--primary-color); font-size: 3.5rem;\"></i>'">`;
+            } else {
+                albumArt.className = 'album-art default';
+                albumArt.innerHTML = '<i class="fas fa-music"></i>';
+            }
+            
+            // 获取播放链接
+            try {
+                const params = {
+                    id: song.id,
+                    level: userCookie ? 'exhigh' : 'standard'
+                };
+                
+                if (userCookie) params.cookie = userCookie;
+                
+                const url = buildApiUrl('/song/url/v1', params);
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.code === 200 && data.data && data.data[0].url) {
+                    const songData = data.data[0];
+                    document.getElementById('trackQuality').textContent = '音质：' + getQualityText(songData.level);
+                    
+                    // 播放
+                    currentAudio.src = songData.url;
+                    currentAudio.play().then(() => {
+                        isPlaying = true;
+                        document.getElementById('playIcon').className = 'fas fa-pause';
+                        currentTrackIndex = index;
+                    });
+                } else {
+                    alert('无法播放此歌曲：' + (data.message || '无版权或VIP专享'));
+                }
+            } catch (error) {
+                alert('播放失败：' + error.message);
+            }
+        }
+
+        // 获取推荐音乐
+        async function getRecommendations() {
+            const recDiv = document.getElementById('recommendations');
+            
+            try {
+                const params = {};
+                if (userCookie) params.cookie = userCookie;
+                
+                const url = buildApiUrl('/personalized/newsong', params);
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.code === 200 && data.result) {
+                    displayRecommendations(data.result.slice(0, 10));
+                } else {
+                    getDefaultRecommendations();
+                }
+            } catch (error) {
+                getDefaultRecommendations();
+            }
+        }
+
+        // 显示推荐音乐
+        function displayRecommendations(songs) {
+            const recDiv = document.getElementById('recommendations');
+            
+            let html = '';
+            
+            songs.forEach((song, index) => {
+                const cover = song.picUrl || (song.song && song.song.al && song.song.al.picUrl) || '';
+                const songName = song.name || (song.song && song.song.name) || '未知歌曲';
+                const artist = song.song && song.song.ar ? song.song.ar.map(a => a.name).join(', ') : '未知歌手';
+                const songId = song.id || (song.song && song.song.id);
+                
+                html += `
+                    <div class="song-item" onclick="playRecommendation(${songId})">
+                        <div class="song-cover">
+                            ${cover ? `<img src="${cover}?param=50y50" alt="${songName}" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\"fas fa-music\" style=\"color: var(--text-muted); font-size: 1.2rem;\"></i>'">` : 
+                                      `<i class="fas fa-music" style="color: var(--text-muted); font-size: 1.2rem;"></i>`}
+                        </div>
+                        <div class="song-info">
+                            <div class="song-title">${songName}</div>
+                            <div class="song-artist">${artist}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            recDiv.innerHTML = html;
+        }
+
+        // 默认推荐列表
+        function getDefaultRecommendations() {
+            const recDiv = document.getElementById('recommendations');
+            
+            const defaultSongs = [
+                { id: 33894312, name: "起风了", artist: "买辣椒也用券" },
+                { id: 1330348068, name: "沈园外", artist: "阿YueYue,戾格,小田音乐社" },
+                { id: 1441758494, name: "如愿", artist: "王菲" },
+                { id: 1901371647, name: "雪 Distance", artist: "Capper,罗言RollFlash" },
+                { id: 1974443814, name: "我会等", artist: "承桓" },
+                { id: 202373, name: "晴天", artist: "周杰伦" },
+                { id: 65528, name: "江南", artist: "林俊杰" },
+                { id: 108478, name: "泡沫", artist: "G.E.M.邓紫棋" }
+            ];
+            
+            let html = '';
+            
+            defaultSongs.forEach((song) => {
+                html += `
+                    <div class="song-item" onclick="playSongById(${song.id})">
+                        <div class="song-cover">
+                            <i class="fas fa-music" style="color: var(--text-muted); font-size: 1.2rem;"></i>
+                        </div>
+                        <div class="song-info">
+                            <div class="song-title">${song.name}</div>
+                            <div class="song-artist">${song.artist}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            recDiv.innerHTML = html;
+        }
+
+        // 通过ID播放歌曲
+        async function playSongById(songId) {
+            try {
+                // 获取歌曲详情
+                const songUrl = buildApiUrl('/song/detail', { ids: songId });
+                const songResponse = await fetch(songUrl);
+                const songData = await songResponse.json();
+                
+                if (songData.code === 200 && songData.songs[0]) {
+                    const song = songData.songs[0];
+                    
+                    // 更新播放器显示
+                    document.getElementById('trackTitle').textContent = song.name;
+                    document.getElementById('trackArtist').textContent = song.ar ? song.ar.map(artist => artist.name).join(', ') : '未知';
+                    document.getElementById('trackAlbum').textContent = '专辑：' + (song.al ? song.al.name : '未知');
+                    document.getElementById('trackDuration').textContent = '时长：' + formatTime(song.dt);
+                    
+                    // 更新专辑封面
+                    const albumArt = document.getElementById('albumArt');
+                    if (song.al && song.al.picUrl) {
+                        albumArt.className = 'album-art';
+                        albumArt.innerHTML = `<img src="${song.al.picUrl}?param=200y200" alt="${song.name}" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\"fas fa-music\" style=\"color: var(--primary-color); font-size: 3.5rem;\"></i>'">`;
+                    } else {
+                        albumArt.className = 'album-art default';
+                        albumArt.innerHTML = '<i class="fas fa-music"></i>';
+                    }
+                    
+                    // 获取播放链接
                     const params = {
-                        id: song.id,
+                        id: songId,
                         level: userCookie ? 'exhigh' : 'standard'
                     };
                     
@@ -977,549 +1270,193 @@
                     const data = await response.json();
                     
                     if (data.code === 200 && data.data && data.data[0].url) {
-                        const songData = data.data[0];
-                        trackQuality.textContent = '音质：' + getQualityText(songData.level);
+                        const audioData = data.data[0];
+                        document.getElementById('trackQuality').textContent = '音质：' + getQualityText(audioData.level);
                         
                         // 播放
-                        currentAudio.src = songData.url;
+                        currentAudio.src = audioData.url;
                         currentAudio.play().then(() => {
                             isPlaying = true;
-                            playIcon.className = 'fas fa-pause';
-                            currentSongData = song;
-                            currentTrackIndex = index;
+                            document.getElementById('playIcon').className = 'fas fa-pause';
                         });
-                    } else {
-                        alert('无法播放此歌曲：' + (data.message || '无版权或VIP专享'));
                     }
-                } catch (error) {
-                    alert('播放失败：' + error.message);
                 }
+            } catch (error) {
+                alert('播放失败：' + error.message);
+            }
+        }
+
+        // 播放推荐歌曲
+        function playRecommendation(songId) {
+            playSongById(songId);
+        }
+
+        // 播放/暂停
+        function togglePlay() {
+            if (!currentAudio.src) {
+                const firstSong = document.querySelector('#recommendations .song-item');
+                if (firstSong) {
+                    const songId = firstSong.getAttribute('onclick').match(/\d+/)[0];
+                    playSongById(songId);
+                }
+                return;
             }
             
-            // 获取推荐音乐
-            async function getRecommendations() {
-                const recList = document.getElementById('recommendationsList');
-                recList.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
-                
-                try {
-                    const params = {};
-                    if (userCookie) params.cookie = userCookie;
-                    
-                    const url = buildApiUrl('/personalized/newsong', params);
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    
-                    if (data.code === 200 && data.result) {
-                        displayRecommendations(data.result.slice(0, 10));
-                    } else {
-                        getDefaultRecommendations();
-                    }
-                } catch (error) {
-                    getDefaultRecommendations();
-                }
-            }
-            
-            // 显示推荐音乐
-            function displayRecommendations(songs) {
-                const recList = document.getElementById('recommendationsList');
-                
-                let html = '';
-                
-                songs.forEach((song, index) => {
-                    const cover = song.picUrl || (song.song && song.song.al && song.song.al.picUrl) || '';
-                    const songName = song.name || (song.song && song.song.name) || '未知歌曲';
-                    const artist = song.song && song.song.ar ? song.song.ar.map(a => a.name).join(', ') : '未知歌手';
-                    const songId = song.id || (song.song && song.song.id);
-                    
-                    html += `
-                        <div class="song-item" onclick="window.playRecommendation(${songId})">
-                            <div class="song-cover">
-                                ${cover ? `<img src="${cover}?param=60y60" alt="${songName}">` : 
-                                          `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-music"></i></div>`}
-                            </div>
-                            <div class="song-info">
-                                <div class="song-title">${songName}</div>
-                                <div class="song-artist">${artist}</div>
-                            </div>
-                        </div>
-                    `;
+            if (isPlaying) {
+                currentAudio.pause();
+                document.getElementById('playIcon').className = 'fas fa-play';
+            } else {
+                currentAudio.play().then(() => {
+                    document.getElementById('playIcon').className = 'fas fa-pause';
                 });
-                
-                recList.innerHTML = html;
+            }
+            isPlaying = !isPlaying;
+        }
+
+        // 播放上一首
+        function playPrev() {
+            if (currentPlaylist.length === 0) return;
+            
+            currentTrackIndex--;
+            if (currentTrackIndex < 0) {
+                currentTrackIndex = currentPlaylist.length - 1;
             }
             
-            // 默认推荐列表（备用）
-            function getDefaultRecommendations() {
-                const recList = document.getElementById('recommendationsList');
-                
-                const defaultSongs = [
-                    { id: 33894312, name: "起风了", artist: "买辣椒也用券" },
-                    { id: 1330348068, name: "沈园外", artist: "阿YueYue,戾格,小田音乐社" },
-                    { id: 1441758494, name: "如愿", artist: "王菲" },
-                    { id: 1901371647, name: "雪 Distance", artist: "Capper,罗言RollFlash" },
-                    { id: 1974443814, name: "我会等", artist: "承桓" },
-                    { id: 202373, name: "晴天", artist: "周杰伦" },
-                    { id: 65528, name: "江南", artist: "林俊杰" },
-                    { id: 108478, name: "泡沫", artist: "G.E.M.邓紫棋" }
-                ];
-                
-                let html = '';
-                
-                defaultSongs.forEach((song, index) => {
-                    html += `
-                        <div class="song-item" onclick="window.playSongById(${song.id})">
-                            <div class="song-cover">
-                                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-music"></i></div>
-                            </div>
-                            <div class="song-info">
-                                <div class="song-title">${song.name}</div>
-                                <div class="song-artist">${song.artist}</div>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                recList.innerHTML = html;
+            const song = currentPlaylist[currentTrackIndex];
+            if (song && song.id) {
+                playSongById(song.id);
+            }
+        }
+
+        // 播放下一首
+        function playNext() {
+            if (currentPlaylist.length === 0) return;
+            
+            currentTrackIndex++;
+            if (currentTrackIndex >= currentPlaylist.length) {
+                currentTrackIndex = 0;
             }
             
-            // 通过ID播放歌曲
-            async function playSongById(songId) {
-                try {
-                    // 获取歌曲详情
-                    const songUrl = buildApiUrl('/song/detail', { ids: songId });
-                    const songResponse = await fetch(songUrl);
-                    const songData = await songResponse.json();
-                    
-                    if (songData.code === 200 && songData.songs[0]) {
-                        const song = songData.songs[0];
-                        
-                        // 更新播放器显示
-                        trackTitle.textContent = song.name;
-                        trackArtist.textContent = song.ar ? song.ar.map(artist => artist.name).join(', ') : '未知';
-                        trackAlbum.textContent = '专辑：' + (song.al ? song.al.name : '未知');
-                        trackDuration.textContent = '时长：' + formatTime(song.dt);
-                        
-                        // 更新专辑封面
-                        if (song.al && song.al.picUrl) {
-                            albumArt.innerHTML = `<img src="${song.al.picUrl}?param=160y160" alt="${song.name}">`;
-                        } else {
-                            albumArt.innerHTML = '<i class="fas fa-music"></i>';
-                        }
-                        
-                        // 获取播放链接
-                        const params = {
-                            id: songId,
-                            level: userCookie ? 'exhigh' : 'standard'
-                        };
-                        
-                        if (userCookie) params.cookie = userCookie;
-                        
-                        const url = buildApiUrl('/song/url/v1', params);
-                        const response = await fetch(url);
-                        const data = await response.json();
-                        
-                        if (data.code === 200 && data.data && data.data[0].url) {
-                            const audioData = data.data[0];
-                            trackQuality.textContent = '音质：' + getQualityText(audioData.level);
-                            
-                            // 播放
-                            currentAudio.src = audioData.url;
-                            currentAudio.play().then(() => {
-                                isPlaying = true;
-                                playIcon.className = 'fas fa-pause';
-                                currentSongData = song;
-                            });
-                        }
-                    }
-                } catch (error) {
-                    alert('播放失败：' + error.message);
-                }
+            const song = currentPlaylist[currentTrackIndex];
+            if (song && song.id) {
+                playSongById(song.id);
             }
-            
-            // 播放推荐歌曲
-            async function playRecommendation(songId) {
-                await playSongById(songId);
+        }
+
+        // 切换喜欢状态
+        function toggleLike() {
+            const likeBtn = document.getElementById('likeBtn');
+            if (likeBtn.querySelector('.fas.fa-heart')) {
+                likeBtn.innerHTML = '<i class="far fa-heart"></i>';
+            } else {
+                likeBtn.innerHTML = '<i class="fas fa-heart" style="color: var(--primary-color);"></i>';
             }
+        }
+
+        // 更新进度条
+        function updateProgress() {
+            if (!currentAudio.duration) return;
             
-            // 播放/暂停
-            function togglePlay() {
-                if (!currentAudio.src) {
-                    // 如果没有歌曲，播放第一首推荐
-                    const firstSong = document.querySelector('#recommendationsList .song-item');
-                    if (firstSong) {
-                        const onclickAttr = firstSong.getAttribute('onclick');
-                        const match = onclickAttr.match(/play(?:SongById|Recommendation)\((\d+)\)/);
-                        if (match) {
-                            playSongById(match[1]);
-                        }
-                    }
-                    return;
-                }
-                
-                if (isPlaying) {
-                    currentAudio.pause();
-                    playIcon.className = 'fas fa-play';
-                } else {
-                    currentAudio.play().then(() => {
-                        playIcon.className = 'fas fa-pause';
-                    });
-                }
-                isPlaying = !isPlaying;
+            const progressPercent = (currentAudio.currentTime / currentAudio.duration) * 100;
+            document.getElementById('progress').style.width = progressPercent + '%';
+            document.getElementById('currentTime').textContent = formatTime(currentAudio.currentTime);
+        }
+
+        // 工具函数
+        function buildApiUrl(endpoint, params = {}) {
+            const baseParams = {
+                timestamp: Date.now()
+            };
+            
+            const allParams = { ...baseParams, ...params };
+            const queryString = new URLSearchParams(allParams).toString();
+            
+            return `${API_BASE}${endpoint}?${queryString}`;
+        }
+
+        function formatTime(milliseconds) {
+            const seconds = Math.floor(milliseconds / 1000);
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function getQualityText(level) {
+            const qualityMap = {
+                'standard': '标准',
+                'higher': '较高',
+                'exhigh': '极高',
+                'lossless': '无损',
+                'hires': 'Hi-Res'
+            };
+            return qualityMap[level] || level;
+        }
+
+        // 登录相关功能
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+
+        function hideLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        async function startQRLogin() {
+            hideLoginModal();
+            alert('二维码登录功能需要连接网易云官方API，请在实际部署时启用');
+        }
+
+        // 更新登录状态
+        function updateLoginStatus() {
+            const savedCookie = localStorage.getItem('netease_cookie');
+            if (savedCookie) {
+                userCookie = savedCookie;
+                document.getElementById('loginStatus').textContent = '已登录';
+                document.getElementById('loginStatus').style.color = '#28a745';
+                document.getElementById('qualityStatus').textContent = '高质量音质';
+                document.getElementById('qualityStatus').style.color = '#28a745';
+            } else {
+                userCookie = null;
+                document.getElementById('loginStatus').textContent = '未登录';
+                document.getElementById('loginStatus').style.color = '#dc3545';
+                document.getElementById('qualityStatus').textContent = '标准音质';
+                document.getElementById('qualityStatus').style.color = '#ffc107';
             }
-            
-            // 播放上一首
-            function playPrev() {
-                if (currentPlaylist.length === 0) return;
-                
-                currentTrackIndex--;
-                if (currentTrackIndex < 0) {
-                    currentTrackIndex = currentPlaylist.length - 1;
-                }
-                
-                const song = currentPlaylist[currentTrackIndex];
-                if (song && song.id) {
-                    playSongById(song.id);
-                }
+        }
+
+        async function checkLoginStatus() {
+            if (!userCookie) {
+                alert('当前未登录');
+                return;
             }
-            
-            // 播放下一首
-            function playNext() {
-                if (currentPlaylist.length === 0) return;
-                
-                currentTrackIndex++;
-                if (currentTrackIndex >= currentPlaylist.length) {
-                    currentTrackIndex = 0;
-                }
-                
-                const song = currentPlaylist[currentTrackIndex];
-                if (song && song.id) {
-                    playSongById(song.id);
-                }
+            alert('登录状态正常');
+        }
+
+        // 检查API状态
+        async function checkAPIStatus() {
+            try {
+                const url = buildApiUrl('/login/status');
+                await fetch(url);
+                document.getElementById('apiStatus').textContent = '正常';
+                document.getElementById('apiStatus').style.color = '#28a745';
+            } catch (error) {
+                document.getElementById('apiStatus').textContent = '异常';
+                document.getElementById('apiStatus').style.color = '#dc3545';
             }
-            
-            // 切换喜欢状态
-            function toggleLike() {
-                if (likeBtn.querySelector('.fas.fa-heart')) {
-                    likeBtn.innerHTML = '<i class="far fa-heart"></i>';
-                } else {
-                    likeBtn.innerHTML = '<i class="fas fa-heart" style="color: #e60026;"></i>';
-                }
+        }
+
+        // 其他功能
+        function getPersonalized() {
+            if (!userCookie) {
+                alert('个性化推荐需要登录后使用');
+                showLoginModal();
+                return;
             }
-            
-            // 更新进度条
-            function updateProgress() {
-                if (!currentAudio.duration) return;
-                
-                const progressPercent = (currentAudio.currentTime / currentAudio.duration) * 100;
-                progress.style.width = progressPercent + '%';
-                currentTimeEl.textContent = formatTime(currentAudio.currentTime * 1000);
-            }
-            
-            // 跳转到指定播放位置
-            function seekToPosition(e) {
-                if (!currentAudio.duration) return;
-                
-                const progressBarWidth = progressBar.clientWidth;
-                const clickPosition = e.offsetX;
-                const duration = currentAudio.duration;
-                const seekTime = (clickPosition / progressBarWidth) * duration;
-                
-                currentAudio.currentTime = seekTime;
-                progress.style.width = `${(clickPosition / progressBarWidth) * 100}%`;
-            }
-            
-            // 设置音量
-            function setVolume(value) {
-                const volume = value / 100;
-                currentAudio.volume = volume;
-                volumePercent.textContent = `${value}%`;
-            }
-            
-            // 事件监听器
-            playBtn.addEventListener('click', togglePlay);
-            prevBtn.addEventListener('click', playPrev);
-            nextBtn.addEventListener('click', playNext);
-            likeBtn.addEventListener('click', toggleLike);
-            
-            volumeSlider.addEventListener('input', function() {
-                setVolume(this.value);
-            });
-            
-            progressBar.addEventListener('click', function(e) {
-                seekToPosition(e);
-            });
-            
-            // 音频事件监听
-            currentAudio.addEventListener('timeupdate', updateProgress);
-            currentAudio.addEventListener('loadedmetadata', function() {
-                totalTimeEl.textContent = formatTime(currentAudio.duration * 1000);
-            });
-            currentAudio.addEventListener('ended', function() {
-                isPlaying = false;
-                playIcon.className = 'fas fa-play';
-                // 播放下一首
-                setTimeout(() => {
-                    playNext();
-                }, 1000);
-            });
-            
-            // 拖拽进度条
-            progressBar.addEventListener('mousedown', function(e) {
-                const isSeeking = true;
-                seekToPosition(e);
-                
-                const mouseMoveHandler = function(e) {
-                    if (!isSeeking) return;
-                    const rect = progressBar.getBoundingClientRect();
-                    const offsetX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-                    const progressPercent = (offsetX / rect.width) * 100;
-                    progress.style.width = `${progressPercent}%`;
-                };
-                
-                const mouseUpHandler = function() {
-                    if (currentAudio.duration) {
-                        const rect = progressBar.getBoundingClientRect();
-                        const offsetX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-                        const seekTime = (offsetX / rect.width) * currentAudio.duration;
-                        currentAudio.currentTime = seekTime;
-                    }
-                    document.removeEventListener('mousemove', mouseMoveHandler);
-                    document.removeEventListener('mouseup', mouseUpHandler);
-                };
-                
-                document.addEventListener('mousemove', mouseMoveHandler);
-                document.addEventListener('mouseup', mouseUpHandler);
-            });
-            
-            // 公开函数供全局调用
-            window.playSearchResult = playSearchResult;
-            window.playSongById = playSongById;
-            window.playRecommendation = playRecommendation;
-            window.searchMusic = searchMusic;
-            window.getRecommendations = getRecommendations;
-            window.getPersonalized = getPersonalized;
-            window.getTopList = getTopList;
-            window.showLoginModal = showLoginModal;
-            window.checkLoginStatus = checkLoginStatus;
-            window.openQRLogin = openQRLogin;
-            
-            // 初始化
-            setVolume(volumeSlider.value);
-            getRecommendations();
-            checkAPIStatus();
-            
-            // 其他功能函数
-            async function getPersonalized() {
-                if (!userCookie) {
-                    alert('个性化推荐需要登录后使用');
-                    showLoginModal();
-                    return;
-                }
-                
-                try {
-                    const url = buildApiUrl('/recommend/songs', { cookie: userCookie });
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    
-                    if (data.code === 200 && data.data.dailySongs) {
-                        displayRecommendations(data.data.dailySongs.slice(0, 10));
-                    } else {
-                        getRecommendations();
-                    }
-                } catch (error) {
-                    getRecommendations();
-                }
-            }
-            
-            async function getTopList() {
-                try {
-                    const url = buildApiUrl('/toplist');
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    
-                    if (data.code === 200 && data.list) {
-                        // 显示第一个排行榜
-                        const listId = data.list[0]?.id;
-                        if (listId) {
-                            const listUrl = buildApiUrl('/playlist/detail', { id: listId });
-                            const listResponse = await fetch(listUrl);
-                            const listData = await listResponse.json();
-                            
-                            if (listData.code === 200 && listData.playlist.tracks) {
-                                currentPlaylist = listData.playlist.tracks;
-                                displaySearchResults(listData.playlist.tracks.slice(0, 10));
-                                document.getElementById('searchResults').style.display = 'block';
-                                document.getElementById('searchResults').querySelector('h4').textContent = data.list[0].name + ' 排行榜';
-                            }
-                        }
-                    }
-                } catch (error) {
-                    alert('获取排行榜失败：' + error.message);
-                }
-            }
-            
-            function showLoginModal() {
-                alert('登录功能：\n1. 请点击"扫码登录"按钮\n2. 使用网易云音乐APP扫描二维码\n3. 登录后即可享受高质量音质和个性化推荐');
-            }
-            
-            async function checkLoginStatus() {
-                if (!userCookie) {
-                    alert('当前未登录');
-                    return;
-                }
-                
-                try {
-                    const url = buildApiUrl('/login/status', { cookie: userCookie });
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    
-                    if (data.code === 200 && data.data.profile) {
-                        alert(`登录状态正常\n用户: ${data.data.profile.nickname}\nVIP: ${data.data.profile.vipType ? '是' : '否'}`);
-                        updateLoginStatus();
-                    } else {
-                        alert('登录状态已过期');
-                        localStorage.removeItem('netease_cookie');
-                        userCookie = null;
-                        updateLoginStatus();
-                    }
-                } catch (error) {
-                    alert('检查失败：' + error.message);
-                }
-            }
-            
-            async function openQRLogin() {
-                try {
-                    // 获取二维码key
-                    const keyUrl = buildApiUrl('/login/qr/key');
-                    const keyResponse = await fetch(keyUrl);
-                    const keyData = await keyResponse.json();
-                    
-                    if (keyData.code !== 200) {
-                        throw new Error('获取二维码失败');
-                    }
-                    
-                    const qrKey = keyData.data.unikey;
-                    
-                    // 生成二维码
-                    const qrUrl = buildApiUrl('/login/qr/create', { 
-                        key: qrKey, 
-                        qrimg: true 
-                    });
-                    const qrResponse = await fetch(qrUrl);
-                    const qrData = await qrResponse.json();
-                    
-                    if (qrData.code !== 200) {
-                        throw new Error('生成二维码失败');
-                    }
-                    
-                    // 显示二维码
-                    const qrWindow = window.open('', '网易云音乐扫码登录', 'width=400,height=550');
-                    qrWindow.document.write(`
-                        <html>
-                        <head>
-                            <title>网易云音乐 - 扫码登录</title>
-                            <style>
-                                body { 
-                                    font-family: 'Inter', sans-serif; 
-                                    padding: 20px; 
-                                    text-align: center; 
-                                    background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
-                                    color: white;
-                                    margin: 0;
-                                }
-                                .container { 
-                                    max-width: 360px; 
-                                    margin: 0 auto; 
-                                    padding: 30px 20px; 
-                                }
-                                h3 { 
-                                    color: #e60026; 
-                                    margin-bottom: 20px; 
-                                }
-                                img { 
-                                    max-width: 300px; 
-                                    margin: 20px 0; 
-                                    border-radius: 15px;
-                                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                                }
-                                .status { 
-                                    color: rgba(255,255,255,0.7); 
-                                    margin: 15px 0; 
-                                    font-size: 0.9rem;
-                                }
-                                .instructions {
-                                    background: rgba(255,255,255,0.05);
-                                    border-radius: 10px;
-                                    padding: 15px;
-                                    margin: 20px 0;
-                                    font-size: 0.85rem;
-                                    line-height: 1.6;
-                                }
-                                button {
-                                    background: linear-gradient(135deg, #e60026, #ff2d55);
-                                    color: white;
-                                    border: none;
-                                    padding: 10px 20px;
-                                    border-radius: 25px;
-                                    cursor: pointer;
-                                    font-family: inherit;
-                                    font-weight: 600;
-                                    margin-top: 10px;
-                                }
-                                button:hover {
-                                    transform: translateY(-2px);
-                                    box-shadow: 0 5px 15px rgba(230,0,38,0.3);
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <div class="container">
-                                <h3><i class="fas fa-music"></i> 网易云音乐扫码登录</h3>
-                                <img src="${qrData.data.qrimg}" alt="登录二维码">
-                                <div class="instructions">
-                                    1. 打开网易云音乐APP<br>
-                                    2. 点击右上角"扫一扫"<br>
-                                    3. 扫描上方二维码登录
-                                </div>
-                                <p class="status">请使用网易云音乐APP扫码登录</p>
-                                <p><small>扫码后自动登录，窗口将自动关闭</small></p>
-                                <button onclick="window.close()">关闭窗口</button>
-                            </div>
-                        </body>
-                        </html>
-                    `);
-                    
-                    // 轮询登录状态
-                    const checkInterval = setInterval(async () => {
-                        try {
-                            const checkUrl = buildApiUrl('/login/qr/check', { key: qrKey });
-                            const checkResponse = await fetch(checkUrl);
-                            const checkData = await checkResponse.json();
-                            
-                            if (checkData.code === 803) {
-                                // 登录成功
-                                clearInterval(checkInterval);
-                                userCookie = checkData.cookie;
-                                localStorage.setItem('netease_cookie', userCookie);
-                                qrWindow.close();
-                                
-                                updateLoginStatus();
-                                alert('登录成功！');
-                                getRecommendations(); // 刷新推荐
-                            } else if (checkData.code === 800) {
-                                clearInterval(checkInterval);
-                                alert('二维码已过期，请重新扫描');
-                                qrWindow.close();
-                            }
-                        } catch (error) {
-                            console.error('检查登录状态失败:', error);
-                        }
-                    }, 2000);
-                    
-                } catch (error) {
-                    alert('登录失败：' + error.message);
-                }
-            }
+            alert('个性化推荐功能需要登录后使用');
+        }
+
+        function getTopList() {
+            alert('排行榜功能正在开发中...');
         }
     </script>
 </body>
