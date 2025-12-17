@@ -10,8 +10,35 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-music"></i> 网易云音乐API测试</h1>
-            <p>二维码登录 → 获取高质量音乐URL</p>
+            <h1><i class="fas fa-music"></i> 网易云音乐API测试 (Vercel部署版)</h1>
+            <p>已适配Vercel部署规范，解决海外IP限制问题</p>
+        </div>
+
+        <!-- API配置 -->
+        <div class="card" style="background: #e9ecef; margin-bottom: 20px;">
+            <h2><i class="fas fa-cog"></i> API配置</h2>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">API地址:</label>
+                    <input type="text" id="apiBaseInput" value="https://neteasecloudmusicapi-xxxx.vercel.app" 
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-family: monospace;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">IP参数:</label>
+                    <select id="ipMethod" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                        <option value="randomCNIP">randomCNIP=true</option>
+                        <option value="realIP">realIP=中国IP</option>
+                    </select>
+                </div>
+                <div>
+                    <button onclick="updateApiConfig()" style="padding: 8px 15px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px;">
+                        应用配置
+                    </button>
+                </div>
+            </div>
+            <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                <p>注意：Vercel部署必须添加IP参数解决海外IP限制问题</p>
+            </div>
         </div>
 
         <!-- 登录状态显示 -->
@@ -133,7 +160,17 @@
             
             <div style="margin-bottom: 15px;">
                 <label style="display: block; margin-bottom: 5px; font-weight: bold;">播放音乐ID:</label>
-                <input type="text" id="playSongId" placeholder="输入音乐ID进行播放" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                <input type="text" id="playSongId" placeholder="输入音乐ID进行播放" value="33894312" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">音质选择:</label>
+                <select id="qualityLevel" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    <option value="standard">标准</option>
+                    <option value="higher" selected>较高</option>
+                    <option value="exhigh">极高</option>
+                    <option value="lossless">无损</option>
+                </select>
             </div>
             
             <div class="button-group" style="display: flex; gap: 10px; margin-bottom: 15px;">
@@ -143,6 +180,9 @@
                 <button onclick="stopAudio()" id="stopBtn" style="flex: 1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
                     <i class="fas fa-stop"></i> 停止播放
                 </button>
+                <button onclick="testApiDirectly()" style="flex: 1; padding: 12px; background: #17a2b8; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-vial"></i> 测试接口
+                </button>
             </div>
             
             <div id="audioPlayerContainer" style="display: none; margin-top: 20px;">
@@ -151,26 +191,19 @@
                 <audio id="audioPlayer" controls style="width: 100%;"></audio>
                 <div id="audioInfo" style="margin-top: 10px; font-size: 12px; color: #666;"></div>
             </div>
-        </div>
-
-        <!-- API信息 -->
-        <div class="card">
-            <h2><i class="fas fa-info-circle"></i> 接口说明</h2>
-            <div style="line-height: 1.8;">
-                <p><strong>API地址:</strong> <code id="currentApiBase">https://neteaseapi-enhanced.vercel.app</code></p>
-                <p><strong>二维码登录:</strong> /login/qr/key → /login/qr/create → /login/qr/check</p>
-                <p><strong>游客登录:</strong> /register/anonimous</p>
-                <p><strong>音乐URL获取:</strong> /song/url/v1 (需要登录获取高质量音质)</p>
-                <p><strong>搜索功能:</strong> /cloudsearch</p>
-                <p><strong>注意:</strong> 所有请求已添加 randomCNIP=true 参数解决海外IP限制</p>
+            
+            <div id="apiTestResult" style="display: none; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+                <h4><i class="fas fa-code"></i> 接口测试结果</h4>
+                <pre id="apiResponse" style="font-size: 12px; max-height: 300px; overflow: auto; background: white; padding: 10px; border-radius: 5px;"></pre>
             </div>
         </div>
     </div>
 
     <script>
-        // API基础地址 - 请确保这里是你Vercel部署的正确地址
-        const API_BASE = 'https://neteaseapi-enhanced.vercel.app'; // 请修改为你的Vercel地址
-        document.getElementById('currentApiBase').textContent = API_BASE;
+        // 全局配置
+        let API_BASE = 'https://neteasecloudmusicapi-xxxx.vercel.app'; // 请修改为你的Vercel地址
+        let IP_METHOD = 'randomCNIP'; // randomCNIP 或 realIP
+        let REAL_IP = '116.25.146.177'; // 备用中国IP
         
         let currentAudio = null;
         let searchResults = [];
@@ -178,22 +211,102 @@
         let currentQRKey = null;
         let currentCookie = null;
 
-        // 构建API URL的辅助函数 - 自动添加时间戳和randomCNIP参数
-        function buildApiUrl(endpoint, params = {}) {
-            // 确保所有请求都带上时间戳和中国IP参数
-            const baseParams = `timestamp=${Date.now()}&randomCNIP=true`;
-            const queryParams = new URLSearchParams(params).toString();
+        // 初始化配置
+        document.getElementById('apiBaseInput').value = API_BASE;
+        document.getElementById('ipMethod').value = IP_METHOD;
+
+        // 更新API配置
+        function updateApiConfig() {
+            API_BASE = document.getElementById('apiBaseInput').value;
+            IP_METHOD = document.getElementById('ipMethod').value;
+            alert('API配置已更新:\n' + API_BASE + '\nIP参数: ' + IP_METHOD);
+        }
+
+        // 构建API URL - 遵循Vercel部署规范
+        function buildApiUrl(endpoint, params = {}, useV1 = false) {
+            const timestamp = Date.now();
+            let url = `${API_BASE}${endpoint}?timestamp=${timestamp}`;
             
-            if (queryParams) {
-                return `${API_BASE}${endpoint}?${baseParams}&${queryParams}`;
-            } else {
-                return `${API_BASE}${endpoint}?${baseParams}`;
+            // 添加IP参数（Vercel部署必需）
+            if (IP_METHOD === 'randomCNIP') {
+                url += '&randomCNIP=true';
+            } else if (IP_METHOD === 'realIP') {
+                url += `&realIP=${REAL_IP}`;
+            }
+            
+            // 添加其他参数
+            if (params) {
+                Object.keys(params).forEach(key => {
+                    if (params[key] !== undefined && params[key] !== null) {
+                        url += `&${key}=${encodeURIComponent(params[key])}`;
+                    }
+                });
+            }
+            
+            return url;
+        }
+
+        // 直接测试API接口
+        async function testApiDirectly() {
+            const songId = document.getElementById('playSongId').value.trim() || '33894312';
+            const quality = document.getElementById('qualityLevel').value;
+            
+            // 测试两种接口
+            const testUrls = [
+                buildApiUrl('/song/url', { id: songId, br: 320000 }),
+                buildApiUrl('/song/url/v1', { id: songId, level: quality })
+            ];
+            
+            const apiResponse = document.getElementById('apiResponse');
+            apiResponse.innerHTML = '正在测试接口...';
+            document.getElementById('apiTestResult').style.display = 'block';
+            
+            try {
+                let results = [];
+                
+                for (let i = 0; i < testUrls.length; i++) {
+                    const url = testUrls[i];
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    results.push({
+                        url: url,
+                        status: response.status,
+                        data: data
+                    });
+                }
+                
+                // 显示结果
+                let html = '';
+                results.forEach((result, index) => {
+                    const interfaceName = index === 0 ? '旧版 /song/url' : '新版 /song/url/v1';
+                    html += `<div style="margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+                        <strong>${interfaceName}</strong><br>
+                        <small>URL: ${result.url}</small><br>
+                        <small>状态码: ${result.status}</small><br>
+                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; margin-top: 5px; max-height: 200px; overflow: auto;">${JSON.stringify(result.data, null, 2)}</pre>
+                    </div>`;
+                });
+                
+                apiResponse.innerHTML = html;
+                
+                // 提示使用哪个接口
+                if (results[0].data.code === 200 && results[0].data.data) {
+                    alert('建议使用旧版 /song/url 接口，返回正常！');
+                } else if (results[1].data.code === 200 && results[1].data.data) {
+                    alert('建议使用新版 /song/url/v1 接口，返回正常！');
+                } else {
+                    alert('两个接口都测试失败，请检查API配置');
+                }
+                
+            } catch (error) {
+                apiResponse.innerHTML = `<div style="color: #dc3545;">测试失败: ${error.message}</div>`;
             }
         }
 
         // 页面加载时检查登录状态
         window.addEventListener('load', function() {
-            console.log('音乐API测试页面已加载');
+            console.log('音乐API测试页面已加载 (Vercel适配版)');
             
             // 检查本地存储的Cookie
             const savedCookie = localStorage.getItem('netease_cookie');
@@ -470,7 +583,7 @@
             searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 搜索中...';
             
             try {
-                // 构建请求URL - 使用辅助函数自动添加参数
+                // 构建请求URL
                 const params = {
                     keywords: encodeURIComponent(keywords),
                     type: searchType,
@@ -561,9 +674,10 @@
             await playSelectedSong(songName);
         }
 
-        // 播放选中的歌曲
+        // 播放选中的歌曲 - 兼容新旧版接口
         async function playSelectedSong(predefinedName) {
             const songId = document.getElementById('playSongId').value.trim();
+            const quality = document.getElementById('qualityLevel').value;
             const playBtn = document.getElementById('playBtn');
             
             if (!songId) {
@@ -575,18 +689,18 @@
             playBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 获取URL中...';
             
             try {
-                // 构建请求URL - 使用辅助函数自动添加参数
-                const params = {
+                // 优先尝试旧版接口（根据文档推荐）
+                const paramsV1 = {
                     id: songId,
-                    level: 'exhigh'
+                    level: quality
                 };
                 
                 // 如果有Cookie，添加到请求中（获取高质量音质必需）
                 if (currentCookie) {
-                    params.cookie = currentCookie;
+                    paramsV1.cookie = currentCookie;
                 }
                 
-                const url = buildApiUrl('/song/url/v1', params);
+                const url = buildApiUrl('/song/url/v1', paramsV1);
                 const response = await fetch(url);
                 const data = await response.json();
                 
@@ -598,10 +712,12 @@
                     if (song.url && song.url.startsWith('http') && song.code !== 404) {
                         playSong(songId, song.url, songName, song.br, song.size);
                     } else {
-                        alert(`无法播放此歌曲\n可能原因：需要VIP、无版权或地区限制\n当前登录状态: ${currentCookie ? '已登录' : '未登录'}`);
+                        // 如果新版接口失败，尝试旧版接口
+                        await tryOldVersion(songId, predefinedName);
                     }
                 } else {
-                    alert(`无法获取歌曲URL: ${data.message || '未知错误'}\n当前登录状态: ${currentCookie ? '已登录' : '未登录'}`);
+                    // 如果新版接口失败，尝试旧版接口
+                    await tryOldVersion(songId, predefinedName);
                 }
                 
             } catch (error) {
@@ -609,6 +725,39 @@
             } finally {
                 playBtn.disabled = false;
                 playBtn.innerHTML = '<i class="fas fa-play"></i> 播放音乐';
+            }
+        }
+
+        // 尝试使用旧版接口
+        async function tryOldVersion(songId, predefinedName) {
+            try {
+                const paramsOld = {
+                    id: songId,
+                    br: 320000
+                };
+                
+                if (currentCookie) {
+                    paramsOld.cookie = currentCookie;
+                }
+                
+                const urlOld = buildApiUrl('/song/url', paramsOld);
+                const responseOld = await fetch(urlOld);
+                const dataOld = await responseOld.json();
+                
+                if (dataOld.code === 200 && dataOld.data && dataOld.data[0] && dataOld.data[0].url) {
+                    const song = dataOld.data[0];
+                    const songName = predefinedName || song.name || `歌曲 ${songId}`;
+                    
+                    if (song.url && song.url.startsWith('http')) {
+                        playSong(songId, song.url, songName, song.br, song.size);
+                    } else {
+                        alert(`无法播放此歌曲\n可能原因：需要VIP、无版权或地区限制\n当前登录状态: ${currentCookie ? '已登录' : '未登录'}\n接口: 旧版/song/url`);
+                    }
+                } else {
+                    alert(`无法获取歌曲URL: ${dataOld.message || '未知错误'}\n当前登录状态: ${currentCookie ? '已登录' : '未登录'}\n已尝试新旧两版接口`);
+                }
+            } catch (error) {
+                alert(`旧版接口也失败: ${error.message}`);
             }
         }
 
