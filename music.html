@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>音乐播放器 - 鹿衔</title>
     
+    <!-- 样式文件 -->
     <link rel="stylesheet" href="global.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- 组件加载器 -->
+    <script type="module" src="load-components.js"></script>
+    
+    <!-- 网站图标 -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦌</text></svg>">
     
     <style>
@@ -356,10 +361,31 @@
                 height: 55px;
             }
         }
+        
+        /* 动画效果 */
+        body {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .main-content {
+            opacity: 1;
+            animation: slideInUp 0.6s ease 0.3s both;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
-    <iframe src="header.html" frameborder="0" scrolling="no" style="width: 100%; height: 80px; border: none;"></iframe>
+    <!-- 页眉将由load-components.js动态插入 -->
     
     <main class="main-content">
         <div class="container">
@@ -523,11 +549,11 @@
         </div>
     </main>
     
-    <iframe src="footer.html" frameborder="0" scrolling="no" style="width: 100%; height: 200px; border: none;"></iframe>
+    <!-- 页脚将由load-components.js动态插入 -->
 
     <script>
-        // 页面初始化
-        document.addEventListener('DOMContentLoaded', function() {
+        // 等待组件加载完成后再初始化播放器
+        document.addEventListener('componentsLoaded', function() {
             console.log('双平台音乐播放器初始化...');
             
             // 初始化平台切换
@@ -564,11 +590,22 @@
                     });
                     
                     // 更新body类名，用于CSS样式
-                    document.body.className = platform;
+                    document.body.classList.remove('spotify', 'netease');
+                    document.body.classList.add(platform);
                     
                     console.log(`切换到 ${platform} 平台`);
+                    
+                    // 停止当前播放的音乐（如果正在播放）
+                    const activePlayer = document.querySelector(`.player-container.active`);
+                    const audio = activePlayer.querySelector('audio');
+                    if (audio) {
+                        audio.pause();
+                    }
                 });
             });
+            
+            // 默认设置body类
+            document.body.classList.add('spotify');
         }
         
         // Spotify播放器初始化
@@ -852,28 +889,3 @@
                 } else {
                     // 如果还没选择歌曲，播放第一首
                     playTrack(0);
-                }
-            }
-            
-            // 上一首
-            function prevTrack() {
-                let newIndex = currentTrackIndex - 1;
-                if (newIndex < 0) newIndex = playlist.length - 1;
-                playTrack(newIndex);
-            }
-            
-            // 下一首
-            function nextTrack() {
-                let newIndex = currentTrackIndex + 1;
-                if (newIndex >= playlist.length) newIndex = 0;
-                playTrack(newIndex);
-            }
-            
-            // 更新播放进度
-            function updateProgress() {
-                if (!isSeeking && audio.duration && !isNaN(audio.duration)) {
-                    const progressPercent = (audio.currentTime / audio.duration) * 100;
-                    progress.style.width = `${progressPercent}%`;
-                    
-                    // 更新时间显示
-                    currentTimeEl.textContent = formatTime(audio.currentTim
