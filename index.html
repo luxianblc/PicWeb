@@ -1,4 +1,3 @@
-            
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -11,12 +10,36 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- 组件加载器 -->
+    <script type="module" src="load-components.js"></script>
+    
     <!-- 网站图标 -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦌</text></svg>">
+    
+    <style>
+        /* 页面加载时的过渡效果 */
+        body {
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        
+        /* 确保内容在组件加载前隐藏 */
+        .main-content {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        body.components-loaded .main-content {
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>
-    <!-- 加载头部组件 -->
-    <iframe src="header.html" frameborder="0" scrolling="no" style="width: 100%; height: 80px; border: none;"></iframe>
+    <!-- 组件将在这里动态插入 -->
     
     <!-- 主内容 -->
     <main class="main-content">
@@ -67,8 +90,7 @@
         </div>
     </main>
     
-    <!-- 加载尾部组件 -->
-    <iframe src="footer.html" frameborder="0" scrolling="no" style="width: 100%; height: 200px; border: none;"></iframe>
+    <!-- 页脚将在这里动态插入 -->
     
     <!-- 灯箱 -->
     <div class="lightbox" id="lightbox">
@@ -80,6 +102,11 @@
     </div>
 
     <script>
+        // 组件加载完成后添加类名
+        document.addEventListener('componentsLoaded', () => {
+            document.body.classList.add('components-loaded');
+        });
+        
         // 灯箱功能
         const lightbox = document.getElementById('lightbox');
         const lightboxImage = document.getElementById('lightboxImage');
