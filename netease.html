@@ -114,4 +114,632 @@
             height: 50px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .play-btn {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #e60026, #ff4d4d);
+            border: none;
+        }
+        
+        .play-btn:hover {
+            box-shadow: 0 0 20px rgba(230, 0, 38, 0.3);
+        }
+        
+        /* 音量控制 */
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            background: #e60026;
+        }
+        
+        /* 播放列表 */
+        .playlist {
+            margin-top: 2rem;
+        }
+        
+        .playlist h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            color: white;
+        }
+        
+        .playlist-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .playlist-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .playlist-item.active {
+            background: rgba(230, 0, 38, 0.15);
+            border-left: 4px solid #e60026;
+        }
+        
+        .playlist-item img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        
+        .playlist-info {
+            flex: 1;
+        }
+        
+        .playlist-info h4 {
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+            color: white;
+        }
+        
+        .playlist-info p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .playlist-duration {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        /* 网易云官方播放器 */
+        .netease-embed {
+            margin-top: 2rem;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            background: #fff;
+        }
+        
+        .netease-embed h3 {
+            padding: 1rem;
+            margin: 0;
+            background: rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #333;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .player-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .album-art {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .control-buttons {
+                gap: 1rem;
+            }
+            
+            .control-btn {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .play-btn {
+                width: 55px;
+                height: 55px;
+            }
+        }
+        
+        /* 动画效果 */
+        body {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .main-content {
+            opacity: 1;
+            animation: slideInUp 0.6s ease 0.3s both;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 网易云主题颜色 */
+        .netease-theme {
+            --primary-color: #e60026;
+            --secondary-color: #ff4d4d;
+        }
+        
+        .back-to-music {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .back-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="netease-theme">
+    <!-- 页眉将由load-components.js动态插入 -->
+    
+    <main class="main-content">
+        <div class="container">
+            <div class="back-to-music">
+                <a href="music.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> 返回音乐主页
+                </a>
+            </div>
+            
+            <div class="page-title">
+                <h1><i class="fab fa-netease-music" style="color: #e60026;"></i> 网易云音乐</h1>
+                <p>发现好音乐，分享好心情，尽在网易云音乐</p>
+            </div>
+
+            <div class="music-player-container">
+                <!-- 网易云自定义播放器 -->
+                <div class="glass player-card">
+                    <div class="player-controls">
+                        <div class="player-info">
+                            <div class="album-art" id="albumArt">
+                                <i class="fab fa-netease-music"></i>
+                            </div>
+                            <div class="track-info">
+                                <h2 id="trackTitle">选择歌曲开始播放</h2>
+                                <p id="trackArtist">-</p>
+                                <div class="progress-bar" id="progressBar">
+                                    <div class="progress" id="progress"></div>
+                                </div>
+                                <div class="time-info">
+                                    <span id="currentTime">0:00</span>
+                                    <span id="totalTime">0:00</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="control-buttons">
+                            <button class="control-btn" id="prevBtn" title="上一首">
+                                <i class="fas fa-step-backward"></i>
+                            </button>
+                            <button class="control-btn play-btn" id="playBtn" title="播放/暂停">
+                                <i class="fas fa-play" id="playIcon"></i>
+                            </button>
+                            <button class="control-btn" id="nextBtn" title="下一首">
+                                <i class="fas fa-step-forward"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="volume-control">
+                            <i class="fas fa-volume-up" style="color: #e60026;"></i>
+                            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50">
+                            <span id="volumePercent" style="color: rgba(255, 255, 255, 0.7);">50%</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 网易云播放列表 -->
+                    <div class="playlist">
+                        <h3><i class="fas fa-list"></i> 网易云音乐热门歌曲</h3>
+                        <div id="playlistContainer">
+                            <!-- 播放列表将通过JavaScript动态生成 -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 网易云官方播放器 -->
+                <div class="platform-player netease-embed">
+                    <h3><i class="fab fa-netease-music"></i> 网易云音乐精选歌单</h3>
+                    <iframe 
+                        frameborder="no" 
+                        border="0" 
+                        marginwidth="0" 
+                        marginheight="0" 
+                        width="100%" 
+                        height="450" 
+                        src="https://music.163.com/outchain/player?type=0&id=2956917777&auto=1&height=430">
+                    </iframe>
+                </div>
+                
+                <!-- 使用说明 -->
+                <div class="glass card mt-3 text-center">
+                    <h3><i class="fas fa-info-circle"></i> 网易云音乐使用说明</h3>
+                    <p style="color: rgba(255, 255, 255, 0.7); margin-top: 1rem;">
+                        1. 点击播放列表中的歌曲可以开始播放<br>
+                        2. 使用控制按钮切换歌曲和调整音量<br>
+                        3. 进度条可以拖拽以跳转到指定位置<br>
+                        4. 如需更多歌曲，请使用上方官方播放器<br>
+                        5. 部分歌曲可能因版权限制无法播放<br>
+                        6. 音乐仅供个人欣赏，请支持正版音乐
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- 页脚将由load-components.js动态插入 -->
+
+    <script>
+        // 等待组件加载完成后再初始化播放器
+        document.addEventListener('componentsLoaded', function() {
+            console.log('网易云音乐播放器初始化...');
+            initNeteasePlayer();
+            console.log('网易云音乐播放器初始化完成');
+        });
+        
+        // 网易云播放器初始化
+        function initNeteasePlayer() {
+            // 网易云音乐数据
+            const neteasePlaylist = [
+                {
+                    id: 1,
+                    title: "Lemon",
+                    artist: "米津玄師",
+                    duration: "4:15",
+                    cover: "https://p2.music.126.net/9idkdzbel_-lYBP7Dv_dVQ==/109951163785855539.jpg",
+                    audioUrl: "https://music.163.com/song/media/outer/url?id=536622304.mp3"
+                },
+                {
+                    id: 2,
+                    title: "打上花火",
+                    artist: "DAOKO × 米津玄師",
+                    duration: "4:49",
+                    cover: "https://p1.music.126.net/Y7aCCR6OW3m_-eTd_vs7Tw==/109951163077613693.jpg",
+                    audioUrl: "https://music.163.com/song/media/outer/url?id=516657051.mp3"
+                },
+                {
+                    id: 3,
+                    title: "前前前世",
+                    artist: "RADWIMPS",
+                    duration: "4:45",
+                    cover: "https://p2.music.126.net/wQ9q8O2v7sK8pN5Y2e6z6Q==/109951163078599674.jpg",
+                    audioUrl: "https://music.163.com/song/media/outer/url?id=436514312.mp3"
+                },
+                {
+                    id: 4,
+                    title: "春日影",
+                    artist: "MyGO!!!!!",
+                    duration: "5:20",
+                    cover: "https://p2.music.126.net/fYNa6NyhpaKv-Rkz2qTq8A==/109951168716169363.jpg",
+                    audioUrl: "https://music.163.com/song/media/outer/url?id=2058267912.mp3"
+                },
+                {
+                    id: 5,
+                    title: "シルエット",
+                    artist: "KANA-BOON",
+                    duration: "4:00",
+                    cover: "https://p2.music.126.net/6O5I7P-cnM-_VoKx6e1Ojw==/109951163088216710.jpg",
+                    audioUrl: "https://music.163.com/song/media/outer/url?id=29723014.mp3"
+                },
+                {
+                    id: 6,
+                    title: "紅蓮華",
+                    artist: "LiSA",
+                    duration: "3:58",
+                    cover: "https://p2.music.126.net/koiU-jvV2V2zqMxWfBcTgw==/109951164076539477.jpg",
+                    audioUrl: "https://music.163.com/song/media/outer/url?id=1363948882.mp3"
+                },
+                {
+                    id: 7,
+                    title: "アイドル",
+                    artist: "YOASOBI",
+                    duration: "3:32",
+                    cover: "https://p2.music.126.net/A6WY2aXwR8j-wMdcRht-Sg==/109951168540364937.jpg",
+                    audioUrl: "https://music.163.com/song/media/outer/url?id=2049512697.mp3"
+                },
+                {
+                    id: 8,
+                    title: "夜に駆ける",
+                    artist: "YOASOBI",
+                    duration: "4:18",
+                    cover: "https://p2.music.126.net/ZJYyZB4m2P44AwtQkA0GlA==/109951164796474038.jpg",
+                    audioUrl: "https://music.163.com/song/media/outer/url?id=1413863166.mp3"
+                }
+            ];
+            
+            // 创建播放器
+            createMusicPlayer(neteasePlaylist);
+        }
+        
+        // 创建播放器函数
+        function createMusicPlayer(playlist) {
+            // 音频元素
+            const audio = new Audio();
+            let currentTrackIndex = 0;
+            let isPlaying = false;
+            let isSeeking = false;
+            
+            // DOM 元素
+            const albumArt = document.getElementById('albumArt');
+            const trackTitle = document.getElementById('trackTitle');
+            const trackArtist = document.getElementById('trackArtist');
+            const progress = document.getElementById('progress');
+            const progressBar = document.getElementById('progressBar');
+            const currentTimeEl = document.getElementById('currentTime');
+            const totalTimeEl = document.getElementById('totalTime');
+            const playBtn = document.getElementById('playBtn');
+            const playIcon = document.getElementById('playIcon');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const volumePercent = document.getElementById('volumePercent');
+            const playlistContainer = document.getElementById('playlistContainer');
+            
+            // 初始化播放列表
+            function initPlaylist() {
+                playlistContainer.innerHTML = '';
+                
+                playlist.forEach((track, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'playlist-item';
+                    if (index === currentTrackIndex) {
+                        item.classList.add('active');
+                    }
+                    
+                    item.innerHTML = `
+                        <img src="${track.cover}" alt="${track.title}" 
+                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>'">
+                        <div class="playlist-info">
+                            <h4>${track.title}</h4>
+                            <p>${track.artist}</p>
+                        </div>
+                        <div class="playlist-duration">${track.duration}</div>
+                    `;
+                    
+                    item.addEventListener('click', () => {
+                        playTrack(index);
+                    });
+                    
+                    playlistContainer.appendChild(item);
+                });
+            }
+            
+            // 播放指定曲目
+            function playTrack(index) {
+                if (index < 0 || index >= playlist.length) return;
+                
+                currentTrackIndex = index;
+                const track = playlist[currentTrackIndex];
+                
+                // 更新音频源
+                audio.src = track.audioUrl;
+                
+                // 更新界面
+                albumArt.innerHTML = `<img src="${track.cover}" alt="${track.title}" 
+                    onerror="this.parentElement.innerHTML='<i class=\"fab fa-netease-music\"></i>'">`;
+                trackTitle.textContent = track.title;
+                trackArtist.textContent = track.artist;
+                totalTimeEl.textContent = track.duration;
+                
+                // 更新播放列表高亮
+                document.querySelectorAll('#playlistContainer .playlist-item').forEach((item, i) => {
+                    if (i === currentTrackIndex) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+                
+                // 播放
+                audio.play().then(() => {
+                    isPlaying = true;
+                    playIcon.className = 'fas fa-pause';
+                    console.log('网易云音乐正在播放:', track.title);
+                }).catch(error => {
+                    console.error('网易云音乐播放失败:', error);
+                    // 优雅降级
+                    trackTitle.textContent = "播放失败，请点击其他歌曲";
+                    trackArtist.textContent = "网络或版权限制，请尝试其他歌曲";
+                });
+            }
+            
+            // 播放/暂停
+            function togglePlay() {
+                if (audio.src) {
+                    if (isPlaying) {
+                        audio.pause();
+                        playIcon.className = 'fas fa-play';
+                    } else {
+                        audio.play().then(() => {
+                            playIcon.className = 'fas fa-pause';
+                        });
+                    }
+                    isPlaying = !isPlaying;
+                } else {
+                    // 如果还没选择歌曲，播放第一首
+                    playTrack(0);
+                }
+            }
+            
+            // 上一首
+            function prevTrack() {
+                let newIndex = currentTrackIndex - 1;
+                if (newIndex < 0) newIndex = playlist.length - 1;
+                playTrack(newIndex);
+            }
+            
+            // 下一首
+            function nextTrack() {
+                let newIndex = currentTrackIndex + 1;
+                if (newIndex >= playlist.length) newIndex = 0;
+                playTrack(newIndex);
+            }
+            
+            // 格式化时间显示
+            function formatTime(seconds) {
+                if (isNaN(seconds)) return "0:00";
+                
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }
+            
+            // 更新播放进度
+            function updateProgress() {
+                if (!isSeeking && audio.duration && !isNaN(audio.duration)) {
+                    const progressPercent = (audio.currentTime / audio.duration) * 100;
+                    progress.style.width = `${progressPercent}%`;
+                    
+                    // 更新时间显示
+                    currentTimeEl.textContent = formatTime(audio.currentTime);
+                }
+            }
+            
+            // 设置音量
+            function setVolume(value) {
+                const volume = value / 100;
+                audio.volume = volume;
+                volumePercent.textContent = `${value}%`;
+            }
+            
+            // 跳转到指定播放位置
+            function seekToPosition(e) {
+                if (!audio.duration) return;
+                
+                const progressBarWidth = progressBar.clientWidth;
+                const clickPosition = e.offsetX;
+                const duration = audio.duration;
+                const seekTime = (clickPosition / progressBarWidth) * duration;
+                
+                audio.currentTime = seekTime;
+                progress.style.width = `${(clickPosition / progressBarWidth) * 100}%`;
+            }
+            
+            // 事件监听器
+            playBtn.addEventListener('click', togglePlay);
+            prevBtn.addEventListener('click', prevTrack);
+            nextBtn.addEventListener('click', nextTrack);
+            
+            volumeSlider.addEventListener('input', function() {
+                setVolume(this.value);
+            });
+            
+            progressBar.addEventListener('click', function(e) {
+                seekToPosition(e);
+            });
+            
+            // 拖拽进度条
+            progressBar.addEventListener('mousedown', function(e) {
+                isSeeking = true;
+                seekToPosition(e);
+                
+                const mouseMoveHandler = function(e) {
+                    if (!isSeeking) return;
+                    const rect = progressBar.getBoundingClientRect();
+                    const offsetX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+                    const progressPercent = (offsetX / rect.width) * 100;
+                    progress.style.width = `${progressPercent}%`;
+                };
+                
+                const mouseUpHandler = function() {
+                    isSeeking = false;
+                    if (audio.duration) {
+                        const rect = progressBar.getBoundingClientRect();
+                        const offsetX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+                        const seekTime = (offsetX / rect.width) * audio.duration;
+                        audio.currentTime = seekTime;
+                    }
+                    document.removeEventListener('mousemove', mouseMoveHandler);
+                    document.removeEventListener('mouseup', mouseUpHandler);
+                };
+                
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('mouseup', mouseUpHandler);
+            });
+            
+            // 音频事件监听器
+            audio.addEventListener('timeupdate', updateProgress);
+            audio.addEventListener('loadedmetadata', function() {
+                totalTimeEl.textContent = formatTime(audio.duration);
+            });
+            audio.addEventListener('ended', function() {
+                isPlaying = false;
+                playIcon.className = 'fas fa-play';
+                // 自动播放下一首
+                setTimeout(() => {
+                    nextTrack();
+                }, 1000);
+            });
+            
+            // 初始化
+            initPlaylist();
+            setVolume(volumeSlider.value);
+            
+            // 默认显示第一首信息
+            setTimeout(() => {
+                if (playlist.length > 0) {
+                    const track = playlist[0];
+                    albumArt.innerHTML = `<img src="${track.cover}" alt="${track.title}" 
+                        onerror="this.parentElement.innerHTML='<i class=\"fab fa-netease-music\"></i>'">`;
+                    trackTitle.textContent = track.title;
+                    trackArtist.textContent = track.artist;
+                    totalTimeEl.textContent = track.duration;
+                }
+            }, 100);
+        }
+    </script>
+</body>
+</html>
