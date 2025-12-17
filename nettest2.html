@@ -157,24 +157,39 @@
         <div class="card">
             <h2><i class="fas fa-info-circle"></i> 接口说明</h2>
             <div style="line-height: 1.8;">
-                <p><strong>API地址:</strong> <code>https://api-enhanced-blond.vercel.app</code></p>
+                <p><strong>API地址:</strong> <code id="currentApiBase">https://neteaseapi-enhanced.vercel.app</code></p>
                 <p><strong>二维码登录:</strong> /login/qr/key → /login/qr/create → /login/qr/check</p>
                 <p><strong>游客登录:</strong> /register/anonimous</p>
                 <p><strong>音乐URL获取:</strong> /song/url/v1 (需要登录获取高质量音质)</p>
                 <p><strong>搜索功能:</strong> /cloudsearch</p>
-                <p><strong>注意:</strong> 所有接口调用请加上时间戳参数</p>
+                <p><strong>注意:</strong> 所有请求已添加 randomCNIP=true 参数解决海外IP限制</p>
             </div>
         </div>
     </div>
 
     <script>
-        // API基础地址
-        const API_BASE = 'https://neteaseapi-enhanced.vercel.app';
+        // API基础地址 - 请确保这里是你Vercel部署的正确地址
+        const API_BASE = 'https://neteaseapi-enhanced.vercel.app'; // 请修改为你的Vercel地址
+        document.getElementById('currentApiBase').textContent = API_BASE;
+        
         let currentAudio = null;
         let searchResults = [];
         let qrCheckInterval = null;
         let currentQRKey = null;
         let currentCookie = null;
+
+        // 构建API URL的辅助函数 - 自动添加时间戳和randomCNIP参数
+        function buildApiUrl(endpoint, params = {}) {
+            // 确保所有请求都带上时间戳和中国IP参数
+            const baseParams = `timestamp=${Date.now()}&randomCNIP=true`;
+            const queryParams = new URLSearchParams(params).toString();
+            
+            if (queryParams) {
+                return `${API_BASE}${endpoint}?${baseParams}&${queryParams}`;
+            } else {
+                return `${API_BASE}${endpoint}?${baseParams}`;
+            }
+        }
 
         // 页面加载时检查登录状态
         window.addEventListener('load', function() {
@@ -194,7 +209,8 @@
         // 自动游客登录
         async function autoGuestLogin() {
             try {
-                const response = await fetch(`${API_BASE}/register/anonimous?timestamp=${Date.now()}`);
+                const url = buildApiUrl('/register/anonimous');
+                const response = await fetch(url);
                 const data = await response.json();
                 
                 if (data.code === 200 && data.cookie) {
@@ -206,11 +222,6 @@
             } catch (error) {
                 console.log('自动游客登录失败，继续未登录状态');
             }
-        }
-
-        // 生成时间戳
-        function getTimestamp() {
-            return Date.now();
         }
 
         // 更新登录状态显示
@@ -235,7 +246,7 @@
             }
             
             try {
-                const url = `${API_BASE}/login/status?timestamp=${getTimestamp()}&cookie=${encodeURIComponent(currentCookie)}`;
+                const url = buildApiUrl('/login/status', { cookie: currentCookie });
                 const response = await fetch(url);
                 const data = await response.json();
                 
@@ -264,13 +275,14 @@
             qrLoginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 处理中...';
             
             qrcodeContainer.style.display = 'block';
-            document.getElementById('qrTimestamp').textContent = getTimestamp();
+            document.getElementById('qrTimestamp').textContent = Date.now();
             
             try {
                 // 1. 获取二维码key
                 qrcodeStatus.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> 正在获取二维码密钥...';
                 
-                const keyResponse = await fetch(`${API_BASE}/login/qr/key?timestamp=${getTimestamp()}`);
+                const keyUrl = buildApiUrl('/login/qr/key');
+                const keyResponse = await fetch(keyUrl);
                 const keyData = await keyResponse.json();
                 
                 if (keyData.code !== 200) {
@@ -281,7 +293,8 @@
                 qrcodeStatus.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> 正在生成二维码...';
                 
                 // 2. 生成二维码
-                const qrResponse = await fetch(`${API_BASE}/login/qr/create?key=${currentQRKey}&qrimg=true&timestamp=${getTimestamp()}`);
+                const qrUrl = buildApiUrl('/login/qr/create', { key: currentQRKey, qrimg: true });
+                const qrResponse = await fetch(qrUrl);
                 const qrData = await qrResponse.json();
                 
                 if (qrData.code !== 200) {
@@ -308,7 +321,8 @@
             
             qrCheckInterval = setInterval(async () => {
                 try {
-                    const checkResponse = await fetch(`${API_BASE}/login/qr/check?key=${currentQRKey}&timestamp=${getTimestamp()}`);
+                    const checkUrl = buildApiUrl('/login/qr/check', { key: currentQRKey });
+                    const checkResponse = await fetch(checkUrl);
                     const checkData = await checkResponse.json();
                     
                     const qrcodeStatus = document.getElementById('qrcodeStatus');
@@ -382,7 +396,8 @@
             guestLoginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 登录中...';
             
             try {
-                const response = await fetch(`${API_BASE}/register/anonimous?timestamp=${getTimestamp()}`);
+                const url = buildApiUrl('/register/anonimous');
+                const response = await fetch(url);
                 const data = await response.json();
                 
                 if (data.code === 200 && data.cookie) {
@@ -455,14 +470,19 @@
             searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 搜索中...';
             
             try {
-                // 构建请求URL
-                let url = `${API_BASE}/cloudsearch?keywords=${encodeURIComponent(keywords)}&type=${searchType}&limit=${limit}&timestamp=${getTimestamp()}`;
+                // 构建请求URL - 使用辅助函数自动添加参数
+                const params = {
+                    keywords: encodeURIComponent(keywords),
+                    type: searchType,
+                    limit: limit
+                };
                 
-                // 如果有Cookie，添加到请求中（可能影响搜索结果）
+                // 如果有Cookie，添加到请求中
                 if (currentCookie) {
-                    url += `&cookie=${encodeURIComponent(currentCookie)}`;
+                    params.cookie = currentCookie;
                 }
                 
+                const url = buildApiUrl('/cloudsearch', params);
                 const response = await fetch(url);
                 const data = await response.json();
                 
@@ -555,14 +575,18 @@
             playBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 获取URL中...';
             
             try {
-                // 构建请求URL - 使用新版API
-                let url = `${API_BASE}/song/url/v1?id=${songId}&level=exhigh&timestamp=${getTimestamp()}`;
+                // 构建请求URL - 使用辅助函数自动添加参数
+                const params = {
+                    id: songId,
+                    level: 'exhigh'
+                };
                 
                 // 如果有Cookie，添加到请求中（获取高质量音质必需）
                 if (currentCookie) {
-                    url += `&cookie=${encodeURIComponent(currentCookie)}`;
+                    params.cookie = currentCookie;
                 }
                 
+                const url = buildApiUrl('/song/url/v1', params);
                 const response = await fetch(url);
                 const data = await response.json();
                 
