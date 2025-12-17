@@ -15,60 +15,70 @@
     
     <!-- 网站图标 -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦌</text></svg>">
-    
     <style>
-        .gallery-controls {
-            margin-bottom: 2.5rem;
-        }
-        
-        .search-container {
-            position: relative;
-            max-width: 400px;
-            margin: 1rem auto;
-        }
-        
-        .search-input {
-            width: 100%;
-            padding: 12px 20px;
-            padding-right: 50px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 50px;
-            color: var(--text-color);
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(107, 112, 255, 0.1);
-        }
-        
-        .search-icon {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-secondary);
-            pointer-events: none;
-        }
-        
-        /* 页面加载过渡 */
-        body {
+    .gallery-controls {
+        margin-bottom: 2.5rem;
+    }
+    
+    .search-container {
+        position: relative;
+        max-width: 400px;
+        margin: 1rem auto;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 12px 20px;
+        padding-right: 50px;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 50px;
+        color: var(--text-color);
+        font-size: 1rem;
+        transition: var(--transition);
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(107, 112, 255, 0.1);
+    }
+    
+    .search-icon {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        pointer-events: none;
+    }
+    
+    /* 修改这里：移除隐藏主内容的CSS */
+    body {
+        opacity: 1; /* 改为1 */
+    }
+    
+    .main-content {
+        opacity: 1; /* 改为1，立即显示 */
+    }
+    
+    /* 保留动画效果 */
+    .main-content {
+        animation: fadeInUp 0.6s ease forwards;
+    }
+    
+    @keyframes fadeInUp {
+        from {
             opacity: 0;
-            animation: fadeIn 0.5s ease forwards;
+            transform: translateY(20px);
         }
-        
-        .main-content {
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        body.components-loaded .main-content {
+        to {
             opacity: 1;
+            transform: translateY(0);
         }
+    }
     </style>
+    
 </head>
 <body>
     <!-- 组件将在这里动态插入 -->
