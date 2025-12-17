@@ -2,708 +2,515 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>网易云API测试</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            color: white;
-        }
-        
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-        
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1rem;
-        }
-        
-        .test-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-        
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
-        }
-        
-        .card h2 {
-            color: #333;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #667eea;
-            font-size: 1.5rem;
-        }
-        
-        .card h2 i {
-            margin-right: 10px;
-            color: #667eea;
-        }
-        
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-        }
-        
-        .input-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-        }
-        
-        .input-group input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        button {
-            flex: 1;
-            padding: 14px 20px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            opacity: 0.9;
-            transform: scale(1.02);
-        }
-        
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-        }
-        
-        .btn-secondary:hover {
-            background: #e0e0e0;
-        }
-        
-        .result {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .result h3 {
-            color: #333;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .result pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 14px;
-            color: #333;
-        }
-        
-        .result-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 15px;
-        }
-        
-        .song-item, .playlist-item {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease;
-        }
-        
-        .song-item:hover, .playlist-item:hover {
-            transform: translateY(-3px);
-        }
-        
-        .song-cover, .playlist-cover {
-            width: 100%;
-            aspect-ratio: 1;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-        }
-        
-        .song-cover img, .playlist-cover img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .song-info h4, .playlist-info h4 {
-            font-size: 14px;
-            margin-bottom: 5px;
-            color: #333;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        .song-info p, .playlist-info p {
-            font-size: 12px;
-            color: #666;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #667eea;
-        }
-        
-        .loading::after {
-            content: '';
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #667eea;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s linear infinite;
-            margin-left: 10px;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .url-display {
-            background: #f0f0f0;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-            font-family: monospace;
-            font-size: 14px;
-            word-break: break-all;
-            color: #333;
-        }
-        
-        .url-display span {
-            color: #667eea;
-            font-weight: bold;
-        }
-        
-        .statistics {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            color: white;
-            margin-bottom: 30px;
-        }
-        
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-        
-        .stat-item {
-            text-align: center;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-        
-        .copy-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        
-        @media (max-width: 768px) {
-            .test-cards {
-                grid-template-columns: 1fr;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .result-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            }
-        }
-    </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>网易云登录测试</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1><i class="fas fa-music"></i> 网易云音乐API测试</h1>
-            <p>测试推荐歌单和推荐新音乐接口</p>
-        </div>
-        
-        <div class="statistics">
-            <div class="stat-grid">
-                <div class="stat-item">
-                    <div class="stat-value" id="apiStatus">✓</div>
-                    <div class="stat-label">API状态</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="playlistCount">0</div>
-                    <div class="stat-label">推荐歌单数</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="songCount">0</div>
-                    <div class="stat-label">推荐新歌数</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="responseTime">0ms</div>
-                    <div class="stat-label">响应时间</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="test-cards">
-            <!-- 推荐歌单测试 -->
-            <div class="card">
-                <h2><i class="fas fa-list"></i> 推荐歌单测试</h2>
-                
-                <div class="input-group">
-                    <label for="playlistLimit">显示数量 (默认30)</label>
-                    <input type="number" id="playlistLimit" min="1" max="100" value="10">
-                </div>
-                
-                <div class="url-display">
-                    API URL: <span id="playlistUrl">等待输入...</span>
-                </div>
-                
-                <div class="button-group">
-                    <button class="btn-primary" onclick="testPlaylist()">
-                        <i class="fas fa-play"></i> 测试接口
-                    </button>
-                    <button class="btn-secondary" onclick="clearPlaylistResult()">
-                        <i class="fas fa-trash"></i> 清空结果
-                    </button>
-                </div>
-                
-                <div id="playlistResult" class="result">
-                    <h3><i class="fas fa-list-ul"></i> 测试结果</h3>
-                    <div id="playlistData">
-                        <!-- 结果将在这里显示 -->
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 推荐新音乐测试 -->
-            <div class="card">
-                <h2><i class="fas fa-star"></i> 推荐新音乐测试</h2>
-                
-                <div class="input-group">
-                    <label for="songLimit">显示数量 (默认10)</label>
-                    <input type="number" id="songLimit" min="1" max="50" value="5">
-                </div>
-                
-                <div class="url-display">
-                    API URL: <span id="songUrl">等待输入...</span>
-                </div>
-                
-                <div class="button-group">
-                    <button class="btn-primary" onclick="testNewSongs()">
-                        <i class="fas fa-play"></i> 测试接口
-                    </button>
-                    <button class="btn-secondary" onclick="clearSongResult()">
-                        <i class="fas fa-trash"></i> 清空结果
-                    </button>
-                </div>
-                
-                <div id="songResult" class="result">
-                    <h3><i class="fas fa-music"></i> 测试结果</h3>
-                    <div id="songData">
-                        <!-- 结果将在这里显示 -->
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- API信息 -->
-        <div class="card">
-            <h2><i class="fas fa-info-circle"></i> API接口信息</h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div>
-                    <h3>推荐歌单接口</h3>
-                    <p><strong>接口地址:</strong> <code>/personalized</code></p>
-                    <p><strong>参数:</strong> limit (数量，默认30)</p>
-                    <p><strong>示例:</strong> <code>/personalized?limit=10</code></p>
-                </div>
-                <div>
-                    <h3>推荐新音乐接口</h3>
-                    <p><strong>接口地址:</strong> <code>/personalized/newsong</code></p>
-                    <p><strong>参数:</strong> limit (数量，默认10)</p>
-                    <p><strong>示例:</strong> <code>/personalized/newsong?limit=5</code></p>
-                </div>
-            </div>
-        </div>
+    <h1>网易云音乐登录测试</h1>
+    
+    <h2>游客登录测试</h2>
+    <button onclick="testGuestLogin()">测试游客登录</button>
+    <div id="guestResult" style="border:1px solid #ccc; padding:10px; margin:10px 0; min-height:50px;"></div>
+    
+    <hr>
+    
+    <h2>二维码登录测试</h2>
+    <button onclick="startQrLogin()">开始二维码登录</button>
+    <button onclick="stopQrCheck()" style="background-color:#f0f0f0;">停止检查</button>
+    <button onclick="checkLoginStatus()">检查登录状态</button>
+    
+    <div id="qrArea" style="display:none; margin:20px 0;">
+        <h3>请用网易云APP扫描二维码</h3>
+        <canvas id="qrcodeCanvas" style="border:1px solid #ccc;"></canvas>
+        <div id="qrStatus" style="margin:10px 0; padding:10px; background-color:#f5f5f5;"></div>
+    </div>
+    
+    <div id="userInfo" style="display:none; border:1px solid green; padding:15px; margin:10px 0; background-color:#f0fff0;">
+        <h3>登录成功！用户信息</h3>
+        <div id="userData"></div>
+        <button onclick="logout()">退出登录</button>
+    </div>
+    
+    <hr>
+    
+    <h2>API调用测试（需要登录）</h2>
+    <div>
+        <button onclick="testPersonalized()">测试推荐歌单</button>
+        <button onclick="testUserPlaylist()">测试用户歌单</button>
+        <button onclick="testDailyRecommend()">测试每日推荐</button>
+    </div>
+    <div id="apiResult" style="border:1px solid #ccc; padding:10px; margin:10px 0; min-height:100px; max-height:300px; overflow:auto;"></div>
+    
+    <hr>
+    
+    <div style="background-color:#fff8e1; padding:15px; border-left:4px solid #ff9800; margin:20px 0;">
+        <h3>安全提示</h3>
+        <p>1. 请勿使用他人提供的公开服务进行登录</p>
+        <p>2. 二维码登录可能因网易云盾检测而失败</p>
+        <p>3. 游客登录无法访问个人收藏等私有数据</p>
+        <p>4. 请勿频繁调用登录接口，避免触发风控</p>
     </div>
 
     <script>
-        // API基础地址
+        // API基础地址 - 请修改为你的部署地址
         const API_BASE = 'https://neteaseapi-enhanced.vercel.app';
+        let currentCookie = '';
+        let qrKey = '';
+        let qrCheckInterval = null;
         
-        // 更新URL显示
-        function updateUrlDisplays() {
-            const playlistLimit = document.getElementById('playlistLimit').value;
-            const songLimit = document.getElementById('songLimit').value;
-            
-            document.getElementById('playlistUrl').textContent = 
-                `${API_BASE}/personalized?limit=${playlistLimit}`;
-            document.getElementById('songUrl').textContent = 
-                `${API_BASE}/personalized/newsong?limit=${songLimit}`;
-        }
-        
-        // 初始更新URL显示
-        updateUrlDisplays();
-        
-        // 监听输入变化
-        document.getElementById('playlistLimit').addEventListener('input', updateUrlDisplays);
-        document.getElementById('songLimit').addEventListener('input', updateUrlDisplays);
-        
-        // 测试推荐歌单接口
-        async function testPlaylist() {
-            const limit = document.getElementById('playlistLimit').value;
-            const resultDiv = document.getElementById('playlistData');
-            const startTime = performance.now();
-            
-            resultDiv.innerHTML = '<div class="loading">正在加载推荐歌单...</div>';
-            updateStat('playlistCount', '...');
+        // 测试游客登录
+        async function testGuestLogin() {
+            const resultDiv = document.getElementById('guestResult');
+            resultDiv.innerHTML = '正在请求游客登录...';
             
             try {
-                const response = await fetch(`${API_BASE}/personalized?limit=${limit}`);
-                const endTime = performance.now();
-                const responseTime = Math.round(endTime - startTime);
-                updateStat('responseTime', `${responseTime}ms`);
-                
+                const startTime = Date.now();
+                const response = await fetch(`${API_BASE}/register/anonimous?timestamp=${Date.now()}`);
                 const data = await response.json();
+                const endTime = Date.now();
+                
+                if (data.code === 200 && data.cookie) {
+                    currentCookie = data.cookie;
+                    localStorage.setItem('netease_cookie', currentCookie);
+                    
+                    let html = `
+                        <div style="color:green;">
+                            <h4>✅ 游客登录成功！</h4>
+                            <p>响应时间: ${endTime - startTime}ms</p>
+                            <p>Cookie长度: ${data.cookie.length} 字符</p>
+                            <p>用户ID: ${data.account?.id || '匿名用户'}</p>
+                            <p>用户名: ${data.account?.userName || '游客'}</p>
+                            <p><button onclick="showCookie()">查看Cookie</button></p>
+                            <div id="cookieDisplay" style="display:none; background:#f5f5f5; padding:10px; margin:5px 0; word-break:break-all;"></div>
+                        </div>
+                    `;
+                    
+                    resultDiv.innerHTML = html;
+                    showUserInfo(data.account);
+                    checkAPIAccess();
+                } else {
+                    resultDiv.innerHTML = `
+                        <div style="color:red;">
+                            <h4>❌ 游客登录失败</h4>
+                            <p>错误码: ${data.code}</p>
+                            <p>错误信息: ${data.message || '未知错误'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div style="color:red;">
+                        <h4>❌ 请求失败</h4>
+                        <p>错误: ${error.message}</p>
+                        <p>请检查API地址: ${API_BASE}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // 显示Cookie
+        function showCookie() {
+            const display = document.getElementById('cookieDisplay');
+            if (display.style.display === 'none') {
+                display.innerHTML = `<pre>${currentCookie}</pre>`;
+                display.style.display = 'block';
+            } else {
+                display.style.display = 'none';
+            }
+        }
+        
+        // 显示用户信息
+        function showUserInfo(account) {
+            const userInfoDiv = document.getElementById('userInfo');
+            const userDataDiv = document.getElementById('userData');
+            
+            if (account) {
+                userDataDiv.innerHTML = `
+                    <p><strong>用户ID:</strong> ${account.id}</p>
+                    <p><strong>用户名:</strong> ${account.userName}</p>
+                    <p><strong>创建时间:</strong> ${new Date(account.createTime).toLocaleString()}</p>
+                    <p><strong>类型:</strong> ${account.type === 0 ? '普通用户' : '其他'}</p>
+                    <p><strong>状态:</strong> ${account.status === 0 ? '正常' : '异常'}</p>
+                `;
+            } else {
+                userDataDiv.innerHTML = '<p>匿名用户（游客）</p>';
+            }
+            
+            userInfoDiv.style.display = 'block';
+        }
+        
+        // 开始二维码登录流程
+        async function startQrLogin() {
+            try {
+                document.getElementById('qrArea').style.display = 'block';
+                document.getElementById('qrStatus').innerHTML = '正在生成二维码...';
+                
+                // 1. 获取二维码key
+                const keyRes = await fetch(`${API_BASE}/login/qr/key?timestamp=${Date.now()}`);
+                const keyData = await keyRes.json();
+                
+                if (keyData.code !== 200) {
+                    document.getElementById('qrStatus').innerHTML = `获取二维码key失败: ${keyData.code}`;
+                    return;
+                }
+                
+                qrKey = keyData.data.unikey;
+                console.log('二维码key:', qrKey);
+                
+                // 2. 生成二维码
+                const qrRes = await fetch(`${API_BASE}/login/qr/create?key=${qrKey}&qrimg=true&timestamp=${Date.now()}`);
+                const qrData = await qrRes.json();
+                
+                if (qrData.code !== 200) {
+                    document.getElementById('qrStatus').innerHTML = `生成二维码失败: ${qrData.code}`;
+                    return;
+                }
+                
+                // 显示二维码
+                QRCode.toCanvas(document.getElementById('qrcodeCanvas'), qrData.data.qrimg, {
+                    width: 250,
+                    height: 250,
+                    margin: 2
+                }, function(error) {
+                    if (error) {
+                        document.getElementById('qrStatus').innerHTML = `生成二维码图片失败: ${error.message}`;
+                    }
+                });
+                
+                document.getElementById('qrStatus').innerHTML = '请用网易云APP扫描二维码';
+                
+                // 3. 开始轮询检查扫码状态
+                startPollingQrStatus();
+                
+            } catch (error) {
+                document.getElementById('qrStatus').innerHTML = `请求失败: ${error.message}`;
+            }
+        }
+        
+        // 轮询检查二维码扫码状态
+        function startPollingQrStatus() {
+            if (qrCheckInterval) clearInterval(qrCheckInterval);
+            
+            qrCheckInterval = setInterval(async () => {
+                try {
+                    const checkRes = await fetch(`${API_BASE}/login/qr/check?key=${qrKey}&timestamp=${Date.now()}`);
+                    const checkData = await checkRes.json();
+                    
+                    console.log('扫码状态:', checkData.code, checkData.message);
+                    
+                    if (checkData.code === 800) {
+                        document.getElementById('qrStatus').innerHTML = '❌ 二维码已过期，请重新生成';
+                        clearInterval(qrCheckInterval);
+                    } else if (checkData.code === 801) {
+                        document.getElementById('qrStatus').innerHTML = '⏳ 等待扫码...';
+                    } else if (checkData.code === 802) {
+                        document.getElementById('qrStatus').innerHTML = '✅ 已扫码，请在APP中确认登录';
+                    } else if (checkData.code === 803) {
+                        // 登录成功
+                        clearInterval(qrCheckInterval);
+                        currentCookie = checkData.cookie || checkData.data?.cookie;
+                        
+                        if (currentCookie) {
+                            localStorage.setItem('netease_cookie', currentCookie);
+                            document.getElementById('qrStatus').innerHTML = '🎉 登录成功！';
+                            document.getElementById('qrArea').style.display = 'none';
+                            
+                            // 获取用户信息
+                            const userRes = await fetch(`${API_BASE}/login/status?timestamp=${Date.now()}`, {
+                                headers: {
+                                    'Cookie': currentCookie
+                                }
+                            });
+                            const userData = await userRes.json();
+                            
+                            if (userData.data?.profile) {
+                                showUserInfo(userData.data.profile);
+                                checkAPIAccess();
+                            }
+                        } else {
+                            document.getElementById('qrStatus').innerHTML = '❌ 登录失败，未获取到Cookie';
+                        }
+                    } else if (checkData.code === 502) {
+                        document.getElementById('qrStatus').innerHTML = '⚠️ 扫码后返回502，请尝试加上noCookie参数';
+                    }
+                } catch (error) {
+                    console.error('检查扫码状态失败:', error);
+                    document.getElementById('qrStatus').innerHTML = `检查失败: ${error.message}`;
+                }
+            }, 2000); // 每2秒检查一次
+        }
+        
+        // 停止二维码检查
+        function stopQrCheck() {
+            if (qrCheckInterval) {
+                clearInterval(qrCheckInterval);
+                qrCheckInterval = null;
+                document.getElementById('qrStatus').innerHTML = '已停止检查扫码状态';
+            }
+        }
+        
+        // 检查登录状态
+        async function checkLoginStatus() {
+            if (!currentCookie) {
+                currentCookie = localStorage.getItem('netease_cookie');
+                if (!currentCookie) {
+                    alert('请先登录');
+                    return;
+                }
+            }
+            
+            try {
+                const res = await fetch(`${API_BASE}/login/status?timestamp=${Date.now()}`, {
+                    headers: {
+                        'Cookie': currentCookie
+                    }
+                });
+                const data = await res.json();
+                
+                const resultDiv = document.getElementById('guestResult');
+                if (data.data?.profile) {
+                    const profile = data.data.profile;
+                    resultDiv.innerHTML = `
+                        <div style="color:green;">
+                            <h4>✅ 已登录</h4>
+                            <p>用户ID: ${profile.userId}</p>
+                            <p>昵称: ${profile.nickname}</p>
+                            <p>头像: ${profile.avatarUrl ? '有' : '无'}</p>
+                            <p>VIP类型: ${profile.vipType === 0 ? '非VIP' : 'VIP'}</p>
+                        </div>
+                    `;
+                    showUserInfo(profile);
+                } else {
+                    resultDiv.innerHTML = `
+                        <div style="color:orange;">
+                            <h4>⚠️ 登录状态异常</h4>
+                            <p>可能Cookie已过期，请重新登录</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('检查登录状态失败:', error);
+            }
+        }
+        
+        // 检查API访问权限
+        async function checkAPIAccess() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = '正在测试API访问权限...';
+            
+            try {
+                // 测试推荐歌单（不需要登录）
+                const playlistRes = await fetch(`${API_BASE}/personalized?limit=3&timestamp=${Date.now()}`);
+                const playlistData = await playlistRes.json();
+                
+                let html = '<h4>API访问测试结果:</h4>';
+                
+                if (playlistData.code === 200) {
+                    html += `<p>✅ 推荐歌单接口: 正常 (${playlistData.result?.length || 0} 个歌单)</p>`;
+                } else {
+                    html += `<p>❌ 推荐歌单接口: 失败 (${playlistData.code})</p>`;
+                }
+                
+                // 如果已登录，测试需要登录的接口
+                if (currentCookie) {
+                    try {
+                        const userRes = await fetch(`${API_BASE}/user/account?timestamp=${Date.now()}`, {
+                            headers: {
+                                'Cookie': currentCookie
+                            }
+                        });
+                        const userData = await userRes.json();
+                        
+                        if (userData.code === 200) {
+                            html += `<p>✅ 用户信息接口: 正常</p>`;
+                        } else {
+                            html += `<p>❌ 用户信息接口: 失败 (${userData.code})</p>`;
+                        }
+                    } catch (error) {
+                        html += `<p>❌ 用户信息接口: 请求失败</p>`;
+                    }
+                }
+                
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.innerHTML = `<p>❌ API测试失败: ${error.message}</p>`;
+            }
+        }
+        
+        // 测试推荐歌单接口
+        async function testPersonalized() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = '正在测试推荐歌单接口...';
+            
+            try {
+                const res = await fetch(`${API_BASE}/personalized?limit=5&timestamp=${Date.now()}`);
+                const data = await res.json();
+                
+                let html = '<h4>推荐歌单测试结果:</h4>';
                 
                 if (data.code === 200) {
                     const playlists = data.result || data.data || [];
-                    updateStat('playlistCount', playlists.length);
-                    displayPlaylists(playlists, resultDiv);
-                    updateStat('apiStatus', '✓');
+                    html += `<p>✅ 成功获取 ${playlists.length} 个推荐歌单</p>`;
+                    
+                    playlists.forEach((playlist, index) => {
+                        html += `
+                            <div style="border:1px solid #ddd; padding:10px; margin:5px 0;">
+                                <p><strong>${index + 1}. ${playlist.name}</strong></p>
+                                <p>描述: ${playlist.copywriter || '无'}</p>
+                                <p>歌曲数: ${playlist.trackCount}</p>
+                            </div>
+                        `;
+                    });
                 } else {
-                    resultDiv.innerHTML = `<div style="color: #e74c3c; text-align: center; padding: 20px;">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <h3>错误: ${data.code}</h3>
-                        <p>${data.message || '获取歌单失败'}</p>
-                    </div>`;
+                    html += `<p>❌ 失败: ${data.code} - ${data.message || '未知错误'}</p>`;
                 }
+                
+                resultDiv.innerHTML = html;
             } catch (error) {
-                resultDiv.innerHTML = `<div style="color: #e74c3c; text-align: center; padding: 20px;">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <h3>网络错误</h3>
-                    <p>${error.message}</p>
-                    <p>请检查API地址是否可用</p>
-                </div>`;
-                updateStat('apiStatus', '✗');
+                resultDiv.innerHTML = `<p>❌ 请求失败: ${error.message}</p>`;
             }
         }
         
-        // 显示推荐歌单
-        function displayPlaylists(playlists, container) {
-            if (playlists.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #666;">没有找到推荐歌单</p>';
+        // 测试用户歌单接口
+        async function testUserPlaylist() {
+            if (!currentCookie) {
+                alert('请先登录');
                 return;
             }
             
-            let html = `<div class="result-grid">`;
-            
-            playlists.forEach((playlist, index) => {
-                html += `
-                    <div class="playlist-item">
-                        <div class="playlist-cover">
-                            ${playlist.picUrl ? 
-                                `<img src="${playlist.picUrl}" alt="${playlist.name}" 
-                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\"fas fa-music\"></i>'">` :
-                                `<i class="fas fa-music"></i>`
-                            }
-                        </div>
-                        <div class="playlist-info">
-                            <h4>${playlist.name || '未知歌单'}</h4>
-                            <p>${playlist.copywriter || playlist.description || '网易云音乐推荐'}</p>
-                            <p style="font-size: 11px; color: #999; margin-top: 5px;">
-                                <i class="fas fa-music"></i> ${playlist.trackCount || 0} 首
-                            </p>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += `</div>`;
-            
-            // 添加JSON数据查看按钮
-            html += `
-                <div style="margin-top: 20px;">
-                    <button onclick="showRawData('playlistRawData', ${JSON.stringify(playlists)})" 
-                            class="btn-secondary" style="width: 100%;">
-                        <i class="fas fa-code"></i> 查看原始JSON数据
-                    </button>
-                    <div id="playlistRawData" style="display: none; margin-top: 15px;">
-                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 12px; max-height: 300px; overflow: auto;"></pre>
-                    </div>
-                </div>
-            `;
-            
-            container.innerHTML = html;
-        }
-        
-        // 测试推荐新音乐接口
-        async function testNewSongs() {
-            const limit = document.getElementById('songLimit').value;
-            const resultDiv = document.getElementById('songData');
-            const startTime = performance.now();
-            
-            resultDiv.innerHTML = '<div class="loading">正在加载推荐新音乐...</div>';
-            updateStat('songCount', '...');
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = '正在测试用户歌单接口...';
             
             try {
-                const response = await fetch(`${API_BASE}/personalized/newsong?limit=${limit}`);
-                const endTime = performance.now();
-                const responseTime = Math.round(endTime - startTime);
-                updateStat('responseTime', `${responseTime}ms`);
+                // 先获取用户信息以获取UID
+                const statusRes = await fetch(`${API_BASE}/login/status?timestamp=${Date.now()}`, {
+                    headers: {
+                        'Cookie': currentCookie
+                    }
+                });
+                const statusData = await statusRes.json();
                 
-                const data = await response.json();
+                if (statusData.code !== 200 || !statusData.data?.profile?.userId) {
+                    resultDiv.innerHTML = '<p>❌ 无法获取用户ID</p>';
+                    return;
+                }
+                
+                const userId = statusData.data.profile.userId;
+                
+                // 获取用户歌单
+                const res = await fetch(`${API_BASE}/user/playlist?uid=${userId}&timestamp=${Date.now()}`, {
+                    headers: {
+                        'Cookie': currentCookie
+                    }
+                });
+                const data = await res.json();
+                
+                let html = '<h4>用户歌单测试结果:</h4>';
                 
                 if (data.code === 200) {
-                    const songs = data.result || data.data || [];
-                    updateStat('songCount', songs.length);
-                    displaySongs(songs, resultDiv);
-                    updateStat('apiStatus', '✓');
+                    const playlists = data.playlist || data.data || [];
+                    html += `<p>✅ 成功获取 ${playlists.length} 个歌单</p>`;
+                    
+                    playlists.slice(0, 5).forEach((playlist, index) => {
+                        html += `
+                            <div style="border:1px solid #ddd; padding:10px; margin:5px 0;">
+                                <p><strong>${index + 1}. ${playlist.name}</strong></p>
+                                <p>歌曲数: ${playlist.trackCount}</p>
+                                <p>创建者: ${playlist.creator?.nickname || '未知'}</p>
+                            </div>
+                        `;
+                    });
+                    
+                    if (playlists.length > 5) {
+                        html += `<p>... 还有 ${playlists.length - 5} 个歌单未显示</p>`;
+                    }
+                } else if (data.code === 301) {
+                    html += `<p>❌ 需要登录（返回301）</p>`;
+                    html += `<p>可能原因：Cookie已过期或无效</p>`;
                 } else {
-                    resultDiv.innerHTML = `<div style="color: #e74c3c; text-align: center; padding: 20px;">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <h3>错误: ${data.code}</h3>
-                        <p>${data.message || '获取新音乐失败'}</p>
-                    </div>`;
+                    html += `<p>❌ 失败: ${data.code} - ${data.message || '未知错误'}</p>`;
                 }
+                
+                resultDiv.innerHTML = html;
             } catch (error) {
-                resultDiv.innerHTML = `<div style="color: #e74c3c; text-align: center; padding: 20px;">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <h3>网络错误</h3>
-                    <p>${error.message}</p>
-                    <p>请检查API地址是否可用</p>
-                </div>`;
-                updateStat('apiStatus', '✗');
+                resultDiv.innerHTML = `<p>❌ 请求失败: ${error.message}</p>`;
             }
         }
         
-        // 显示推荐新音乐
-        function displaySongs(songs, container) {
-            if (songs.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #666;">没有找到推荐新音乐</p>';
+        // 测试每日推荐
+        async function testDailyRecommend() {
+            if (!currentCookie) {
+                alert('请先登录');
                 return;
             }
             
-            let html = `<div class="result-grid">`;
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = '正在测试每日推荐接口...';
             
-            songs.forEach((song, index) => {
-                const songInfo = song.song || song;
-                const album = songInfo.album || {};
-                const artists = songInfo.artists || [];
-                
-                html += `
-                    <div class="song-item">
-                        <div class="song-cover">
-                            ${album.picUrl ? 
-                                `<img src="${album.picUrl}" alt="${songInfo.name}" 
-                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\"fas fa-music\"></i>'">` :
-                                `<i class="fas fa-music"></i>`
-                            }
-                        </div>
-                        <div class="song-info">
-                            <h4>${songInfo.name || '未知歌曲'}</h4>
-                            <p>${artists.map(a => a.name).join(', ') || '未知歌手'}</p>
-                            <p style="font-size: 11px; color: #999; margin-top: 5px;">
-                                <i class="fas fa-compact-disc"></i> ${album.name || '未知专辑'}
-                            </p>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += `</div>`;
-            
-            // 添加JSON数据查看按钮
-            html += `
-                <div style="margin-top: 20px;">
-                    <button onclick="showRawData('songRawData', ${JSON.stringify(songs)})" 
-                            class="btn-secondary" style="width: 100%;">
-                        <i class="fas fa-code"></i> 查看原始JSON数据
-                    </button>
-                    <div id="songRawData" style="display: none; margin-top: 15px;">
-                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 12px; max-height: 300px; overflow: auto;"></pre>
-                    </div>
-                </div>
-            `;
-            
-            container.innerHTML = html;
-        }
-        
-        // 显示原始JSON数据
-        function showRawData(elementId, data) {
-            const element = document.getElementById(elementId);
-            const isVisible = element.style.display !== 'none';
-            
-            if (isVisible) {
-                element.style.display = 'none';
-            } else {
-                element.style.display = 'block';
-                const pre = element.querySelector('pre');
-                pre.textContent = JSON.stringify(data, null, 2);
-            }
-        }
-        
-        // 清空结果
-        function clearPlaylistResult() {
-            document.getElementById('playlistData').innerHTML = '';
-            updateStat('playlistCount', '0');
-        }
-        
-        function clearSongResult() {
-            document.getElementById('songData').innerHTML = '';
-            updateStat('songCount', '0');
-        }
-        
-        // 更新统计信息
-        function updateStat(statId, value) {
-            const element = document.getElementById(statId);
-            if (element) {
-                element.textContent = value;
-                
-                // 添加动画效果
-                element.style.transform = 'scale(1.1)';
-                setTimeout(() => {
-                    element.style.transform = 'scale(1)';
-                }, 200);
-            }
-        }
-        
-        // 页面加载时自动测试API状态
-        window.addEventListener('load', async () => {
             try {
-                const startTime = performance.now();
-                const response = await fetch(`${API_BASE}/personalized?limit=1`);
-                const endTime = performance.now();
-                const responseTime = Math.round(endTime - startTime);
+                const res = await fetch(`${API_BASE}/recommend/songs?timestamp=${Date.now()}`, {
+                    headers: {
+                        'Cookie': currentCookie
+                    }
+                });
+                const data = await res.json();
                 
-                updateStat('responseTime', `${responseTime}ms`);
+                let html = '<h4>每日推荐测试结果:</h4>';
                 
-                if (response.ok) {
-                    updateStat('apiStatus', '✓');
-                    console.log('API状态: 正常');
+                if (data.code === 200) {
+                    const songs = data.data?.dailySongs || data.recommend || [];
+                    html += `<p>✅ 成功获取 ${songs.length} 首推荐歌曲</p>`;
+                    
+                    songs.slice(0, 5).forEach((song, index) => {
+                        html += `
+                            <div style="border:1px solid #ddd; padding:10px; margin:5px 0;">
+                                <p><strong>${index + 1}. ${song.name}</strong></p>
+                                <p>歌手: ${song.ar?.map(a => a.name).join(', ') || '未知'}</p>
+                                <p>专辑: ${song.al?.name || '未知'}</p>
+                            </div>
+                        `;
+                    });
+                } else if (data.code === 301) {
+                    html += `<p>❌ 需要登录（返回301）</p>`;
                 } else {
-                    updateStat('apiStatus', '⚠');
-                    console.log('API状态: 警告');
+                    html += `<p>❌ 失败: ${data.code} - ${data.message || '未知错误'}</p>`;
+                }
+                
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.innerHTML = `<p>❌ 请求失败: ${error.message}</p>`;
+            }
+        }
+        
+        // 退出登录
+        async function logout() {
+            if (!currentCookie) return;
+            
+            try {
+                const res = await fetch(`${API_BASE}/logout?timestamp=${Date.now()}`, {
+                    headers: {
+                        'Cookie': currentCookie
+                    }
+                });
+                const data = await res.json();
+                
+                if (data.code === 200) {
+                    currentCookie = '';
+                    localStorage.removeItem('netease_cookie');
+                    document.getElementById('userInfo').style.display = 'none';
+                    document.getElementById('guestResult').innerHTML = '<p style="color:green;">✅ 已退出登录</p>';
                 }
             } catch (error) {
-                updateStat('apiStatus', '✗');
-                console.error('API状态: 异常', error);
+                console.error('退出登录失败:', error);
             }
-        });
+        }
         
-        // 添加键盘快捷键
-        document.addEventListener('keydown', (e) => {
-            // Ctrl+1 测试歌单
-            if (e.ctrlKey && e.key === '1') {
-                e.preventDefault();
-                testPlaylist();
-            }
-            // Ctrl+2 测试新音乐
-            else if (e.ctrlKey && e.key === '2') {
-                e.preventDefault();
-                testNewSongs();
+        // 页面加载时检查是否有保存的Cookie
+        window.addEventListener('load', () => {
+            const savedCookie = localStorage.getItem('netease_cookie');
+            if (savedCookie) {
+                currentCookie = savedCookie;
+                checkLoginStatus();
             }
         });
     </script>
