@@ -1,0 +1,59 @@
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">🦌</div>
+                鹿衔
+            </a>
+            <ul class="footer-links">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="gallery.html">外链画廊</a></li>
+            </ul>
+            <p class="copyright">© 2023 鹿衔 视觉设计. 保留所有权利.</p>
+        </div>
+    </div>
+</footer>
+
+<style>
+    /* 页脚特定样式 */
+    .footer {
+        margin-top: 4rem;
+        padding: 3rem 0;
+        text-align: center;
+        border-top: 1px solid var(--footer-border);
+    }
+
+    .footer-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .footer-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .footer-links a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: var(--transition);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+    }
+
+    .footer-links a:hover {
+        color: var(--text-color);
+        background: rgba(107, 112, 255, 0.1);
+    }
+
+    .copyright {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-top: 1rem;
+    }
+</style>
