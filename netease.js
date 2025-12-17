@@ -46,7 +46,38 @@ document.addEventListener('DOMContentLoaded', function() {
     // 绑定事件
     bindEvents();
 });
+// 工具函数 - 构建API URL
+function buildApiUrl(endpoint, params = {}) {
+    const baseParams = {
+        timestamp: Date.now()
+    };
+    
+    const allParams = { ...baseParams, ...params };
+    const queryString = new URLSearchParams(allParams).toString();
+    
+    return `${API_BASE}${endpoint}?${queryString}`;
+}
 
+// 格式时间
+function formatTime(milliseconds) {
+    if (!milliseconds || isNaN(milliseconds)) return '0:00';
+    const seconds = Math.floor(milliseconds / 1000);
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+// 获取音质文本
+function getQualityText(level) {
+    const qualityMap = {
+        'standard': '标准',
+        'higher': '较高',
+        'exhigh': '极高',
+        'lossless': '无损',
+        'hires': 'Hi-Res'
+    };
+    return qualityMap[level] || level;
+}
 // 初始化主题
 function initTheme() {
     const savedTheme = localStorage.getItem('netease_theme');
