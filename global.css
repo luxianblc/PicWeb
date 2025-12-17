@@ -314,3 +314,70 @@ body {
 .p-1 { padding: 1rem; }
 .p-2 { padding: 2rem; }
 .p-3 { padding: 3rem; }
+/* 组件相关样式 */
+#header-container, #footer-container {
+    width: 100%;
+}
+
+/* 组件加载动画 */
+.component-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+    color: var(--text-secondary);
+}
+
+.component-loading::after {
+    content: '加载中...';
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* 组件错误状态 */
+#header-fallback, #footer-fallback {
+    padding: 1rem;
+    margin: 1rem 0;
+    background: rgba(255, 100, 100, 0.1);
+    border: 1px solid rgba(255, 100, 100, 0.3);
+    border-radius: 8px;
+    color: #ff6b6b;
+    text-align: center;
+}
+
+/* 确保导航栏在内容之上 */
+.navbar {
+    z-index: 1000 !important;
+    position: fixed !important;
+    top: 0 !important;
+    width: 100% !important;
+}
+
+/* 主内容区域需要给导航栏留出空间 */
+.main-content {
+    padding-top: 100px !important;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .main-content {
+        padding-top: 120px !important;
+    }
+}
+
+/* 链接过渡效果 */
+.nav-link, .footer-links a {
+    transition: all 0.3s ease !important;
+}
+
+/* 活动链接高亮效果 */
+.nav-link.active {
+    background: rgba(107, 112, 255, 0.2) !important;
+    color: var(--text-color) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(107, 112, 255, 0.2) !important;
+}
