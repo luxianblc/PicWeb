@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐播放器</title>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .source-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        audio {
+            width: 100%;
+            margin: 15px 0;
+        }
+        #status {
+            color: #666;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>音乐播放器</h1>
+        
+        <div class="form-group">
+            <label for="songId">歌曲ID:</label>
+            <input type="number" id="songId" placeholder="例如: 33894312" required>
+        </div>
+
+        <div class="form-group">
+            <label>选择音源:</label>
+            <div class="source-options">
+                <div>
+                    <input type="checkbox" id="pyncmd" value="pyncmd" checked>
+                    <label for="pyncmd">pyncmd</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="kuwo" value="kuwo" checked>
+                    <label for="kuwo">kuwo</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="bodian" value="bodian" checked>
+                    <label for="bodian">bodian</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="qq" value="qq" checked>
+                    <label for="qq">qq</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="kugou" value="kugou" checked>
+                    <label for="kugou">kugou</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="migu" value="migu" checked>
+                    <label for="migu">migu</label>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="loadMusic()">加载音乐</button>
+        <div id="status"></div>
+        <audio id="audioPlayer" controls></audio>
+        <div id="error" style="color: red;"></div>
+    </div>
+
+    <script>
+        const audioPlayer = document.getElementById('audioPlayer');
+        const statusElement = document.getElementById('status');
+        const errorElement = document.getElementById('error');
+
+        async function loadMusic() {
+            const songId = document.getElementById('songId').value;
+            if (!songId) {
+                showError('请输入歌曲ID');
+                return;
+            }
+
+            // 获取选中的音源
+            const sources = ['pyncmd', 'kuwo', 'bodian', 'qq', 'kugou', 'migu']
+                .filter(source => document.getElementById(source).checked)
+                .join(',');
+
+            if (!sources) {
+                showError('请至少选择一个音源');
+                return;
+            }
+
+            try {
+                // 重置状态
+                statusElement.textContent = '正在获取音乐资源...';
+                errorElement.textContent = '';
+                audioPlayer.src = '';
+                
+                // 调用歌曲匹配接口获取播放URL (来自song_url_match模块)
+                const response = await fetch(`/song/url/match?id=${songId}&source=${sources}`);
+                const data = await response.json();
+
+                if (data.code === 200 && data.data && data.data.url) {
+                    statusElement.textContent = `正在播放来自 ${data.data.source} 的音乐`;
+                    audioPlayer.src = data.data.proxyUrl || data.data.url;
+                    audioPlayer.play().catch(err => {
+                        showError(`播放失败: ${err.message}`);
+                        console.error('播放错误:', err);
+                    });
+                } else {
+                    showError('无法获取音乐资源: ' + (data.msg || '未知错误'));
+                }
+            } catch (error) {
+                showError(`请求失败: ${error.message}`);
+                console.error('加载错误:', error);
+            }
+        }
+
+        function showError(message) {
+            errorElement.textContent = message;
+            statusElement.textContent = '';
+        }
+
+        // 监听播放状态变化
+        audioPlayer.addEventListener('play', () => {
+            statusElement.textContent = '正在播放...';
+        });
+
+        audioPlayer.addEventListener('pause', () => {
+            statusElement.textContent = '已暂停';
+        });
+
+        audioPlayer.addEventListener('ended', () => {
+            statusElement.textContent = '播放结束';
+        });
+    </script>
+</body>
+</html>
