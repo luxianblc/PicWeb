@@ -1,962 +1,1386 @@
-// 网易云音乐增强版 - JavaScript
+// 网易云音乐播放器 - 主要功能实现
 
 // 全局变量
-let API_BASE = 'https://neteaseapi-enhanced.vercel.app';
-let currentAudio = null;
-let currentTrackIndex = 0;
+let currentTrack = null;
 let isPlaying = false;
+let audioPlayer = new Audio();
 let currentPlaylist = [];
-let userCookie = null;
-let currentSongData = null;
-let repeatMode = 0; // 0: 不循环, 1: 循环列表, 2: 单曲循环
-let searchCurrentPage = 1;
-let searchTotalPage = 1;
-let currentSearchType = '1';
-let currentSearchKeywords = '';
-let currentSearchLimit = 20;
-let qrCheckInterval = null;
+let currentIndex = -1;
+let volume = 0.5;
+let playMode = 'sequential'; // sequential, repeat-one, shuffle
+let isLoggedIn = false;
+let userInfo = null;
+let searchTimeout = null;
 
-// 页面加载初始化
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('网易云音乐增强版已加载');
+// 配置
+const API_BASE_URL = 'https://netease-cloud-music-api-sigma-three.vercel.app';
+const DEFAULT_COVER = 'https://p2.music.126.net/UeTuwE7pvjBpypWLudqukA==/3132508627578625.jpg';
+
+// DOM 元素
+const elements = {
+    // 播放器控制
+    playBtn: document.getElementById('playBtn'),
+    playIcon: document.getElementById('playIcon'),
+    prevBtn: document.getElementById('prevBtn'),
+    nextBtn: document.getElementById('nextBtn'),
+    likeBtn: document.getElementById('likeBtn'),
+    modeBtn: document.getElementById('modeBtn'),
+    volumeSlider: document.getElementById('volumeSlider'),
+    volumePercent: document.getElementById('volumePercent'),
+    volumeIcon: document.getElementById('volumeIcon'),
+    
+    // 播放器显示
+    trackTitle: document.getElementById('trackTitle'),
+    trackArtist: document.getElementById('trackArtist'),
+    trackAlbum: document.getElementById('trackAlbum'),
+    trackDuration: document.getElementById('trackDuration'),
+    trackQuality: document.getElementById('trackQuality'),
+    albumArt: document.getElementById('albumArt'),
+    currentTime: document.getElementById('currentTime'),
+    totalTime: document.getElementById('totalTime'),
+    progress: document.getElementById('progress'),
+    progressBar: document.getElementById('progressBar'),
+    
+    // 搜索相关
+    searchInput: document.getElementById('searchInput'),
+    searchType: document.getElementById('searchType'),
+    searchClear: document.getElementById('searchClear'),
+    searchResults: document.getElementById('searchResults'),
+    resultCount: document.getElementById('resultCount'),
+    resultType: document.getElementById('resultType'),
+    searchStats: document.getElementById('searchStats'),
+    noResults: document.getElementById('noResults'),
+    
+    // 推荐和状态
+    recommendations: document.getElementById('recommendations'),
+    loginStatus: document.getElementById('loginStatus'),
+    qualityStatus: document.getElementById('qualityStatus'),
+    apiStatusCard: document.getElementById('apiStatusCard'),
+    playMode: document.getElementById('playMode'),
+    
+    // 主题切换
+    themeToggle: document.getElementById('themeToggle'),
+    
+    // 登录模态框
+    loginModal: document.getElementById('loginModal'),
+    loginAccount: document.getElementById('loginAccount'),
+    loginPassword: document.getElementById('loginPassword')
+};
+
+// 初始化函数
+function init() {
+    console.log('网易云音乐播放器初始化...');
+    
+    // 设置音频播放器
+    setupAudioPlayer();
+    
+    // 绑定事件监听器
+    bindEvents();
+    
+    // 检查 API 状态
+    checkApiStatus();
+    
+    // 获取推荐音乐
+    getRecommendations();
+    
+    // 检查登录状态
+    checkLoginStatus();
     
     // 初始化主题
     initTheme();
     
-    // 从本地存储加载设置
-    loadSettings();
-    
-    // 初始化播放器
-    initPlayer();
-    
-    // 初始化搜索功能
+    // 初始化搜索
     initSearch();
     
-    // 加载推荐音乐
-    getRecommendations();
-    
-    // 加载热门搜索
-    getHotSearch();
-    
-    // 检查API状态
-    checkAPIStatus();
-    
-    // 更新登录状态
-    updateLoginStatus();
-    
-    // 初始化登录标签切换
-    initLoginTabs();
-    
-    // 设置事件监听
-    setupEventListeners();
-});
-// 构建API请求URL
-function buildApiUrl(endpoint, params = {}) {
-    // API基础URL
-    const API_BASE = 'https://neteaseapi-enhanced.vercel.app';
-    
-    // 默认参数
-    const defaultParams = {
-        timestamp: Date.now(),
-        realIP: '116.25.146.177' // 可以设置为随机IP或空
-    };
-    
-    // 合并参数
-    const allParams = { ...defaultParams, ...params };
-    
-    // 构建查询字符串
-    const queryString = Object.entries(allParams)
-        .filter(([_, value]) => value !== null && value !== undefined)
-        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-        .join('&');
-    
-    // 返回完整URL
-    return `${API_BASE}${endpoint}${queryString ? '?' + queryString : ''}`;
-}
-// 初始化主题
-function initTheme() {
-    const savedTheme = localStorage.getItem('netease_theme') || 'dark';
-    setTheme(savedTheme);
-    
-    // 主题切换按钮
-    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    console.log('初始化完成！');
 }
 
-// 设置主题
-function setTheme(theme) {
-    if (theme === 'light') {
+// 设置音频播放器
+function setupAudioPlayer() {
+    audioPlayer.volume = volume;
+    audioPlayer.preload = 'metadata';
+    
+    // 音频事件监听
+    audioPlayer.addEventListener('timeupdate', updateProgress);
+    audioPlayer.addEventListener('loadedmetadata', updateDuration);
+    audioPlayer.addEventListener('ended', handleTrackEnd);
+    audioPlayer.addEventListener('error', handleAudioError);
+    audioPlayer.addEventListener('play', () => {
+        isPlaying = true;
+        updatePlayButton();
+    });
+    audioPlayer.addEventListener('pause', () => {
+        isPlaying = false;
+        updatePlayButton();
+    });
+    
+    // 设置默认专辑封面
+    setDefaultAlbumArt();
+}
+
+// 绑定事件监听器
+function bindEvents() {
+    // 播放器控制
+    elements.playBtn.addEventListener('click', togglePlay);
+    elements.prevBtn.addEventListener('click', playPrevious);
+    elements.nextBtn.addEventListener('click', playNext);
+    elements.likeBtn.addEventListener('click', toggleLike);
+    elements.modeBtn.addEventListener('click', togglePlayMode);
+    
+    // 音量控制
+    elements.volumeSlider.addEventListener('input', updateVolume);
+    
+    // 进度条控制
+    elements.progressBar.addEventListener('click', seekToPosition);
+    
+    // 主题切换
+    elements.themeToggle.addEventListener('click', toggleTheme);
+    
+    // 搜索相关
+    elements.searchInput.addEventListener('input', handleSearchInput);
+    elements.searchClear.addEventListener('click', clearSearchInput);
+    elements.searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchMusic();
+    });
+    
+    // 模态框关闭
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') hideLoginModal();
+    });
+    
+    // 点击模态框外部关闭
+    elements.loginModal.addEventListener('click', (e) => {
+        if (e.target === elements.loginModal) {
+            hideLoginModal();
+        }
+    });
+    
+    // 窗口焦点变化时检查播放状态
+    window.addEventListener('blur', () => {
+        // 保存播放状态
+        if (audioPlayer) {
+            localStorage.setItem('playbackTime', audioPlayer.currentTime);
+            localStorage.setItem('isPlaying', isPlaying);
+        }
+    });
+    
+    window.addEventListener('focus', () => {
+        // 恢复播放状态
+        const savedTime = localStorage.getItem('playbackTime');
+        const savedPlaying = localStorage.getItem('isPlaying');
+        
+        if (savedTime && currentTrack) {
+            audioPlayer.currentTime = parseFloat(savedTime);
+        }
+        
+        if (savedPlaying === 'true' && currentTrack) {
+            audioPlayer.play().catch(console.error);
+        }
+    });
+}
+
+// 初始化主题
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.remove('dark-theme');
         document.body.classList.add('light-theme');
-        document.getElementById('themeIcon').className = 'fas fa-sun';
-        localStorage.setItem('netease_theme', 'light');
+        elements.themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
     } else {
         document.body.classList.remove('light-theme');
-        document.getElementById('themeIcon').className = 'fas fa-moon';
-        localStorage.setItem('netease_theme', 'dark');
+        document.body.classList.add('dark-theme');
+        elements.themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+    }
+}
+
+// 初始化搜索功能
+function initSearch() {
+    // 清空搜索输入
+    elements.searchInput.value = '';
+    
+    // 隐藏统计信息
+    elements.searchStats.style.display = 'none';
+    
+    // 显示初始状态
+    showNoResults('输入关键词搜索音乐');
+}
+
+// 检查 API 状态
+async function checkApiStatus() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/`);
+        if (response.ok) {
+            updateApiStatus('success', 'API 正常');
+        } else {
+            updateApiStatus('error', 'API 异常');
+        }
+    } catch (error) {
+        console.error('API 状态检查失败:', error);
+        updateApiStatus('error', 'API 连接失败');
+    }
+}
+
+// 更新 API 状态显示
+function updateApiStatus(status, message) {
+    const statusElement = document.querySelector('#apiStatus');
+    if (statusElement) {
+        statusElement.textContent = message;
+    }
+    
+    if (elements.apiStatusCard) {
+        elements.apiStatusCard.textContent = message;
+        elements.apiStatusCard.className = 'status-value ' + status;
     }
 }
 
 // 切换主题
 function toggleTheme() {
-    const isLight = document.body.classList.contains('light-theme');
-    setTheme(isLight ? 'dark' : 'light');
-}
-
-// 初始化搜索功能
-function initSearch() {
-    const searchInput = document.getElementById('searchInput');
-    const searchClear = document.getElementById('searchClear');
+    const isDark = document.body.classList.contains('dark-theme');
     
-    // 输入框回车搜索
-    searchInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            searchMusic();
-        }
-    });
-    
-    // 清空搜索
-    searchClear.addEventListener('click', function() {
-        searchInput.value = '';
-        this.style.display = 'none';
-        clearSearch();
-    });
-    
-    // 输入时显示清空按钮
-    searchInput.addEventListener('input', function() {
-        searchClear.style.display = this.value ? 'block' : 'none';
-    });
-    
-    // 搜索类型切换
-    document.getElementById('searchType').addEventListener('change', function() {
-        currentSearchType = this.value;
-    });
-    
-    // 搜索数量切换
-    document.getElementById('searchLimit').addEventListener('change', function() {
-        currentSearchLimit = parseInt(this.value);
-    });
-    
-    // 搜索标签切换
-    const searchTabs = document.querySelectorAll('.search-tab');
-    searchTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            // 更新激活状态
-            searchTabs.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            
-            // 更新当前搜索类型
-            currentSearchType = this.getAttribute('data-type');
-            
-            // 重新显示搜索结果
-            if (currentSearchKeywords) {
-                searchMusic();
-            }
-        });
-    });
-    
-    // 分页按钮
-    document.getElementById('prevPage').addEventListener('click', function() {
-        if (searchCurrentPage > 1) {
-            searchCurrentPage--;
-            searchMusic();
-        }
-    });
-    
-    document.getElementById('nextPage').addEventListener('click', function() {
-        if (searchCurrentPage < searchTotalPage) {
-            searchCurrentPage++;
-            searchMusic();
-        }
-    });
-}
-
-// 初始化播放器
-function initPlayer() {
-    const audio = new Audio();
-    currentAudio = audio;
-    
-    // DOM元素
-    const playBtn = document.getElementById('playBtn');
-    const playIcon = document.getElementById('playIcon');
-    const progress = document.getElementById('progress');
-    const progressBar = document.getElementById('progressBar');
-    const volumeSlider = document.getElementById('volumeSlider');
-    const repeatBtn = document.getElementById('repeatBtn');
-    
-    // 播放/暂停
-    playBtn.addEventListener('click', togglePlay);
-    
-    // 音量控制
-    volumeSlider.addEventListener('input', function() {
-        audio.volume = this.value / 100;
-        document.getElementById('volumePercent').textContent = this.value + '%';
-        
-        // 更新音量图标
-        const volumeIcon = document.getElementById('volumeIcon');
-        if (this.value == 0) {
-            volumeIcon.className = 'fas fa-volume-mute';
-        } else if (this.value < 50) {
-            volumeIcon.className = 'fas fa-volume-down';
-        } else {
-            volumeIcon.className = 'fas fa-volume-up';
-        }
-    });
-    
-    // 进度条控制
-    progressBar.addEventListener('click', function(e) {
-        if (!audio.duration) return;
-        const percent = e.offsetX / this.clientWidth;
-        audio.currentTime = percent * audio.duration;
-    });
-    
-    // 循环模式
-    repeatBtn.addEventListener('click', function() {
-        repeatMode = (repeatMode + 1) % 3;
-        updateRepeatButton();
-    });
-    
-    // 音频事件监听
-    audio.addEventListener('timeupdate', updateProgress);
-    audio.addEventListener('loadedmetadata', function() {
-        document.getElementById('totalTime').textContent = formatTime(audio.duration);
-    });
-    audio.addEventListener('ended', function() {
-        isPlaying = false;
-        playIcon.className = 'fas fa-play';
-        
-        // 根据循环模式处理
-        if (repeatMode === 2) {
-            // 单曲循环
-            audio.currentTime = 0;
-            audio.play();
-            isPlaying = true;
-            playIcon.className = 'fas fa-pause';
-        } else if (repeatMode === 1) {
-            // 循环列表
-            playNext();
-        } else {
-            // 不循环，什么也不做
-        }
-    });
-    
-    // 上一首/下一首按钮
-    document.getElementById('prevBtn').addEventListener('click', playPrev);
-    document.getElementById('nextBtn').addEventListener('click', playNext);
-    
-    // 喜欢按钮
-    document.getElementById('likeBtn').addEventListener('click', toggleLike);
-}
-
-// 更新循环按钮
-function updateRepeatButton() {
-    const repeatBtn = document.getElementById('repeatBtn');
-    const icon = repeatBtn.querySelector('i');
-    
-    if (repeatMode === 0) {
-        icon.className = 'fas fa-redo';
-        icon.style.color = '';
-        repeatBtn.title = '列表循环';
-    } else if (repeatMode === 1) {
-        icon.className = 'fas fa-redo';
-        icon.style.color = 'var(--primary-color)';
-        repeatBtn.title = '单曲循环';
+    if (isDark) {
+        // 切换到浅色主题
+        document.body.classList.remove('dark-theme');
+        document.body.classList.add('light-theme');
+        elements.themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        localStorage.setItem('theme', 'light');
     } else {
-        icon.className = 'fas fa-redo';
-        icon.style.color = 'var(--primary-color)';
-        icon.style.textShadow = '0 0 10px var(--primary-color)';
-        repeatBtn.title = '随机播放';
+        // 切换到深色主题
+        document.body.classList.remove('light-theme');
+        document.body.classList.add('dark-theme');
+        elements.themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        localStorage.setItem('theme', 'dark');
     }
 }
 
-// 加载设置
-function loadSettings() {
-    const savedApiBase = localStorage.getItem('netease_api_base');
-    if (savedApiBase) {
-        API_BASE = savedApiBase;
-    }
-    
-    const savedCookie = localStorage.getItem('netease_cookie');
-    if (savedCookie) {
-        userCookie = savedCookie;
-    }
-}
-
-// 设置事件监听
-function setupEventListeners() {
-    // 发现链接
-    document.getElementById('discoverLink').addEventListener('click', function(e) {
-        e.preventDefault();
-        document.getElementById('searchInput').focus();
-    });
-}
-
-// 搜索音乐 - 聚合搜索
+// 搜索音乐
 async function searchMusic() {
-    const searchInput = document.getElementById('searchInput');
-    const keywords = searchInput.value.trim();
+    const keyword = elements.searchInput.value.trim();
+    const type = elements.searchType.value;
     
-    if (!keywords) {
-        alert('请输入搜索关键词');
+    if (!keyword) {
+        showNoResults('请输入搜索关键词');
         return;
     }
     
-    currentSearchKeywords = keywords;
-    searchCurrentPage = 1;
-    
     // 显示加载状态
-    const resultsContainer = document.getElementById('searchResultsContainer');
-    const searchResults = document.getElementById('searchResults');
-    const noResults = document.getElementById('noResults');
-    const searchLoading = document.getElementById('searchLoading');
-    const searchPagination = document.getElementById('searchPagination');
-    
-    resultsContainer.style.display = 'block';
-    searchResults.innerHTML = '';
-    noResults.style.display = 'none';
-    searchLoading.style.display = 'block';
-    searchPagination.style.display = 'none';
-    
-    // 更新标题
-    document.getElementById('searchResultsTitle').textContent = `搜索: ${keywords}`;
-    document.getElementById('searchResultsType').textContent = `类型: ${getSearchTypeName(currentSearchType)}`;
+    showLoading(elements.searchResults);
     
     try {
-        const params = {
-            keywords: encodeURIComponent(keywords),
-            type: currentSearchType,
-            limit: currentSearchLimit,
-            offset: (searchCurrentPage - 1) * currentSearchLimit
-        };
+        const response = await fetch(`${API_BASE_URL}/search?keywords=${encodeURIComponent(keyword)}&type=${type}`);
         
-        if (userCookie) params.cookie = userCookie;
-        
-        const url = buildApiUrl('/cloudsearch', params);
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        searchLoading.style.display = 'none';
-        
-        if (data.code === 200) {
-            displaySearchResults(data.result);
-            updateSearchPagination(data.result);
-        } else {
-            noResults.style.display = 'block';
-            noResults.innerHTML = `
-                <i class="fas fa-exclamation-triangle fa-3x"></i>
-                <h4>搜索失败</h4>
-                <p>${data.message || '未知错误'}</p>
-            `;
+        if (!response.ok) {
+            throw new Error(`搜索失败: ${response.status}`);
         }
+        
+        const data = await response.json();
+        displaySearchResults(data, type);
+        
+        // 更新统计信息
+        updateSearchStats(data, type);
+        
     } catch (error) {
-        searchLoading.style.display = 'none';
-        noResults.style.display = 'block';
-        noResults.innerHTML = `
-            <i class="fas fa-wifi-slash fa-3x"></i>
-            <h4>网络错误</h4>
-            <p>${error.message}</p>
-        `;
+        console.error('搜索错误:', error);
+        showNoResults('搜索失败，请重试');
+        elements.searchStats.style.display = 'none';
     }
+}
+
+// 处理搜索输入
+function handleSearchInput() {
+    const keyword = elements.searchInput.value.trim();
+    
+    // 显示/隐藏清除按钮
+    if (keyword.length > 0) {
+        elements.searchClear.style.display = 'block';
+    } else {
+        elements.searchClear.style.display = 'none';
+    }
+    
+    // 防抖搜索建议
+    clearTimeout(searchTimeout);
+    if (keyword.length >= 2) {
+        searchTimeout = setTimeout(() => {
+            showSearchSuggestions(keyword);
+        }, 300);
+    }
+}
+
+// 显示搜索建议
+function showSearchSuggestions(keyword) {
+    // 这里可以添加搜索建议的实现
+    console.log('搜索建议:', keyword);
+}
+
+// 清除搜索输入
+function clearSearchInput() {
+    elements.searchInput.value = '';
+    elements.searchClear.style.display = 'none';
+    elements.searchInput.focus();
+    showNoResults('输入关键词搜索音乐');
+    elements.searchStats.style.display = 'none';
+}
+
+// 清空搜索结果
+function clearSearchResults() {
+    elements.searchResults.innerHTML = '';
+    showNoResults('输入关键词搜索音乐');
+    elements.searchStats.style.display = 'none';
+    elements.searchInput.value = '';
+    elements.searchClear.style.display = 'none';
+}
+
+// 显示加载状态
+function showLoading(container) {
+    container.innerHTML = `
+        <div class="loading">
+            <div class="loading-spinner"></div>
+        </div>
+    `;
+}
+
+// 显示无结果状态
+function showNoResults(message) {
+    elements.noResults.innerHTML = `
+        <i class="fas fa-search"></i>
+        <p>${message}</p>
+    `;
+    elements.noResults.style.display = 'flex';
+    elements.searchResults.appendChild(elements.noResults);
 }
 
 // 显示搜索结果
-function displaySearchResults(result) {
-    const searchResults = document.getElementById('searchResults');
-    const noResults = document.getElementById('noResults');
+function displaySearchResults(data, type) {
+    const container = elements.searchResults;
+    container.innerHTML = '';
     
-    // 清空结果
-    searchResults.innerHTML = '';
+    if (!data.result || data.result.length === 0) {
+        showNoResults('未找到相关结果');
+        return;
+    }
     
-    // 根据搜索类型显示不同结果
-    let songs = [];
-    let resultCount = 0;
-    
-    switch (currentSearchType) {
+    // 根据类型显示不同格式的结果
+    switch (type) {
         case '1': // 单曲
-            if (result.songs) {
-                songs = result.songs;
-                currentPlaylist = songs;
-                resultCount = result.songCount || songs.length;
-            }
-            break;
-        case '10': // 专辑
-            if (result.albums) {
-                songs = result.albums;
-                resultCount = result.albumCount || songs.length;
-            }
+            displaySongs(data.result.songs || [], container);
             break;
         case '100': // 歌手
-            if (result.artists) {
-                songs = result.artists;
-                resultCount = result.artistCount || songs.length;
-            }
+            displayArtists(data.result.artists || [], container);
+            break;
+        case '10': // 专辑
+            displayAlbums(data.result.albums || [], container);
             break;
         case '1000': // 歌单
-            if (result.playlists) {
-                songs = result.playlists;
-                resultCount = result.playlistCount || songs.length;
-            }
+            displayPlaylists(data.result.playlists || [], container);
             break;
-        case '1018': // 综合
-            // 综合搜索显示所有类型
-            displayComprehensiveResults(result);
-            return;
-    }
-    
-    // 更新结果数量
-    document.getElementById('searchResultsCount').textContent = `${resultCount} 个结果`;
-    
-    // 更新标签计数
-    updateTabCounts(result);
-    
-    if (songs.length === 0) {
-        noResults.style.display = 'block';
-        return;
-    }
-    
-    noResults.style.display = 'none';
-    
-    // 生成HTML
-    let html = '';
-    
-    songs.forEach((item, index) => {
-        if (currentSearchType === '1') {
-            // 单曲
-            const artists = item.ar ? item.ar.map(artist => artist.name).join(', ') : '未知';
-            const album = item.al ? item.al.name : '未知';
-            const cover = item.al ? item.al.picUrl : '';
-            const duration = formatTime(item.dt);
-            
-            html += `
-                <div class="song-item" onclick="playSearchResult(${index})" data-id="${item.id}">
-                    <div class="song-cover">
-                        ${cover ? `<img src="${cover}?param=50y50" alt="${item.name}">` : 
-                                  `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-music"></i></div>`}
-                    </div>
-                    <div class="song-info">
-                        <div class="song-title">${item.name}</div>
-                        <div class="song-artist">${artists} - ${album}</div>
-                    </div>
-                    <div class="song-duration">${duration}</div>
-                </div>
-            `;
-        } else if (currentSearchType === '10') {
-            // 专辑
-            const artist = item.artist ? item.artist.name : '未知';
-            const songCount = item.size || 0;
-            
-            html += `
-                <div class="song-item" onclick="viewAlbum(${item.id})">
-                    <div class="song-cover">
-                        ${item.picUrl ? `<img src="${item.picUrl}?param=50y50" alt="${item.name}">` : 
-                                       `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-compact-disc"></i></div>`}
-                    </div>
-                    <div class="song-info">
-                        <div class="song-title">${item.name}</div>
-                        <div class="song-artist">${artist} · ${songCount}首</div>
-                    </div>
-                </div>
-            `;
-        } else if (currentSearchType === '100') {
-            // 歌手
-            const albumCount = item.albumSize || 0;
-            const mvCount = item.mvSize || 0;
-            
-            html += `
-                <div class="song-item" onclick="viewArtist(${item.id})">
-                    <div class="song-cover">
-                        ${item.picUrl ? `<img src="${item.picUrl}?param=50y50" alt="${item.name}">` : 
-                                       `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-user"></i></div>`}
-                    </div>
-                    <div class="song-info">
-                        <div class="song-title">${item.name}</div>
-                        <div class="song-artist">专辑: ${albumCount} · MV: ${mvCount}</div>
-                    </div>
-                </div>
-            `;
-        } else if (currentSearchType === '1000') {
-            // 歌单
-            const creator = item.creator ? item.creator.nickname : '未知';
-            const trackCount = item.trackCount || 0;
-            
-            html += `
-                <div class="song-item" onclick="viewPlaylist(${item.id})">
-                    <div class="song-cover">
-                        ${item.coverImgUrl ? `<img src="${item.coverImgUrl}?param=50y50" alt="${item.name}">` : 
-                                           `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-list"></i></div>`}
-                    </div>
-                    <div class="song-info">
-                        <div class="song-title">${item.name}</div>
-                        <div class="song-artist">by ${creator} · ${trackCount}首</div>
-                    </div>
-                </div>
-            `;
-        }
-    });
-    
-    searchResults.innerHTML = html;
-}
-
-// 显示综合搜索结果
-function displayComprehensiveResults(result) {
-    const searchResults = document.getElementById('searchResults');
-    const noResults = document.getElementById('noResults');
-    
-    // 清空结果
-    searchResults.innerHTML = '';
-    
-    // 更新结果数量
-    const totalCount = (result.songCount || 0) + (result.albumCount || 0) + 
-                      (result.artistCount || 0) + (result.playlistCount || 0);
-    document.getElementById('searchResultsCount').textContent = `${totalCount} 个结果`;
-    
-    // 更新标签计数
-    updateTabCounts(result);
-    
-    if (totalCount === 0) {
-        noResults.style.display = 'block';
-        return;
-    }
-    
-    noResults.style.display = 'none';
-    
-    // 显示单曲（最多5首）
-    if (result.songs && result.songs.length > 0) {
-        searchResults.innerHTML += '<div class="result-section"><h5>单曲</h5></div>';
-        
-        result.songs.slice(0, 5).forEach((song, index) => {
-            const artists = song.ar ? song.ar.map(artist => artist.name).join(', ') : '未知';
-            const album = song.al ? song.al.name : '未知';
-            const cover = song.al ? song.al.picUrl : '';
-            const duration = formatTime(song.dt);
-            
-            searchResults.innerHTML += `
-                <div class="song-item" onclick="playSearchResult(${index})" data-id="${song.id}">
-                    <div class="song-cover">
-                        ${cover ? `<img src="${cover}?param=50y50" alt="${song.name}">` : 
-                                  `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-music"></i></div>`}
-                    </div>
-                    <div class="song-info">
-                        <div class="song-title">${song.name}</div>
-                        <div class="song-artist">${artists} - ${album}</div>
-                    </div>
-                    <div class="song-duration">${duration}</div>
-                </div>
-            `;
-        });
-        
-        if (result.songs.length > 5) {
-            searchResults.innerHTML += `
-                <div class="more-results" onclick="switchToTab('1')">
-                    查看全部 ${result.songCount || result.songs.length} 首单曲 <i class="fas fa-chevron-right"></i>
-                </div>
-            `;
-        }
-    }
-    
-    // 显示专辑（最多3个）
-    if (result.albums && result.albums.length > 0) {
-        searchResults.innerHTML += '<div class="result-section"><h5>专辑</h5></div>';
-        
-        result.albums.slice(0, 3).forEach(album => {
-            const artist = album.artist ? album.artist.name : '未知';
-            const songCount = album.size || 0;
-            
-            searchResults.innerHTML += `
-                <div class="song-item" onclick="viewAlbum(${album.id})">
-                    <div class="song-cover">
-                        ${album.picUrl ? `<img src="${album.picUrl}?param=50y50" alt="${album.name}">` : 
-                                       `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-compact-disc"></i></div>`}
-                    </div>
-                    <div class="song-info">
-                        <div class="song-title">${album.name}</div>
-                        <div class="song-artist">${artist} · ${songCount}首</div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        if (result.albums.length > 3) {
-            searchResults.innerHTML += `
-                <div class="more-results" onclick="switchToTab('10')">
-                    查看全部 ${result.albumCount || result.albums.length} 张专辑 <i class="fas fa-chevron-right"></i>
-                </div>
-            `;
-        }
-    }
-    
-    // 显示歌手（最多3个）
-    if (result.artists && result.artists.length > 0) {
-        searchResults.innerHTML += '<div class="result-section"><h5>歌手</h5></div>';
-        
-        result.artists.slice(0, 3).forEach(artist => {
-            const albumCount = artist.albumSize || 0;
-            const mvCount = artist.mvSize || 0;
-            
-            searchResults.innerHTML += `
-                <div class="song-item" onclick="viewArtist(${artist.id})">
-                    <div class="song-cover">
-                        ${artist.picUrl ? `<img src="${artist.picUrl}?param=50y50" alt="${artist.name}">` : 
-                                        `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-user"></i></div>`}
-                    </div>
-                    <div class="song-info">
-                        <div class="song-title">${artist.name}</div>
-                        <div class="song-artist">专辑: ${albumCount} · MV: ${mvCount}</div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        if (result.artists.length > 3) {
-            searchResults.innerHTML += `
-                <div class="more-results" onclick="switchToTab('100')">
-                    查看全部 ${result.artistCount || result.artists.length} 位歌手 <i class="fas fa-chevron-right"></i>
-                </div>
-            `;
-        }
-    }
-    
-    // 显示歌单（最多3个）
-    if (result.playlists && result.playlists.length > 0) {
-        searchResults.innerHTML += '<div class="result-section"><h5>歌单</h5></div>';
-        
-        result.playlists.slice(0, 3).forEach(playlist => {
-            const creator = playlist.creator ? playlist.creator.nickname : '未知';
-            const trackCount = playlist.trackCount || 0;
-            
-            searchResults.innerHTML += `
-                <div class="song-item" onclick="viewPlaylist(${playlist.id})">
-                    <div class="song-cover">
-                        ${playlist.coverImgUrl ? `<img src="${playlist.coverImgUrl}?param=50y50" alt="${playlist.name}">` : 
-                                               `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-list"></i></div>`}
-                    </div>
-                    <div class="song-info">
-                        <div class="song-title">${playlist.name}</div>
-                        <div class="song-artist">by ${creator} · ${trackCount}首</div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        if (result.playlists.length > 3) {
-            searchResults.innerHTML += `
-                <div class="more-results" onclick="switchToTab('1000')">
-                    查看全部 ${result.playlistCount || result.playlists.length} 个歌单 <i class="fas fa-chevron-right"></i>
-                </div>
-            `;
-        }
+        case '1004': // MV
+            displayMVs(data.result.mvs || [], container);
+            break;
+        default:
+            displaySongs(data.result.songs || [], container);
     }
 }
 
-// 切换到指定标签
-function switchToTab(type) {
-    currentSearchType = type;
+// 显示歌曲列表
+function displaySongs(songs, container) {
+    songs.forEach((song, index) => {
+        const songElement = createSongElement(song, index);
+        container.appendChild(songElement);
+    });
+}
+
+// 创建歌曲元素
+function createSongElement(song, index) {
+    const div = document.createElement('div');
+    div.className = 'song-item';
+    div.dataset.id = song.id;
+    div.dataset.index = index;
     
-    // 更新标签激活状态
-    const searchTabs = document.querySelectorAll('.search-tab');
-    searchTabs.forEach(tab => {
-        tab.classList.remove('active');
-        if (tab.getAttribute('data-type') === type) {
-            tab.classList.add('active');
-        }
+    const coverUrl = song.al?.picUrl || DEFAULT_COVER;
+    const artists = song.ar?.map(artist => artist.name).join(' / ') || '未知歌手';
+    const album = song.al?.name || '未知专辑';
+    const duration = formatTime(song.dt / 1000);
+    
+    div.innerHTML = `
+        <div class="song-cover">
+            <img src="${coverUrl}" alt="${song.name}" loading="lazy">
+        </div>
+        <div class="song-info">
+            <div class="song-title">${song.name}</div>
+            <div class="song-artist">${artists} - ${album}</div>
+        </div>
+        <div class="song-duration">${duration}</div>
+    `;
+    
+    div.addEventListener('click', () => {
+        playSong(song, index);
+        highlightActiveSong(div);
     });
     
-    // 重新搜索
+    return div;
+}
+
+// 显示艺术家
+function displayArtists(artists, container) {
+    artists.forEach(artist => {
+        const div = document.createElement('div');
+        div.className = 'song-item';
+        
+        const imgUrl = artist.img1v1Url || artist.picUrl || DEFAULT_COVER;
+        
+        div.innerHTML = `
+            <div class="song-cover">
+                <img src="${imgUrl}" alt="${artist.name}" loading="lazy">
+            </div>
+            <div class="song-info">
+                <div class="song-title">${artist.name}</div>
+                <div class="song-artist">
+                    <span class="tag">${artist.alias?.join(' / ') || ''}</span>
+                    <span>专辑数: ${artist.albumSize}</span>
+                </div>
+            </div>
+            <div class="song-duration">
+                <button class="btn btn-secondary" onclick="searchArtistSongs(${artist.id})">
+                    查看歌曲
+                </button>
+            </div>
+        `;
+        
+        container.appendChild(div);
+    });
+}
+
+// 搜索艺术家的歌曲
+function searchArtistSongs(artistId) {
+    elements.searchType.value = '1';
+    elements.searchInput.value = `artist:${artistId}`;
     searchMusic();
 }
 
-// 更新搜索分页
-function updateSearchPagination(result) {
-    const total = result.songCount || result.albumCount || result.artistCount || result.playlistCount || 0;
-    searchTotalPage = Math.ceil(total / currentSearchLimit);
-    
-    const pagination = document.getElementById('searchPagination');
-    const prevBtn = document.getElementById('prevPage');
-    const nextBtn = document.getElementById('nextPage');
-    const currentPage = document.getElementById('currentPage');
-    
-    currentPage.textContent = searchCurrentPage;
-    
-    if (searchTotalPage > 1) {
-        pagination.style.display = 'flex';
-        prevBtn.disabled = searchCurrentPage <= 1;
-        nextBtn.disabled = searchCurrentPage >= searchTotalPage;
-    } else {
-        pagination.style.display = 'none';
-    }
+// 显示专辑
+function displayAlbums(albums, container) {
+    albums.forEach(album => {
+        const div = document.createElement('div');
+        div.className = 'song-item';
+        
+        div.innerHTML = `
+            <div class="song-cover">
+                <img src="${album.picUrl}" alt="${album.name}" loading="lazy">
+            </div>
+            <div class="song-info">
+                <div class="song-title">${album.name}</div>
+                <div class="song-artist">
+                    ${album.artist?.name || '未知歌手'} • ${album.size} 首
+                </div>
+            </div>
+            <div class="song-duration">
+                <button class="btn btn-secondary" onclick="playAlbum(${album.id})">
+                    播放专辑
+                </button>
+            </div>
+        `;
+        
+        container.appendChild(div);
+    });
 }
 
-// 更新标签计数
-function updateTabCounts(result) {
-    document.getElementById('songCount').textContent = result.songCount || 0;
-    document.getElementById('albumCount').textContent = result.albumCount || 0;
-    document.getElementById('artistCount').textContent = result.artistCount || 0;
-    document.getElementById('playlistCount').textContent = result.playlistCount || 0;
-}
-
-// 清空搜索
-function clearSearch() {
-    const resultsContainer = document.getElementById('searchResultsContainer');
-    resultsContainer.style.display = 'none';
-    document.getElementById('searchInput').value = '';
-    currentSearchKeywords = '';
-}
-
-// 获取热门搜索
-async function getHotSearch() {
+// 播放专辑
+async function playAlbum(albumId) {
     try {
-        const url = buildApiUrl('/search/hot/detail');
-        const response = await fetch(url);
+        const response = await fetch(`${API_BASE_URL}/album?id=${albumId}`);
         const data = await response.json();
         
-        if (data.code === 200 && data.data) {
-            displayHotSearch(data.data.slice(0, 10));
+        if (data.songs) {
+            currentPlaylist = data.songs;
+            currentIndex = 0;
+            playSong(currentPlaylist[0], 0);
+            showNotification('已加载专辑歌曲');
         }
     } catch (error) {
-        console.error('获取热门搜索失败:', error);
+        console.error('加载专辑失败:', error);
+        showNotification('加载专辑失败', 'error');
     }
 }
 
-// 显示热门搜索
-function displayHotSearch(hotList) {
-    const hotSearchTags = document.getElementById('hotSearchTags');
-    
-    let html = '';
-    hotList.forEach((item, index) => {
-        html += `
-            <button class="hot-tag" onclick="setSearchKeyword('${item.searchWord}')">
-                ${index < 3 ? `<span style="color: var(--primary-color);">${index + 1}</span>` : index + 1}. ${item.searchWord}
-            </button>
+// 显示歌单
+function displayPlaylists(playlists, container) {
+    playlists.forEach(playlist => {
+        const div = document.createElement('div');
+        div.className = 'song-item';
+        
+        div.innerHTML = `
+            <div class="song-cover">
+                <img src="${playlist.coverImgUrl}" alt="${playlist.name}" loading="lazy">
+            </div>
+            <div class="song-info">
+                <div class="song-title">${playlist.name}</div>
+                <div class="song-artist">
+                    <span class="tag">${playlist.trackCount} 首</span>
+                    <span>播放: ${formatCount(playlist.playCount)}</span>
+                </div>
+            </div>
+            <div class="song-duration">
+                <button class="btn btn-secondary" onclick="playPlaylist(${playlist.id})">
+                    播放歌单
+                </button>
+            </div>
         `;
+        
+        container.appendChild(div);
+    });
+}
+
+// 播放歌单
+async function playPlaylist(playlistId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/playlist/detail?id=${playlistId}`);
+        const data = await response.json();
+        
+        if (data.playlist?.tracks) {
+            currentPlaylist = data.playlist.tracks;
+            currentIndex = 0;
+            playSong(currentPlaylist[0], 0);
+            showNotification('已加载歌单歌曲');
+        }
+    } catch (error) {
+        console.error('加载歌单失败:', error);
+        showNotification('加载歌单失败', 'error');
+    }
+}
+
+// 显示 MV
+function displayMVs(mvs, container) {
+    mvs.forEach(mv => {
+        const div = document.createElement('div');
+        div.className = 'song-item';
+        
+        div.innerHTML = `
+            <div class="song-cover">
+                <img src="${mv.imgurl}" alt="${mv.name}" loading="lazy">
+            </div>
+            <div class="song-info">
+                <div class="song-title">${mv.name}</div>
+                <div class="song-artist">
+                    ${mv.artistName} • ${formatCount(mv.playCount)} 播放
+                </div>
+            </div>
+            <div class="song-duration">
+                <button class="btn btn-secondary" onclick="playMV(${mv.id})">
+                    播放 MV
+                </button>
+            </div>
+        `;
+        
+        container.appendChild(div);
+    });
+}
+
+// 播放 MV
+function playMV(mvId) {
+    showNotification('MV 播放功能开发中');
+    // 这里可以添加 MV 播放的实现
+}
+
+// 更新搜索统计
+function updateSearchStats(data, type) {
+    const typeMap = {
+        '1': '单曲',
+        '100': '歌手',
+        '10': '专辑',
+        '1000': '歌单',
+        '1004': 'MV'
+    };
+    
+    let count = 0;
+    if (data.result) {
+        switch (type) {
+            case '1': count = data.result.songCount || 0; break;
+            case '100': count = data.result.artistCount || 0; break;
+            case '10': count = data.result.albumCount || 0; break;
+            case '1000': count = data.result.playlistCount || 0; break;
+            case '1004': count = data.result.mvCount || 0; break;
+        }
+    }
+    
+    elements.resultCount.textContent = count;
+    elements.resultType.textContent = typeMap[type] || '未知';
+    elements.searchStats.style.display = 'flex';
+}
+
+// 播放歌曲
+async function playSong(song, index) {
+    if (!song) return;
+    
+    try {
+        // 获取歌曲详情
+        const response = await fetch(`${API_BASE_URL}/song/url?id=${song.id}`);
+        const data = await response.json();
+        
+        if (!data.data || data.data.length === 0 || !data.data[0].url) {
+            throw new Error('无法获取歌曲URL');
+        }
+        
+        const songUrl = data.data[0].url;
+        const quality = data.data[0].type || 'standard';
+        
+        // 停止当前播放
+        audioPlayer.pause();
+        
+        // 设置新歌曲
+        audioPlayer.src = songUrl;
+        
+        // 更新当前播放信息
+        currentTrack = song;
+        currentIndex = index;
+        
+        // 更新显示信息
+        updatePlayerInfo(song, quality);
+        
+        // 播放
+        await audioPlayer.play();
+        isPlaying = true;
+        updatePlayButton();
+        
+        // 高亮当前播放的歌曲
+        highlightCurrentSong();
+        
+        // 添加到播放历史
+        addToPlayHistory(song);
+        
+        console.log('正在播放:', song.name);
+        
+    } catch (error) {
+        console.error('播放失败:', error);
+        showNotification('播放失败，请重试', 'error');
+    }
+}
+
+// 更新播放器信息
+function updatePlayerInfo(song, quality) {
+    // 歌曲信息
+    elements.trackTitle.textContent = song.name || '未知歌曲';
+    
+    // 艺术家信息
+    const artists = song.ar ? song.ar.map(artist => artist.name).join(' / ') : 
+                  song.artists ? song.artists.map(artist => artist.name).join(' / ') : '未知歌手';
+    elements.trackArtist.textContent = artists;
+    
+    // 专辑信息
+    const album = song.al ? song.al.name : 
+                 song.album ? song.album.name : '未知专辑';
+    elements.trackAlbum.textContent = `专辑：${album}`;
+    
+    // 时长
+    const duration = song.dt ? song.dt / 1000 : 
+                    song.duration ? song.duration / 1000 : 0;
+    elements.trackDuration.textContent = `时长：${formatTime(duration)}`;
+    
+    // 音质
+    const qualityMap = {
+        'standard': '标准音质',
+        'higher': '较高音质',
+        'exhigh': '极高音质',
+        'lossless': '无损音质',
+        'hires': 'Hi-Res'
+    };
+    elements.trackQuality.textContent = `音质：${qualityMap[quality] || '未知'}`;
+    
+    // 专辑封面
+    updateAlbumArt(song);
+}
+
+// 更新专辑封面
+function updateAlbumArt(song) {
+    const albumArtElement = elements.albumArt;
+    
+    // 获取封面 URL
+    const coverUrl = song.al ? song.al.picUrl : 
+                    song.album ? song.album.picUrl : 
+                    DEFAULT_COVER;
+    
+    // 创建图片元素
+    const img = new Image();
+    img.src = coverUrl;
+    img.alt = song.name || '专辑封面';
+    img.onload = () => {
+        // 图片加载成功后替换内容
+        albumArtElement.innerHTML = '';
+        albumArtElement.appendChild(img);
+        albumArtElement.classList.remove('default');
+    };
+    
+    img.onerror = () => {
+        // 图片加载失败，使用默认图标
+        setDefaultAlbumArt();
+    };
+}
+
+// 设置默认专辑封面
+function setDefaultAlbumArt() {
+    elements.albumArt.innerHTML = '<i class="fas fa-music"></i>';
+    elements.albumArt.classList.add('default');
+}
+
+// 切换播放/暂停
+function togglePlay() {
+    if (!currentTrack) {
+        // 如果没有当前曲目，尝试播放第一首推荐歌曲
+        const firstSong = document.querySelector('.song-item');
+        if (firstSong) {
+            const index = parseInt(firstSong.dataset.index);
+            const songId = firstSong.dataset.id;
+            // 这里需要从数据中获取歌曲对象
+            // 暂时播放第一首
+            const playButtons = document.querySelectorAll('.song-item');
+            if (playButtons.length > 0) {
+                playButtons[0].click();
+            }
+        }
+        return;
+    }
+    
+    if (audioPlayer.paused) {
+        audioPlayer.play().then(() => {
+            isPlaying = true;
+            updatePlayButton();
+        }).catch(error => {
+            console.error('播放失败:', error);
+            showNotification('播放失败', 'error');
+        });
+    } else {
+        audioPlayer.pause();
+        isPlaying = false;
+        updatePlayButton();
+    }
+}
+
+// 更新播放按钮
+function updatePlayButton() {
+    const icon = elements.playIcon;
+    if (isPlaying) {
+        icon.classList.remove('fa-play');
+        icon.classList.add('fa-pause');
+        elements.playBtn.title = '暂停';
+    } else {
+        icon.classList.remove('fa-pause');
+        icon.classList.add('fa-play');
+        elements.playBtn.title = '播放';
+    }
+}
+
+// 播放上一首
+function playPrevious() {
+    if (!currentPlaylist.length) return;
+    
+    let newIndex;
+    switch (playMode) {
+        case 'sequential':
+        case 'repeat-one':
+            newIndex = currentIndex - 1;
+            if (newIndex < 0) newIndex = currentPlaylist.length - 1;
+            break;
+        case 'shuffle':
+            newIndex = Math.floor(Math.random() * currentPlaylist.length);
+            break;
+    }
+    
+    if (currentPlaylist[newIndex]) {
+        playSong(currentPlaylist[newIndex], newIndex);
+    }
+}
+
+// 播放下一首
+function playNext() {
+    if (!currentPlaylist.length) return;
+    
+    let newIndex;
+    switch (playMode) {
+        case 'sequential':
+        case 'repeat-one':
+            newIndex = currentIndex + 1;
+            if (newIndex >= currentPlaylist.length) newIndex = 0;
+            break;
+        case 'shuffle':
+            newIndex = Math.floor(Math.random() * currentPlaylist.length);
+            break;
+    }
+    
+    if (currentPlaylist[newIndex]) {
+        playSong(currentPlaylist[newIndex], newIndex);
+    }
+}
+
+// 切换播放模式
+function togglePlayMode() {
+    const modes = ['sequential', 'repeat-one', 'shuffle'];
+    const modeNames = ['顺序播放', '单曲循环', '随机播放'];
+    const modeIcons = ['fa-retweet', 'fa-redo', 'fa-random'];
+    
+    const currentModeIndex = modes.indexOf(playMode);
+    const nextModeIndex = (currentModeIndex + 1) % modes.length;
+    
+    playMode = modes[nextModeIndex];
+    
+    // 更新按钮图标和文字
+    const modeIcon = modeIcons[nextModeIndex];
+    elements.modeBtn.innerHTML = `<i class="fas ${modeIcon}"></i>`;
+    elements.modeBtn.title = modeNames[nextModeIndex];
+    
+    // 更新状态显示
+    if (elements.playMode) {
+        elements.playMode.textContent = modeNames[nextModeIndex];
+        elements.playMode.className = 'status-value info';
+    }
+    
+    showNotification(`播放模式：${modeNames[nextModeIndex]}`);
+}
+
+// 更新音量
+function updateVolume() {
+    volume = elements.volumeSlider.value / 100;
+    audioPlayer.volume = volume;
+    elements.volumePercent.textContent = `${elements.volumeSlider.value}%`;
+    
+    // 更新音量图标
+    const icon = elements.volumeIcon;
+    if (volume === 0) {
+        icon.className = 'fas fa-volume-mute';
+    } else if (volume < 0.5) {
+        icon.className = 'fas fa-volume-down';
+    } else {
+        icon.className = 'fas fa-volume-up';
+    }
+}
+
+// 更新播放进度
+function updateProgress() {
+    const current = audioPlayer.currentTime;
+    const duration = audioPlayer.duration || 1;
+    const percent = (current / duration) * 100;
+    
+    elements.progress.style.width = `${percent}%`;
+    elements.currentTime.textContent = formatTime(current);
+    
+    // 保存播放进度
+    if (currentTrack) {
+        localStorage.setItem(`progress_${currentTrack.id}`, current.toString());
+    }
+}
+
+// 更新总时长
+function updateDuration() {
+    const duration = audioPlayer.duration;
+    if (duration) {
+        elements.totalTime.textContent = formatTime(duration);
+    }
+}
+
+// 跳转到指定位置
+function seekToPosition(e) {
+    const rect = elements.progressBar.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    const duration = audioPlayer.duration;
+    
+    if (duration) {
+        audioPlayer.currentTime = pos * duration;
+    }
+}
+
+// 处理歌曲结束
+function handleTrackEnd() {
+    if (playMode === 'repeat-one') {
+        // 单曲循环
+        audioPlayer.currentTime = 0;
+        audioPlayer.play();
+    } else {
+        // 播放下一首
+        playNext();
+    }
+}
+
+// 处理音频错误
+function handleAudioError() {
+    console.error('音频播放错误');
+    showNotification('播放失败，请重试', 'error');
+    
+    // 尝试播放下一首
+    if (currentPlaylist.length > 1) {
+        setTimeout(playNext, 1000);
+    }
+}
+
+// 切换喜欢状态
+function toggleLike() {
+    const icon = elements.likeBtn.querySelector('i');
+    
+    if (icon.classList.contains('far')) {
+        // 未喜欢 -> 喜欢
+        icon.classList.remove('far');
+        icon.classList.add('fas');
+        elements.likeBtn.title = '取消喜欢';
+        
+        if (currentTrack) {
+            addToFavorites(currentTrack);
+            showNotification('已添加到喜欢列表');
+        }
+    } else {
+        // 喜欢 -> 未喜欢
+        icon.classList.remove('fas');
+        icon.classList.add('far');
+        elements.likeBtn.title = '喜欢';
+        
+        if (currentTrack) {
+            removeFromFavorites(currentTrack.id);
+            showNotification('已从喜欢列表移除');
+        }
+    }
+}
+
+// 添加到喜欢列表
+function addToFavorites(song) {
+    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const exists = favorites.some(fav => fav.id === song.id);
+    
+    if (!exists) {
+        favorites.push({
+            id: song.id,
+            name: song.name,
+            artists: song.ar ? song.ar.map(artist => artist.name) : [],
+            album: song.al ? song.al.name : '',
+            duration: song.dt,
+            cover: song.al ? song.al.picUrl : DEFAULT_COVER,
+            addedAt: new Date().toISOString()
+        });
+        
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+    }
+}
+
+// 从喜欢列表移除
+function removeFromFavorites(songId) {
+    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    favorites = favorites.filter(fav => fav.id !== songId);
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+}
+
+// 添加到播放历史
+function addToPlayHistory(song) {
+    let history = JSON.parse(localStorage.getItem('playHistory') || '[]');
+    
+    // 移除重复项
+    history = history.filter(item => item.id !== song.id);
+    
+    // 添加到开头
+    history.unshift({
+        id: song.id,
+        name: song.name,
+        artists: song.ar ? song.ar.map(artist => artist.name) : [],
+        album: song.al ? song.al.name : '',
+        cover: song.al ? song.al.picUrl : DEFAULT_COVER,
+        playedAt: new Date().toISOString()
     });
     
-    hotSearchTags.innerHTML = html;
-}
-
-// 设置搜索关键词
-function setSearchKeyword(keyword) {
-    document.getElementById('searchInput').value = keyword;
-    document.getElementById('searchClear').style.display = 'block';
-    searchMusic();
-}
-
-// 播放搜索结果
-async function playSearchResult(index) {
-    const song = currentPlaylist[index];
+    // 限制历史记录数量
+    if (history.length > 100) {
+        history = history.slice(0, 100);
+    }
     
-    // 更新高亮
-    document.querySelectorAll('#searchResults .song-item').forEach(item => {
+    localStorage.setItem('playHistory', JSON.stringify(history));
+}
+
+// 高亮当前播放的歌曲
+function highlightCurrentSong() {
+    // 移除所有 active 类
+    document.querySelectorAll('.song-item.active').forEach(item => {
         item.classList.remove('active');
     });
-    event.currentTarget.classList.add('active');
     
-    // 更新播放器显示
-    document.getElementById('trackTitle').textContent = song.name;
-    document.getElementById('trackArtist').textContent = song.ar ? song.ar.map(artist => artist.name).join(', ') : '未知';
-    document.getElementById('trackAlbum').textContent = '专辑：' + (song.al ? song.al.name : '未知');
-    document.getElementById('trackDuration').textContent = '时长：' + formatTime(song.dt);
-    
-    // 更新专辑封面
-    const albumArt = document.getElementById('albumArt');
-    if (song.al && song.al.picUrl) {
-        albumArt.className = 'album-art';
-        albumArt.innerHTML = `<img src="${song.al.picUrl}?param=200y200" alt="${song.name}">`;
-    } else {
-        albumArt.className = 'album-art default';
-        albumArt.innerHTML = '<i class="fas fa-music"></i>';
+    // 为当前播放的歌曲添加 active 类
+    const currentSongElement = document.querySelector(`.song-item[data-id="${currentTrack?.id}"]`);
+    if (currentSongElement) {
+        currentSongElement.classList.add('active');
+        currentSongElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-    
-    // 获取播放链接
-    try {
-        const params = {
-            id: song.id,
-            level: userCookie ? 'exhigh' : 'standard'
-        };
-        
-        if (userCookie) params.cookie = userCookie;
-        
-        const url = buildApiUrl('/song/url/v1', params);
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        if (data.code === 200 && data.data && data.data[0].url) {
-            const songData = data.data[0];
-            document.getElementById('trackQuality').textContent = '音质：' + getQualityText(songData.level);
-            
-            // 播放
-            currentAudio.src = songData.url;
-            currentAudio.play().then(() => {
-                isPlaying = true;
-                document.getElementById('playIcon').className = 'fas fa-pause';
-                currentSongData = song;
-                currentTrackIndex = index;
-            });
-        } else {
-            alert('无法播放此歌曲：' + (data.message || '无版权或VIP专享'));
-        }
-    } catch (error) {
-        alert('播放失败：' + error.message);
-    }
+}
+
+// 高亮活跃歌曲
+function highlightActiveSong(element) {
+    document.querySelectorAll('.song-item.active').forEach(item => {
+        item.classList.remove('active');
+    });
+    element.classList.add('active');
 }
 
 // 获取推荐音乐
 async function getRecommendations() {
-    const recDiv = document.getElementById('recommendations');
-    recDiv.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
+    showLoading(elements.recommendations);
     
     try {
-        const params = {};
-        if (userCookie) params.cookie = userCookie;
-        
-        const url = buildApiUrl('/personalized/newsong', params);
-        const response = await fetch(url);
+        const response = await fetch(`${API_BASE_URL}/personalized/newsong`);
         const data = await response.json();
         
-        if (data.code === 200 && data.result) {
-            displayRecommendations(data.result.slice(0, 10), '每日推荐');
+        if (data.result) {
+            displayRecommendations(data.result);
+            // 设置为当前播放列表
+            currentPlaylist = data.result.map(item => item.song);
         } else {
-            getDefaultRecommendations();
+            showNoRecommendations();
         }
     } catch (error) {
-        getDefaultRecommendations();
+        console.error('获取推荐失败:', error);
+        showNoRecommendations();
     }
 }
 
 // 显示推荐音乐
-function displayRecommendations(songs, title) {
-    const recDiv = document.getElementById('recommendations');
+function displayRecommendations(songs) {
+    const container = elements.recommendations;
+    container.innerHTML = '';
     
-    let html = `<h4 style="margin-bottom: 1rem; color: var(--primary-color);">${title}</h4>`;
-    
-    songs.forEach((song, index) => {
-        const cover = song.picUrl || (song.song && song.song.al && song.song.al.picUrl) || '';
-        const songName = song.name || (song.song && song.song.name) || '未知歌曲';
-        const artist = song.song && song.song.ar ? song.song.ar.map(a => a.name).join(', ') : '未知歌手';
-        const songId = song.id || (song.song && song.song.id);
-        
-        html += `
-            <div class="song-item" onclick="playRecommendation(${songId})">
-                <div class="song-cover">
-                    ${cover ? `<img src="${cover}?param=50y50" alt="${songName}">` : 
-                              `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-music"></i></div>`}
-                </div>
-                <div class="song-info">
-                    <div class="song-title">${songName}</div>
-                    <div class="song-artist">${artist}</div>
-                </div>
-            </div>
-        `;
+    songs.slice(0, 10).forEach((item, index) => {
+        const song = item.song;
+        const songElement = createSongElement(song, index);
+        container.appendChild(songElement);
     });
-    
-    recDiv.innerHTML = html;
 }
 
-// 默认推荐列表（备用）
-function getDefaultRecommendations() {
-    const recDiv = document.getElementById('recommendations');
-    
-    const defaultSongs = [
-        { id: 33894312, name: "起风了", artist: "买辣椒也用券" },
-        { id: 1330348068, name: "沈园外", artist: "阿YueYue,戾格,小田音乐社" },
-        { id: 1441758494, name: "如愿", artist: "王菲" },
-        { id: 1901371647, name: "雪 Distance", artist: "Capper,罗言RollFlash" },
-        { id: 1974443814, name: "我会等", artist: "承桓" },
-        { id: 202373, name: "晴天", artist: "周杰伦" },
-        { id: 65528, name: "江南", artist: "林俊杰" },
-        { id: 108478, name: "泡沫", artist: "G.E.M.邓紫棋" }
-    ];
-    
-    displayRecommendations(defaultSongs, '热门歌曲');
+// 显示无推荐状态
+function showNoRecommendations() {
+    elements.recommendations.innerHTML = `
+        <div class="no-results">
+            <i class="fas fa-star"></i>
+            <p>暂无推荐，请稍后重试</p>
+        </div>
+    `;
 }
 
-// 通过ID播放歌曲
-async function playSongById(songId) {
+// 获取个性化推荐
+async function getPersonalized() {
     try {
-        // 获取歌曲详情
-        const songUrl = buildApiUrl('/song/detail', { ids: songId });
-        const songResponse = await fetch(songUrl);
-        const songData = await songResponse.json();
+        const response = await fetch(`${API_BASE_URL}/personalized?limit=20`);
+        const data = await response.json();
         
-        if (songData.code === 200 && songData.songs[0]) {
-            const song = songData.songs[0];
-            
-            // 更新播放器显示
-            document.getElementById('trackTitle').textContent = song.name;
-            document.getElementById('trackArtist').textContent = song.ar ? song.ar.map(artist => artist.name).join(', ') : '未知';
-            document.getElementById('trackAlbum').textContent = '专辑：' + (song.al ? song.al.name : '未知');
-            document.getElementById('trackDuration').textContent = '时长：' + formatTime(song.dt);
-            
-            // 更新专辑封面
-            const albumArt = document.getElementById('albumArt');
-            if (song.al && song.al.picUrl) {
-                albumArt.className = 'album-art';
-                albumArt.innerHTML = `<img src="${song.al.picUrl}?param=200y200" alt="${song.name}">`;
-            } else {
-                albumArt.className = 'album-art default';
-                albumArt.innerHTML = '<i class="fas fa-music"></i>';
-            }
-            
-            // 获取播放链接
-            const params = {
-                id: songId,
-                level: userCookie ? 'exhigh' : 'standard'
-            };
-            
-            if (userCookie) params.cookie = userCookie;
-            
-            const url = buildApiUrl('/song/url/v1', params);
-            const response = await fetch(url);
-            const data = await response.json();
-            
-            if (data.code === 200 && data.data && data.data[0].url) {
-                const audioData = data.data[0];
-                document.getElementById('trackQuality').textContent = '音质：' + getQualityText(audioData.level);
-                
-                // 播放
-                currentAudio.src = audioData.url;
-                currentAudio.play().then(() => {
-                    isPlaying = true;
-                    document.getElementById('playIcon').className = 'fas fa-pause';
-                    currentSongData = song;
-                });
-            }
+        if (data.result) {
+            showNotification('已获取个性化推荐');
+            // 这里可以显示个性化推荐
+            console.log('个性化推荐:', data.result);
         }
     } catch (error) {
-        alert('播放失败：' + error.message);
+        console.error('获取个性化推荐失败:', error);
+        showNotification('获取推荐失败', 'error');
     }
 }
 
-// 播放推荐歌曲
-async function playRecommendation(songId) {
-    await playSongById(songId);
+// 获取排行榜
+async function getTopList() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/top/list?idx=0`);
+        const data = await response.json();
+        
+        if (data.playlist?.tracks) {
+            currentPlaylist = data.playlist.tracks;
+            currentIndex = 0;
+            playSong(currentPlaylist[0], 0);
+            showNotification('已加载排行榜歌曲');
+        }
+    } catch (error) {
+        console.error('获取排行榜失败:', error);
+        showNotification('获取排行榜失败', 'error');
+    }
 }
 
-// 播放/暂停
-function togglePlay() {
-    if (!currentAudio.src) {
-        // 如果没有歌曲，播放第一首推荐
-        const firstSong = document.querySelector('#recommendations .song-item');
-        if (firstSong) {
-            const onclickAttr = firstSong.getAttribute('onclick');
-            if (onclickAttr) {
-                const songId = onclickAttr.match(/\d+/)[0];
-                playSongById(songId);
+// 刷新推荐
+function refreshRecommendations() {
+    getRecommendations();
+    showNotification('推荐已刷新');
+}
+
+// 检查登录状态
+async function checkLoginStatus() {
+    // 从本地存储检查登录状态
+    const savedLogin = localStorage.getItem('netease_login');
+    
+    if (savedLogin) {
+        try {
+            const loginData = JSON.parse(savedLogin);
+            const response = await fetch(`${API_BASE_URL}/login/status`);
+            const data = await response.json();
+            
+            if (data.data?.profile) {
+                isLoggedIn = true;
+                userInfo = data.data.profile;
+                updateLoginStatus(true, userInfo);
+            } else {
+                updateLoginStatus(false);
             }
+        } catch (error) {
+            console.error('检查登录状态失败:', error);
+            updateLoginStatus(false);
         }
+    } else {
+        updateLoginStatus(false);
+    }
+}
+
+// 更新登录状态显示
+function updateLoginStatus(loggedIn, user = null) {
+    if (loggedIn && user) {
+        elements.loginStatus.textContent = `已登录: ${user.nickname}`;
+        elements.loginStatus.className = 'status-value success';
+        
+        // 更新音质权限
+        const level = user.vipType === 0 ? 'standard' : 'premium';
+        updateQualityStatus(level);
+    } else {
+        elements.loginStatus.textContent = '未登录';
+        elements.loginStatus.className = 'status-value error';
+        updateQualityStatus('standard');
+    }
+}
+
+// 更新音质状态
+function updateQualityStatus(level) {
+    const statusMap = {
+        'standard': { text: '标准音质', class: 'warning' },
+        'premium': { text: 'VIP 高音质', class: 'success' }
+    };
+    
+    const status = statusMap[level] || statusMap.standard;
+    elements.qualityStatus.textContent = status.text;
+    elements.qualityStatus.className = `status-value ${status.class}`;
+}
+
+// 显示登录模态框
+function showLoginModal() {
+    elements.loginModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+// 隐藏登录模态框
+function hideLoginModal() {
+    elements.loginModal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// 处理登录
+async function handleLogin() {
+    const account = elements.loginAccount.value.trim();
+    const password = elements.loginPassword.value;
+    
+    if (!account || !password) {
+        showNotification('请输入账号和密码', 'error');
         return;
     }
     
-    if (isPlaying) {
-        currentAudio.pause();
-        document.getElementById('playIcon').className = 'fas fa-play';
-    } else {
-        currentAudio.play().then(() => {
-            document.getElementById('playIcon').className = 'fas fa-pause';
-        });
+    // 显示登录中状态
+    const loginBtn = document.querySelector('.btn-primary[onclick="handleLogin()"]');
+    const originalText = loginBtn.innerHTML;
+    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 登录中...';
+    loginBtn.disabled = true;
+    
+    try {
+        // 这里使用模拟登录，实际应该调用网易云音乐API
+        // 注意：出于安全考虑，不建议在前端直接处理登录
+        
+        // 模拟登录成功
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // 保存登录状态
+        const mockUser = {
+            nickname: '网易云用户',
+            vipType: 1,
+            avatarUrl: DEFAULT_COVER
+        };
+        
+        localStorage.setItem('netease_login', JSON.stringify({
+            account,
+            timestamp: Date.now(),
+            user: mockUser
+        }));
+        
+        isLoggedIn = true;
+        userInfo = mockUser;
+        updateLoginStatus(true, mockUser);
+        
+        showNotification('登录成功！');
+        hideLoginModal();
+        
+    } catch (error) {
+        console.error('登录失败:', error);
+        showNotification('登录失败，请检查账号密码', 'error');
+    } finally {
+        // 恢复按钮状态
+        loginBtn.innerHTML = originalText;
+        loginBtn.disabled = false;
     }
-    isPlaying = !isPlaying;
 }
 
-// 播放上一首
-function playPrev() {
-    if (currentPlaylist.length === 0) return;
+// 开始二维码登录
+function startQRLogin() {
+    showNotification('二维码登录功能开发中');
+    // 这里可以添加二维码登录的实现
+}
+
+// 退出登录
+function logout() {
+    localStorage.removeItem('netease_login');
+    isLoggedIn = false;
+    userInfo = null;
+    updateLoginStatus(false);
+    showNotification('已退出登录');
+}
+
+// 显示通知
+function showNotification(message, type = 'info') {
+    // 移除现有通知
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
     
-    current
+    // 创建通知元素
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+        <button class="notification-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    // 添加到页面
+    document.body.appendChild(notification);
+    
+    // 添加样式
+    const style = document.createElement('style');
+    style.textContent = `
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary-color);
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 5px 20px var(--shadow-color);
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            max-width: 400px;
+        }
+        
+        .notification.error {
+            border-left-color: var(--error-color);
+        }
+        
+        .notification.success {
+            border-left-color: var(--success-color);
+        }
+        
+        .notification.warning {
+            border-left-color: var(--warning-color);
+        }
+        
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .notification-close:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+        
+        .light-theme .notification-close:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // 绑定关闭按钮事件
+    notification.querySelector('.notification-close').addEventListener('click', () => {
+        notification.remove();
+        style.remove();
+    });
+    
+    // 自动消失
+    setTimeout(() => {
+        if (document.body.contains(notification)) {
+            notification.style.animation = 'slideOutRight 0.3s ease forwards';
+            
+            // 添加消失动画
+            const disappearStyle = document.createElement('style');
+            disappearStyle.textContent = `
+                @keyframes slideOutRight {
+                    from {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(disappearStyle);
+            
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    notification.remove();
+                }
+                style.remove();
+                disappearStyle.remove();
+            }, 300);
+        }
+    }, 3000);
+}
+
+// 工具函数：格式化时间
+function formatTime(seconds) {
+    if (!seconds || seconds < 0) return '0:00';
+    
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+// 工具函数：格式化数字
+function formatCount(count) {
+    if (count >= 100000000) {
+        return (count / 100000000).toFixed(1) + '亿';
+    } else if (count >= 10000) {
+        return (count / 10000).toFixed(1) + '万';
+    }
+    return count.toString();
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', init);
